@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
+import 'providers/profile_provider.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final profile = ref.watch(profileProvider);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -19,83 +23,78 @@ class ProfilePage extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          const CircleAvatar(
-            radius: 50,
-            backgroundColor: AppColors.primaryBlue,
-            child: Icon(Icons.person, size: 50, color: AppColors.white),
-          ),
+          _buildProfileCard(profile),
           const SizedBox(height: 20),
-          _buildProfileCard(),
-          const SizedBox(height: 20),
-          _buildStatsCard(),
+          _buildStatsCard(profile),
         ],
       ),
     );
   }
 
-  Widget _buildProfileCard() {
+  Widget _buildProfileCard(ProfileState profile) {
     return Card(
       color: AppColors.darkBlue,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            _buildProfileItem(Icons.person, 'Name', 'User Name'),
-            _buildProfileItem(Icons.email, 'Email', 'user@example.com'),
-            _buildProfileItem(Icons.calendar_today, 'Member Since', 'Jan 2024'),
+            _buildProfileItem(Icons.person, 'Name', profile.name),
+            _buildProfileItem(Icons.email, 'Email', profile.email),
+            _buildProfileItem(
+                Icons.calendar_today, 'Member Since', profile.memberSince),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildStatsCard() {
+  Widget _buildStatsCard(ProfileState profile) {
     return Card(
       color: AppColors.darkBlue,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            _buildStatItem('Total Dreams', '42'),
-            _buildStatItem('Dream Streak', '7 days'),
-            _buildStatItem('Average Sleep', '7.5 hours'),
+            _buildStatItem('Total Dreams', '${profile.totalDreams}'),
+            _buildStatItem('Dream Streak', '${profile.dreamStreak} days'),
+            _buildStatItem('Average Sleep', '${profile.averageSleep} hours'),
           ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildProfileItem(IconData icon, String title, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        children: [
-          Icon(icon, color: AppColors.primaryBlue),
-          const SizedBox(width: 16),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title, style: const TextStyle(color: AppColors.lightBlue)),
-              Text(value, style: const TextStyle(color: AppColors.white)),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+Widget _buildProfileItem(IconData icon, String title, String value) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 8),
+    child: Row(
+      children: [
+        Icon(icon, color: AppColors.primaryBlue),
+        const SizedBox(width: 16),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: const TextStyle(color: AppColors.lightBlue)),
+            Text(value, style: const TextStyle(color: AppColors.white)),
+          ],
+        ),
+      ],
+    ),
+  );
+}
 
-  Widget _buildStatItem(String title, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(title, style: const TextStyle(color: AppColors.lightBlue)),
-          Text(value,
-              style: const TextStyle(
-                  color: AppColors.white, fontWeight: FontWeight.bold)),
-        ],
-      ),
-    );
-  }
+Widget _buildStatItem(String title, String value) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 8),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(title, style: const TextStyle(color: AppColors.lightBlue)),
+        Text(value,
+            style: const TextStyle(
+                color: AppColors.white, fontWeight: FontWeight.bold)),
+      ],
+    ),
+  );
 }

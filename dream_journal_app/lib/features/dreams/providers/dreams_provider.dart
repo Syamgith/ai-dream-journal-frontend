@@ -1,25 +1,41 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/models/dream_entry.dart';
+import '../data/repositories/dream_repository.dart';
+
+final dreamRepositoryProvider = Provider((ref) => DreamRepository());
 
 final dreamsProvider =
     StateNotifierProvider<DreamsNotifier, List<DreamEntry>>((ref) {
-  return DreamsNotifier();
+  final repository = ref.watch(dreamRepositoryProvider);
+  return DreamsNotifier(repository);
 });
 
 class DreamsNotifier extends StateNotifier<List<DreamEntry>> {
-  DreamsNotifier() : super([]);
+  final DreamRepository _repository;
 
-  void addDream(DreamEntry dream) {
+  DreamsNotifier(this._repository) : super([]) {
+    loadDreams();
+  }
+
+  Future<void> loadDreams() async {
+    state = await _repository.getDreams();
+  }
+
+  Future<void> addDream(DreamEntry dream) async {
+    await _repository.addDream(dream);
     state = [...state, dream];
   }
 
-  void removeDream(String id) {
-    state = state.where((dream) => dream.id != id).toList();
+  Future<void> updateDream(DreamEntry dream) async {
+    await _repository.updateDream(dream);
+    state = [
+      for (final item in state)
+        if (item.id == dream.id) dream else item
+    ];
   }
 
-  void updateDream(DreamEntry updatedDream) {
-    state = state
-        .map((dream) => dream.id == updatedDream.id ? updatedDream : dream)
-        .toList();
+  Future<void> deleteDream(String id) async {
+    await _repository.deleteDream(id);
+    state = state.where((dream) => dream.id != id).toList();
   }
 }

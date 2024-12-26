@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_text_styles.dart';
+import '../../providers/dreams_provider.dart';
 import '../widgets/dream_card.dart';
 import '../widgets/dream_icon.dart';
 
@@ -10,6 +11,8 @@ class DreamsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final dreams = ref.watch(dreamsProvider);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -59,14 +62,15 @@ class DreamsPage extends ConsumerWidget {
             ),
           ),
           Expanded(
-            child: ListView(
-              children: [
-                DreamCard(
-                  title: 'Test',
-                  description: 'This is a test',
-                ),
-                const SleepingIcon(),
-              ],
+            child: ListView.builder(
+              itemCount: dreams.length,
+              itemBuilder: (context, index) {
+                final dream = dreams[index];
+                return DreamCard(
+                  title: dream.title,
+                  description: dream.description,
+                );
+              },
             ),
           ),
         ],
