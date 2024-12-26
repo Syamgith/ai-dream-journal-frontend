@@ -71,35 +71,6 @@ class DreamsPage extends ConsumerWidget {
           ),
         ],
       ),
-      bottomNavigationBar: BottomAppBar(
-        color: AppColors.background,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            TextButton.icon(
-              onPressed: () {},
-              icon: const Icon(Icons.menu, color: AppColors.primaryBlue),
-              label: const Text(
-                'Dreams',
-                style: TextStyle(color: AppColors.primaryBlue),
-              ),
-            ),
-            FloatingActionButton(
-              onPressed: () {},
-              backgroundColor: AppColors.primaryBlue,
-              child: const Icon(Icons.add),
-            ),
-            TextButton.icon(
-              onPressed: () {},
-              icon: const Icon(Icons.person, color: AppColors.white),
-              label: const Text(
-                'Profile',
-                style: TextStyle(color: AppColors.white),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

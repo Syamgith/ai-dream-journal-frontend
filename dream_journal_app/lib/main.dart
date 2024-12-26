@@ -1,15 +1,10 @@
-import 'package:dream_journal_app/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import 'features/dreams/presentation/pages/dreams_page.dart';
+import 'core/themes/app_theme.dart';
+import 'routes.dart';
 
 void main() {
-  runApp(
-    const ProviderScope(
-      child: MyApp(),
-    ),
-  );
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -19,11 +14,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Dream Journal',
-      theme: ThemeData(
-        scaffoldBackgroundColor: AppColors.background,
-        useMaterial3: true,
-      ),
-      home: const DreamsPage(),
+      theme: AppTheme.darkTheme,
+      initialRoute: AppRoutes.main,
+      routes: AppRoutes.getRoutes(),
     );
   }
 }
