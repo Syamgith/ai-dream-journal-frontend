@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'features/dreams/presentation/pages/add_dream_page.dart';
 import 'features/dreams/presentation/pages/dreams_page.dart';
 import 'features/profile/presentation/pages/profile_page.dart';
 import 'features/shared/screens/main_screen.dart';
@@ -14,6 +15,7 @@ class AppRoutes {
       main: (context) => const MainScreen(),
       dreams: (context) => const DreamsPage(),
       profile: (context) => const ProfilePage(),
+      addDream: (context) => const AddDreamPage(), // Add this line
     };
   }
 }

@@ -37,6 +37,7 @@ class BottomNavBar extends StatelessWidget {
           FloatingActionButton(
             onPressed: () {
               Navigator.pushNamed(context, AppRoutes.addDream);
+              Navigator.pushNamed(context, AppRoutes.addDream);
             },
             backgroundColor: AppColors.primaryBlue,
             child: const Icon(Icons.add),
