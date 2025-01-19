@@ -36,31 +36,31 @@ class DreamsPage extends ConsumerWidget {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'December',
-                  style: AppTextStyles.monthTitle,
-                ),
-                Row(
-                  children: [
-                    Text(
-                      '10',
-                      style: AppTextStyles.dayNumber,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Tue',
-                      style: AppTextStyles.dayText,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
+          // Padding(
+          //   padding: const EdgeInsets.all(20),
+          //   child: Column(
+          //     crossAxisAlignment: CrossAxisAlignment.start,
+          //     children: [
+          //       Text(
+          //         'December',
+          //         style: AppTextStyles.monthTitle,
+          //       ),
+          //       Row(
+          //         children: [
+          //           Text(
+          //             '10',
+          //             style: AppTextStyles.dayNumber,
+          //           ),
+          //           const SizedBox(width: 8),
+          //           Text(
+          //             'Tue',
+          //             style: AppTextStyles.dayText,
+          //           ),
+          //         ],
+          //       ),
+          //     ],
+          //   ),
+          // ),
           Expanded(
             child: ListView.builder(
               itemCount: dreams.length,
@@ -69,6 +69,7 @@ class DreamsPage extends ConsumerWidget {
                 return DreamCard(
                   title: dream.title,
                   description: dream.description,
+                  date: dream.date, // Pass the date parameter
                 );
               },
             ),
