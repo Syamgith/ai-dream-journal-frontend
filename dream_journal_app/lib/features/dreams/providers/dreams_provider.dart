@@ -22,8 +22,10 @@ class DreamsNotifier extends StateNotifier<List<DreamEntry>> {
   }
 
   Future<void> addDream(DreamEntry dream) async {
+    print('Before updating state: $state');
     await _repository.addDream(dream);
     state = [...state, dream];
+    print('After updating state: $state');
   }
 
   Future<void> updateDream(DreamEntry dream) async {
