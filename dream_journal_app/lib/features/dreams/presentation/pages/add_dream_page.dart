@@ -40,7 +40,7 @@ class AddDreamPage extends ConsumerWidget {
 
                 final dream = DreamEntry(
                   id: DateTime.now().toString(), // Generate a unique ID
-                  title: 'Dream Title', // Placeholder for title
+                  title: 'Dream', // Placeholder for title
                   description: _descriptionController.text,
                   date: DateTime.now(),
                 );
