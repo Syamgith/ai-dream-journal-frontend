@@ -19,6 +19,8 @@ class _AddDreamPageState extends ConsumerState<AddDreamPage> {
   final FocusNode _titleFocusNode = FocusNode();
   final FocusNode _descriptionFocusNode = FocusNode();
   late DateTime _selectedDate;
+  String? _interpretation;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -27,6 +29,7 @@ class _AddDreamPageState extends ConsumerState<AddDreamPage> {
       _titleController.text = widget.dream!.title;
       _descriptionController.text = widget.dream!.description;
       _selectedDate = widget.dream!.date;
+      _interpretation = widget.dream!.interpretation;
     } else {
       _selectedDate = DateTime.now();
     }
@@ -195,6 +198,51 @@ class _AddDreamPageState extends ConsumerState<AddDreamPage> {
                 ),
               ),
               const SizedBox(height: 24),
+              if (_isLoading)
+                const Center(
+                  child: CircularProgressIndicator(
+                    color: AppColors.primaryBlue,
+                  ),
+                ),
+              if (_interpretation != null)
+                Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: AppColors.darkBlue,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withAlpha(26),
+                        blurRadius: 10,
+                        offset: const Offset(0, 5),
+                      ),
+                    ],
+                  ),
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Dream Interpretation',
+                        style: TextStyle(
+                          color: AppColors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        _interpretation!,
+                        style: const TextStyle(
+                          color: AppColors.white,
+                          fontSize: 15,
+                          height: 1.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              const SizedBox(height: 24),
               Center(
                 child: Container(
                   height: 56,
@@ -246,36 +294,52 @@ class _AddDreamPageState extends ConsumerState<AddDreamPage> {
     );
   }
 
-  void _saveDream() {
+  void _saveDream() async {
     if (_descriptionController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Please enter a dream description'),
-          backgroundColor: AppColors.darkBlue,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          margin: const EdgeInsets.all(16),
-        ),
-      );
       return;
     }
 
-    final dream = DreamEntry(
-      id: widget.dream?.id ?? DateTime.now().toString(),
-      title: _titleController.text.trim().isEmpty
-          ? 'Dream'
-          : _titleController.text.trim(),
-      description: _descriptionController.text.trim(),
-      date: _selectedDate,
-    );
+    setState(() {
+      _isLoading = true;
+    });
 
-    if (widget.dream != null) {
-      ref.read(dreamsProvider.notifier).updateDream(dream);
-    } else {
-      ref.read(dreamsProvider.notifier).addDream(dream);
+    try {
+      final dream = DreamEntry(
+        id: widget.dream?.id ?? DateTime.now().toString(),
+        title: _titleController.text.trim(),
+        description: _descriptionController.text.trim(),
+        date: _selectedDate,
+      );
+
+      if (widget.dream != null) {
+        ref.read(dreamsProvider.notifier).updateDream(dream);
+      } else {
+        final interpretedDream =
+            await ref.read(dreamsProvider.notifier).addDream(dream);
+        setState(() {
+          _interpretation = interpretedDream.interpretation;
+        });
+        return; // Don't pop the page, show interpretation instead
+      }
+
+      if (mounted) {
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
-    Navigator.pop(context);
   }
 }
