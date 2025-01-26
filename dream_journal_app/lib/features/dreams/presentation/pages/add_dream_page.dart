@@ -80,6 +80,7 @@ class _AddDreamPageState extends ConsumerState<AddDreamPage> {
                       child: TextField(
                         controller: _titleController,
                         focusNode: _titleFocusNode,
+                        maxLength: 30,
                         style: const TextStyle(
                           color: AppColors.white,
                           fontSize: 14,
@@ -90,6 +91,7 @@ class _AddDreamPageState extends ConsumerState<AddDreamPage> {
                           hintText: 'Give your dream a title...',
                           alignLabelWithHint: true,
                           floatingLabelBehavior: FloatingLabelBehavior.never,
+                          counterText: '',
                           hintStyle: TextStyle(
                             color: AppColors.white.withAlpha(128),
                             fontSize: 14,
