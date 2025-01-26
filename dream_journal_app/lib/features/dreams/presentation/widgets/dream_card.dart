@@ -1,21 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../data/models/dream_entry.dart';
+import '../pages/add_dream_page.dart';
 
 class DreamCard extends StatelessWidget {
-  final String title;
-  final String description;
-  final DateTime date;
+  final DreamEntry dream;
 
   const DreamCard({
-    required this.title,
-    required this.description,
-    required this.date,
     super.key,
+    required this.dream,
   });
 
   String _formatDate() {
-    return DateFormat('d\nMMM').format(date).toUpperCase();
+    return DateFormat('d\nMMM').format(dream.date).toUpperCase();
   }
 
   @override
@@ -46,7 +44,12 @@ class DreamCard extends StatelessWidget {
           color: Colors.transparent,
           child: InkWell(
             onTap: () {
-              // Handle tap event if needed
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AddDreamPage(dream: dream),
+                ),
+              );
             },
             splashColor: AppColors.primaryBlue.withAlpha(26),
             highlightColor: AppColors.primaryBlue.withAlpha(13),
@@ -90,7 +93,7 @@ class DreamCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          title,
+                          dream.title,
                           style: TextStyle(
                             color: AppColors.white.withAlpha(242),
                             fontSize: 20,
@@ -100,9 +103,9 @@ class DreamCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          description.length > 100
-                              ? '${description.substring(0, 100)}...'
-                              : description,
+                          dream.description.length > 100
+                              ? '${dream.description.substring(0, 100)}...'
+                              : dream.description,
                           style: TextStyle(
                             color: AppColors.white.withAlpha(204),
                             fontSize: 16,

@@ -6,7 +6,8 @@ import '../../data/models/dream_entry.dart';
 import '../../providers/dreams_provider.dart';
 
 class AddDreamPage extends ConsumerStatefulWidget {
-  const AddDreamPage({super.key});
+  final DreamEntry? dream;
+  const AddDreamPage({super.key, this.dream});
 
   @override
   ConsumerState<AddDreamPage> createState() => _AddDreamPageState();
@@ -17,7 +18,19 @@ class _AddDreamPageState extends ConsumerState<AddDreamPage> {
   final TextEditingController _descriptionController = TextEditingController();
   final FocusNode _titleFocusNode = FocusNode();
   final FocusNode _descriptionFocusNode = FocusNode();
-  DateTime _selectedDate = DateTime.now();
+  late DateTime _selectedDate;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.dream != null) {
+      _titleController.text = widget.dream!.title;
+      _descriptionController.text = widget.dream!.description;
+      _selectedDate = widget.dream!.date;
+    } else {
+      _selectedDate = DateTime.now();
+    }
+  }
 
   @override
   void dispose() {
@@ -33,9 +46,9 @@ class _AddDreamPageState extends ConsumerState<AddDreamPage> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text(
-          'Add Dream',
-          style: TextStyle(
+        title: Text(
+          widget.dream != null ? 'Edit Dream' : 'Add Dream',
+          style: const TextStyle(
             color: AppColors.white,
             fontWeight: FontWeight.bold,
           ),
@@ -206,34 +219,7 @@ class _AddDreamPageState extends ConsumerState<AddDreamPage> {
                     ],
                   ),
                   child: ElevatedButton(
-                    onPressed: () {
-                      if (_descriptionController.text.trim().isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content:
-                                const Text('Please enter a dream description'),
-                            backgroundColor: AppColors.darkBlue,
-                            behavior: SnackBarBehavior.floating,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            margin: const EdgeInsets.all(16),
-                          ),
-                        );
-                        return;
-                      }
-
-                      final dream = DreamEntry(
-                        id: DateTime.now().toString(),
-                        title: _titleController.text.trim().isEmpty
-                            ? 'Dream'
-                            : _titleController.text.trim(),
-                        description: _descriptionController.text.trim(),
-                        date: _selectedDate,
-                      );
-                      ref.read(dreamsProvider.notifier).addDream(dream);
-                      Navigator.pop(context);
-                    },
+                    onPressed: _saveDream,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.transparent,
                       shadowColor: Colors.transparent,
@@ -242,13 +228,12 @@ class _AddDreamPageState extends ConsumerState<AddDreamPage> {
                       ),
                       padding: const EdgeInsets.symmetric(horizontal: 24),
                     ),
-                    child: const Text(
-                      'Save Dream',
-                      style: TextStyle(
+                    child: Text(
+                      widget.dream != null ? 'Update Dream' : 'Save Dream',
+                      style: const TextStyle(
                         color: AppColors.white,
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
-                        letterSpacing: 0.8,
                       ),
                     ),
                   ),
@@ -259,5 +244,38 @@ class _AddDreamPageState extends ConsumerState<AddDreamPage> {
         ),
       ),
     );
+  }
+
+  void _saveDream() {
+    if (_descriptionController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Please enter a dream description'),
+          backgroundColor: AppColors.darkBlue,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          margin: const EdgeInsets.all(16),
+        ),
+      );
+      return;
+    }
+
+    final dream = DreamEntry(
+      id: widget.dream?.id ?? DateTime.now().toString(),
+      title: _titleController.text.trim().isEmpty
+          ? 'Dream'
+          : _titleController.text.trim(),
+      description: _descriptionController.text.trim(),
+      date: _selectedDate,
+    );
+
+    if (widget.dream != null) {
+      ref.read(dreamsProvider.notifier).updateDream(dream);
+    } else {
+      ref.read(dreamsProvider.notifier).addDream(dream);
+    }
+    Navigator.pop(context);
   }
 }

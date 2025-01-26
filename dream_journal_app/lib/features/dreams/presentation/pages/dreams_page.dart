@@ -65,11 +65,7 @@ class DreamsPage extends ConsumerWidget {
               itemCount: dreams.length,
               itemBuilder: (context, index) {
                 final dream = dreams[index];
-                return DreamCard(
-                  title: dream.title,
-                  description: dream.description,
-                  date: dream.date, // Pass the date parameter
-                );
+                return DreamCard(dream: dream);
               },
             ),
           ),
