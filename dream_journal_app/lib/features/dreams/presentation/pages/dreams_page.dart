@@ -64,7 +64,7 @@ class DreamsPage extends ConsumerWidget {
             child: ListView.builder(
               itemCount: dreams.length,
               itemBuilder: (context, index) {
-                final dream = dreams[index];
+                final dream = dreams[dreams.length - 1 - index];
                 return DreamCard(dream: dream);
               },
             ),
