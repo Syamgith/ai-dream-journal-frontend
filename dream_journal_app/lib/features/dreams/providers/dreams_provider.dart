@@ -23,7 +23,9 @@ class DreamsNotifier extends StateNotifier<List<DreamEntry>> {
 
   Future<DreamEntry> addDream(DreamEntry dream) async {
     final interpretedDream = await _repository.addDream(dream);
-    state = [...state, interpretedDream];
+    state = state.contains(interpretedDream)
+        ? [...state]
+        : [...state, interpretedDream];
     return interpretedDream;
   }
 
