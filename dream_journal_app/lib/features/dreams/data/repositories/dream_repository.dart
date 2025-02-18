@@ -1,19 +1,21 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/dream_entry.dart';
+import '../../../../core/config/config.dart';
 
 class DreamRepository {
   final List<DreamEntry> _dreams = [];
-  final String _baseUrl = 'http://127.0.0.1:8000';
+  final String _apiURL = Config.apiURL;
 
   Future<List<DreamEntry>> getDreams() async {
     return _dreams;
   }
 
   Future<DreamEntry> addDream(DreamEntry dream) async {
+    print('$_apiURL/dreams/');
     try {
       final response = await http.post(
-        Uri.parse('$_baseUrl/dreams/'),
+        Uri.parse('$_apiURL/dreams/'),
         headers: {
           'Content-Type': 'application/json',
           'accept': 'application/json',
@@ -26,6 +28,7 @@ class DreamRepository {
         _dreams.add(interpretedDream);
         return interpretedDream;
       } else {
+        print(response.statusCode);
         throw Exception('Failed to get dream interpretation');
       }
     } catch (e) {
