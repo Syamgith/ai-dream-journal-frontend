@@ -23,9 +23,21 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
     try {
       final isLoggedIn = await AuthService.isLoggedIn();
       if (isLoggedIn) {
-        // If we had a way to get the current user, we would use it here
-        // For now, we'll just set the state to null
-        state = const AsyncValue.data(null);
+        // Get the token
+        final token = await AuthService.getToken();
+        if (token != null) {
+          // Fetch user info from API or use a cached user
+          // For now, we'll create a placeholder user
+          final user = User(
+            id: 1,
+            email: 'user@example.com',
+            name: 'Logged In User',
+            isGuest: false,
+          );
+          state = AsyncValue.data(user);
+        } else {
+          state = const AsyncValue.data(null);
+        }
       } else {
         state = const AsyncValue.data(null);
       }

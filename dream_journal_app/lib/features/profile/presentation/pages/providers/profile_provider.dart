@@ -1,4 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../../features/auth/presentation/providers/auth_provider.dart';
+import '../../../../../features/auth/domain/models/user.dart';
 
 class ProfileState {
   final String name;
@@ -7,6 +9,7 @@ class ProfileState {
   final int totalDreams;
   final int dreamStreak;
   final double averageSleep;
+  final bool isGuest;
 
   ProfileState({
     required this.name,
@@ -15,23 +18,49 @@ class ProfileState {
     required this.totalDreams,
     required this.dreamStreak,
     required this.averageSleep,
+    required this.isGuest,
   });
+
+  // Create a copy of the current state with optional new values
+  ProfileState copyWith({
+    String? name,
+    String? email,
+    String? memberSince,
+    int? totalDreams,
+    int? dreamStreak,
+    double? averageSleep,
+    bool? isGuest,
+  }) {
+    return ProfileState(
+      name: name ?? this.name,
+      email: email ?? this.email,
+      memberSince: memberSince ?? this.memberSince,
+      totalDreams: totalDreams ?? this.totalDreams,
+      dreamStreak: dreamStreak ?? this.dreamStreak,
+      averageSleep: averageSleep ?? this.averageSleep,
+      isGuest: isGuest ?? this.isGuest,
+    );
+  }
 }
 
 final profileProvider =
     StateNotifierProvider<ProfileNotifier, ProfileState>((ref) {
-  return ProfileNotifier();
+  final authState = ref.watch(authProvider);
+  final user = authState.value;
+
+  return ProfileNotifier(user);
 });
 
 class ProfileNotifier extends StateNotifier<ProfileState> {
-  ProfileNotifier()
+  ProfileNotifier(User? user)
       : super(ProfileState(
-          name: 'User Name',
-          email: 'user@example.com',
-          memberSince: 'Jan 2024',
+          name: user?.name ?? 'Guest User',
+          email: user?.email ?? 'guest@example.com',
+          memberSince: 'Jan 2024', // This could be fetched from the backend
           totalDreams: 42,
           dreamStreak: 7,
           averageSleep: 7.5,
+          isGuest: user?.isGuest ?? true,
         ));
 
   void updateProfile({
@@ -42,13 +71,13 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
     int? dreamStreak,
     double? averageSleep,
   }) {
-    state = ProfileState(
-      name: name ?? state.name,
-      email: email ?? state.email,
-      memberSince: memberSince ?? state.memberSince,
-      totalDreams: totalDreams ?? state.totalDreams,
-      dreamStreak: dreamStreak ?? state.dreamStreak,
-      averageSleep: averageSleep ?? state.averageSleep,
+    state = state.copyWith(
+      name: name,
+      email: email,
+      memberSince: memberSince,
+      totalDreams: totalDreams,
+      dreamStreak: dreamStreak,
+      averageSleep: averageSleep,
     );
   }
 }
