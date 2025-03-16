@@ -34,6 +34,8 @@ class DreamRepository {
     print('$_apiURL/dreams/');
     try {
       final headers = await Config.getAuthHeaders();
+      print(headers);
+
       final response = await http.post(
         Uri.parse('$_apiURL/dreams/'),
         headers: headers,

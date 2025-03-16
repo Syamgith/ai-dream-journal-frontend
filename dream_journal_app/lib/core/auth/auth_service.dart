@@ -1,7 +1,7 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class AuthService {
-  static const String _tokenKey = 'jwt_token';
+  static const String _tokenKey = 'TOCKENKEY_PLACEHOLDER';
   static final FlutterSecureStorage _storage = FlutterSecureStorage();
 
   // Store JWT token
