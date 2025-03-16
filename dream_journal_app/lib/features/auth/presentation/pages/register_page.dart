@@ -20,6 +20,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   String? _errorMessage;
+  bool _registrationSuccess = false;
 
   @override
   void dispose() {
@@ -56,14 +57,16 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       });
 
       try {
-        await ref.read(authProvider.notifier).register(
+        final success = await ref.read(authProvider.notifier).register(
               _emailController.text.trim(),
               _passwordController.text,
               _nameController.text.trim(),
             );
-        if (mounted) {
-          Navigator.of(context)
-              .pop(); // Return to login page after successful registration
+
+        if (success) {
+          setState(() {
+            _registrationSuccess = true;
+          });
         }
       } catch (e) {
         setState(() {
@@ -73,10 +76,64 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     }
   }
 
+  void _navigateToLogin() {
+    Navigator.of(context).pop();
+  }
+
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
     final isLoading = authState is AsyncLoading;
+
+    if (_registrationSuccess) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Registration Successful'),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+        ),
+        body: SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.check_circle_outline,
+                    color: Colors.green,
+                    size: 80,
+                  ),
+                  const SizedBox(height: 24),
+                  const Text(
+                    'Registration Successful!',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Your account has been created successfully. Please login to continue.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.white70,
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  AuthButton(
+                    text: 'Go to Login',
+                    onPressed: _navigateToLogin,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(

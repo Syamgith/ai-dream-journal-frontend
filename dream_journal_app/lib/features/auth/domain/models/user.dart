@@ -16,7 +16,7 @@ class User {
       id: json['id'],
       email: json['email'],
       name: json['name'],
-      isGuest: json['is_guest'] ?? false,
+      isGuest: json['isGuest'] ?? false,
     );
   }
 
@@ -34,7 +34,7 @@ class User {
       'id': id,
       'email': email,
       'name': name,
-      'is_guest': isGuest,
+      'isGuest': isGuest,
     };
   }
 }

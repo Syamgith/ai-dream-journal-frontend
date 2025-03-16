@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/auth/auth_service.dart';
+import '../../../../core/network/api_provider.dart';
 import '../../data/repositories/auth_repository.dart';
 import '../../domain/models/user.dart';
 
@@ -34,13 +35,16 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
   }
 
   // Register a new user
-  Future<void> register(String email, String password, String name) async {
+  Future<bool> register(String email, String password, String name) async {
     state = const AsyncValue.loading();
     try {
-      final user = await _repository.register(email, password, name);
-      state = AsyncValue.data(user);
+      final success = await _repository.register(email, password, name);
+      // After registration, the user still needs to login
+      state = const AsyncValue.data(null);
+      return success;
     } catch (e) {
       state = AsyncValue.error(e, StackTrace.current);
+      rethrow;
     }
   }
 
@@ -52,6 +56,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
       state = AsyncValue.data(user);
     } catch (e) {
       state = AsyncValue.error(e, StackTrace.current);
+      rethrow;
     }
   }
 
@@ -63,6 +68,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
       state = AsyncValue.data(user);
     } catch (e) {
       state = AsyncValue.error(e, StackTrace.current);
+      rethrow;
     }
   }
 
@@ -74,6 +80,17 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
       state = const AsyncValue.data(null);
     } catch (e) {
       state = AsyncValue.error(e, StackTrace.current);
+      rethrow;
+    }
+  }
+
+  // Refresh token
+  Future<bool> refreshToken() async {
+    try {
+      final newToken = await _repository.refreshToken();
+      return newToken != null;
+    } catch (e) {
+      return false;
     }
   }
 }

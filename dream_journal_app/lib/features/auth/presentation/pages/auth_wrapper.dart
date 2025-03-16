@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/auth_provider.dart';
 import 'login_page.dart';
 import '../../../../features/shared/screens/main_screen.dart';
+import '../../../../features/shared/widgets/loading_indicator.dart';
+import '../../../../features/shared/widgets/error_message.dart';
 
 class AuthWrapper extends ConsumerWidget {
   const AuthWrapper({Key? key}) : super(key: key);
@@ -22,35 +24,12 @@ class AuthWrapper extends ConsumerWidget {
         }
       },
       loading: () => const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
+        body: LoadingIndicator(message: 'Checking authentication status...'),
       ),
       error: (error, stackTrace) => Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.error_outline,
-                color: Colors.red,
-                size: 60,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Error: ${error.toString()}',
-                style: const TextStyle(color: Colors.red),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () {
-                  ref.read(authProvider.notifier).checkAuthStatus();
-                },
-                child: const Text('Retry'),
-              ),
-            ],
-          ),
+        body: ErrorMessage(
+          message: 'Error: ${error.toString()}',
+          onRetry: () => ref.read(authProvider.notifier).checkAuthStatus(),
         ),
       ),
     );

@@ -8,9 +8,9 @@ class AuthRepository {
   final String _baseUrl = Config.apiURL;
 
   // Register a new user
-  Future<User> register(String email, String password, String name) async {
+  Future<bool> register(String email, String password, String name) async {
     final response = await http.post(
-      Uri.parse('$_baseUrl/auth/register'),
+      Uri.parse('$_baseUrl/users/register'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'email': email,
@@ -21,9 +21,9 @@ class AuthRepository {
 
     if (response.statusCode == 201) {
       final data = jsonDecode(response.body);
-      // Save the token
-      await AuthService.setToken(data['access_token']);
-      return User.fromJson(data['user']);
+      // Registration successful, but no token is returned
+      // User needs to login separately
+      return true;
     } else {
       throw Exception('Failed to register: ${response.body}');
     }
@@ -32,7 +32,7 @@ class AuthRepository {
   // Login a user
   Future<User> login(String email, String password) async {
     final response = await http.post(
-      Uri.parse('$_baseUrl/auth/login'),
+      Uri.parse('$_baseUrl/users/login'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'email': email,
@@ -42,8 +42,9 @@ class AuthRepository {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      // Save the token
+      // Save the tokens
       await AuthService.setToken(data['access_token']);
+      await AuthService.setRefreshToken(data['refresh_token']);
       return User.fromJson(data['user']);
     } else {
       throw Exception('Failed to login: ${response.body}');
@@ -61,5 +62,39 @@ class AuthRepository {
   // Logout
   Future<void> logout() async {
     await AuthService.deleteToken();
+    await AuthService.deleteRefreshToken();
+  }
+
+  // Refresh token
+  Future<String?> refreshToken() async {
+    final refreshToken = await AuthService.getRefreshToken();
+
+    if (refreshToken == null) {
+      return null;
+    }
+
+    try {
+      final response = await http.post(
+        Uri.parse('$_baseUrl/users/refresh'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $refreshToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final newToken = data['access_token'];
+        await AuthService.setToken(newToken);
+        return newToken;
+      } else {
+        // If refresh token is invalid, logout the user
+        await logout();
+        return null;
+      }
+    } catch (e) {
+      await logout();
+      return null;
+    }
   }
 }
