@@ -8,18 +8,35 @@ class DreamRepository {
   final String _apiURL = Config.apiURL;
 
   Future<List<DreamEntry>> getDreams() async {
-    return _dreams;
+    try {
+      final headers = await Config.getAuthHeaders();
+      final response = await http.get(
+        Uri.parse('$_apiURL/dreams/'),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> dreamsJson = jsonDecode(response.body);
+        final dreams =
+            dreamsJson.map((json) => DreamEntry.fromJson(json)).toList();
+        _dreams.clear();
+        _dreams.addAll(dreams);
+        return dreams;
+      } else {
+        throw Exception('Failed to load dreams: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Failed to connect to the server: $e');
+    }
   }
 
   Future<DreamEntry> addDream(DreamEntry dream) async {
     print('$_apiURL/dreams/');
     try {
+      final headers = await Config.getAuthHeaders();
       final response = await http.post(
         Uri.parse('$_apiURL/dreams/'),
-        headers: {
-          'Content-Type': 'application/json',
-          'accept': 'application/json',
-        },
+        headers: headers,
         body: jsonEncode(dream.toJson()),
       );
 
@@ -37,13 +54,44 @@ class DreamRepository {
   }
 
   Future<void> updateDream(DreamEntry dream) async {
-    final index = _dreams.indexWhere((d) => d.id == dream.id);
-    if (index != -1) {
-      _dreams[index] = dream;
+    try {
+      final headers = await Config.getAuthHeaders();
+      final response = await http.put(
+        Uri.parse('$_apiURL/dreams/${dream.id}/'),
+        headers: headers,
+        body: jsonEncode(dream.toJson()),
+      );
+
+      if (response.statusCode == 200) {
+        final index = _dreams.indexWhere((d) => d.id == dream.id);
+        if (index != -1) {
+          _dreams[index] = dream;
+        }
+      } else {
+        throw Exception('Failed to update dream: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Failed to connect to the server: $e');
     }
   }
 
-  Future<void> deleteDream(String id) async {
-    _dreams.removeWhere((dream) => dream.id == id);
+  Future<void> deleteDream(int? id) async {
+    if (id == null) return;
+
+    try {
+      final headers = await Config.getAuthHeaders();
+      final response = await http.delete(
+        Uri.parse('$_apiURL/dreams/$id/'),
+        headers: headers,
+      );
+
+      if (response.statusCode == 204) {
+        _dreams.removeWhere((dream) => dream.id == id);
+      } else {
+        throw Exception('Failed to delete dream: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Failed to connect to the server: $e');
+    }
   }
 }

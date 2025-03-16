@@ -26,9 +26,9 @@ class _AddDreamPageState extends ConsumerState<AddDreamPage> {
   void initState() {
     super.initState();
     if (widget.dream != null) {
-      _titleController.text = widget.dream!.title;
+      _titleController.text = widget.dream!.title ?? '';
       _descriptionController.text = widget.dream!.description;
-      _selectedDate = widget.dream!.date;
+      _selectedDate = widget.dream!.timestamp;
       _interpretation = widget.dream!.interpretation;
     } else {
       _selectedDate = DateTime.now();
@@ -305,10 +305,12 @@ class _AddDreamPageState extends ConsumerState<AddDreamPage> {
 
     try {
       final dream = DreamEntry(
-        id: widget.dream?.id ?? DateTime.now().toString(),
-        title: _titleController.text.trim(),
+        id: widget.dream?.id,
+        title: _titleController.text.trim().isNotEmpty
+            ? _titleController.text.trim()
+            : null,
         description: _descriptionController.text.trim(),
-        date: _selectedDate,
+        timestamp: _selectedDate,
       );
 
       if (widget.dream != null) {

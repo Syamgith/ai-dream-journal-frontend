@@ -37,7 +37,7 @@ class DreamsNotifier extends StateNotifier<List<DreamEntry>> {
     ];
   }
 
-  Future<void> deleteDream(String id) async {
+  Future<void> deleteDream(int? id) async {
     await _repository.deleteDream(id);
     state = state.where((dream) => dream.id != id).toList();
   }

@@ -1,37 +1,39 @@
 class DreamEntry {
-  final String id;
-  final String title;
+  final int? id;
+  final String? title;
   final String description;
-  final DateTime date;
+  final DateTime timestamp;
   final String? interpretation;
-  final List<String> emotions;
+  final List<String>? emotions;
 
   DreamEntry({
-    required this.id,
-    required this.title,
+    this.id,
+    this.title,
     required this.description,
-    required this.date,
+    required this.timestamp,
     this.interpretation,
-    this.emotions = const [],
+    this.emotions,
   });
 
   Map<String, dynamic> toJson() {
     return {
       'description': description,
-      'date': date.toIso8601String(),
+      'timestamp': timestamp.toIso8601String(),
       'emotions': emotions,
+      'title': title,
       'tags': [], // Empty tags for now
     };
   }
 
   factory DreamEntry.fromJson(Map<String, dynamic> json) {
     return DreamEntry(
-      id: json['id'] ?? '',
-      title: json['title'] ?? '',
+      id: json['id'],
+      title: json['title'],
       description: json['description'] ?? '',
-      date: DateTime.parse(json['date']),
+      timestamp: DateTime.parse(json['timestamp']),
       interpretation: json['interpretation'],
-      emotions: List<String>.from(json['emotions'] ?? []),
+      emotions:
+          json['emotions'] != null ? List<String>.from(json['emotions']) : null,
     );
   }
 }

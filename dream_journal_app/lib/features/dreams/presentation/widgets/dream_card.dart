@@ -13,7 +13,7 @@ class DreamCard extends StatelessWidget {
   });
 
   String _formatDate() {
-    return DateFormat('d\nMMM').format(dream.date).toUpperCase();
+    return DateFormat('d\nMMM').format(dream.timestamp).toUpperCase();
   }
 
   @override
@@ -93,7 +93,7 @@ class DreamCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          dream.title,
+                          dream.title ?? 'Untitled Dream',
                           style: TextStyle(
                             color: AppColors.white.withAlpha(242),
                             fontSize: 20,
