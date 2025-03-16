@@ -48,6 +48,20 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
     }
   }
 
+  // Register and automatically login
+  Future<User> registerAndLogin(
+      String email, String password, String name) async {
+    state = const AsyncValue.loading();
+    try {
+      final user = await _repository.registerAndLogin(email, password, name);
+      state = AsyncValue.data(user);
+      return user;
+    } catch (e) {
+      state = AsyncValue.error(e, StackTrace.current);
+      rethrow;
+    }
+  }
+
   // Login a user
   Future<void> login(String email, String password) async {
     state = const AsyncValue.loading();

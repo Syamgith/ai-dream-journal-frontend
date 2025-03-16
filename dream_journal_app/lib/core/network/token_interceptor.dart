@@ -1,50 +1,38 @@
 import 'dart:io';
 import 'package:http/http.dart' as http;
-import 'package:http_interceptor/http_interceptor.dart';
 import '../auth/auth_service.dart';
 import '../../features/auth/data/repositories/auth_repository.dart';
 
-class TokenInterceptor implements InterceptorContract {
+// A simpler implementation without using the http_interceptor package
+class TokenInterceptor {
   final AuthRepository _authRepository;
 
   TokenInterceptor(this._authRepository);
 
-  @override
-  Future<RequestData> interceptRequest({required RequestData data}) async {
+  // Add authorization header to request
+  Future<Map<String, String>> addAuthHeader(Map<String, String> headers) async {
     final token = await AuthService.getToken();
 
     if (token != null) {
-      data.headers['Authorization'] = 'Bearer $token';
+      headers['Authorization'] = 'Bearer $token';
     }
 
-    return data;
+    return headers;
   }
 
-  @override
-  Future<ResponseData> interceptResponse({required ResponseData data}) async {
+  // Handle response and refresh token if needed
+  Future<http.Response> handleResponse(http.Response response,
+      Future<http.Response> Function(String) retryWithToken) async {
     // If the response is 401 Unauthorized, try to refresh the token
-    if (data.statusCode == 401) {
+    if (response.statusCode == 401) {
       final newToken = await _authRepository.refreshToken();
 
       if (newToken != null) {
         // Retry the original request with the new token
-        final request = data.request;
-        final headers = Map<String, String>.from(request.headers);
-        headers['Authorization'] = 'Bearer $newToken';
-
-        final retryResponse = await http.Client().send(
-          http.Request(request.method, request.url)
-            ..headers.addAll(headers)
-            ..body = request.body,
-        );
-
-        return ResponseData.fromHttpResponse(
-          await http.Response.fromStream(retryResponse),
-          request: request,
-        );
+        return await retryWithToken(newToken);
       }
     }
 
-    return data;
+    return response;
   }
 }

@@ -3,15 +3,19 @@ import 'package:http/http.dart' as http;
 import '../config/config.dart';
 import '../auth/auth_service.dart';
 import '../../features/auth/data/repositories/auth_repository.dart';
+import 'token_interceptor.dart';
 
 class ApiClient {
   final String baseUrl;
   final AuthRepository authRepository;
+  late final TokenInterceptor _tokenInterceptor;
 
   ApiClient({
     required this.baseUrl,
     required this.authRepository,
-  });
+  }) {
+    _tokenInterceptor = TokenInterceptor(authRepository);
+  }
 
   // Helper method to get auth headers
   Future<Map<String, String>> _getHeaders({bool requireAuth = true}) async {
@@ -21,10 +25,7 @@ class ApiClient {
     };
 
     if (requireAuth) {
-      final token = await AuthService.getToken();
-      if (token != null) {
-        headers['Authorization'] = 'Bearer $token';
-      }
+      return await _tokenInterceptor.addAuthHeader(headers);
     }
 
     return headers;
@@ -32,21 +33,11 @@ class ApiClient {
 
   // Handle response and token refresh if needed
   Future<http.Response> _handleResponse(
-      Future<http.Response> Function() request) async {
+      Future<http.Response> Function() request,
+      Future<http.Response> Function(String) retryWithToken) async {
     try {
       final response = await request();
-
-      // If unauthorized, try to refresh token and retry
-      if (response.statusCode == 401) {
-        final newToken = await authRepository.refreshToken();
-
-        if (newToken != null) {
-          // Retry the request with the new token
-          return await request();
-        }
-      }
-
-      return response;
+      return await _tokenInterceptor.handleResponse(response, retryWithToken);
     } catch (e) {
       rethrow;
     }
@@ -57,7 +48,13 @@ class ApiClient {
     final headers = await _getHeaders(requireAuth: requireAuth);
 
     final response = await _handleResponse(
-        () => http.get(Uri.parse('$baseUrl$endpoint'), headers: headers));
+      () => http.get(Uri.parse('$baseUrl$endpoint'), headers: headers),
+      (newToken) {
+        final newHeaders = Map<String, String>.from(headers);
+        newHeaders['Authorization'] = 'Bearer $newToken';
+        return http.get(Uri.parse('$baseUrl$endpoint'), headers: newHeaders);
+      },
+    );
 
     return _processResponse(response);
   }
@@ -66,12 +63,24 @@ class ApiClient {
   Future<dynamic> post(String endpoint,
       {dynamic body, bool requireAuth = true}) async {
     final headers = await _getHeaders(requireAuth: requireAuth);
+    final encodedBody = jsonEncode(body);
 
-    final response = await _handleResponse(() => http.post(
+    final response = await _handleResponse(
+      () => http.post(
+        Uri.parse('$baseUrl$endpoint'),
+        headers: headers,
+        body: encodedBody,
+      ),
+      (newToken) {
+        final newHeaders = Map<String, String>.from(headers);
+        newHeaders['Authorization'] = 'Bearer $newToken';
+        return http.post(
           Uri.parse('$baseUrl$endpoint'),
-          headers: headers,
-          body: jsonEncode(body),
-        ));
+          headers: newHeaders,
+          body: encodedBody,
+        );
+      },
+    );
 
     return _processResponse(response);
   }
@@ -80,12 +89,24 @@ class ApiClient {
   Future<dynamic> put(String endpoint,
       {dynamic body, bool requireAuth = true}) async {
     final headers = await _getHeaders(requireAuth: requireAuth);
+    final encodedBody = jsonEncode(body);
 
-    final response = await _handleResponse(() => http.put(
+    final response = await _handleResponse(
+      () => http.put(
+        Uri.parse('$baseUrl$endpoint'),
+        headers: headers,
+        body: encodedBody,
+      ),
+      (newToken) {
+        final newHeaders = Map<String, String>.from(headers);
+        newHeaders['Authorization'] = 'Bearer $newToken';
+        return http.put(
           Uri.parse('$baseUrl$endpoint'),
-          headers: headers,
-          body: jsonEncode(body),
-        ));
+          headers: newHeaders,
+          body: encodedBody,
+        );
+      },
+    );
 
     return _processResponse(response);
   }
@@ -95,7 +116,13 @@ class ApiClient {
     final headers = await _getHeaders(requireAuth: requireAuth);
 
     final response = await _handleResponse(
-        () => http.delete(Uri.parse('$baseUrl$endpoint'), headers: headers));
+      () => http.delete(Uri.parse('$baseUrl$endpoint'), headers: headers),
+      (newToken) {
+        final newHeaders = Map<String, String>.from(headers);
+        newHeaders['Authorization'] = 'Bearer $newToken';
+        return http.delete(Uri.parse('$baseUrl$endpoint'), headers: newHeaders);
+      },
+    );
 
     return _processResponse(response);
   }

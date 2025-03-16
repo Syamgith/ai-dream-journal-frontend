@@ -19,13 +19,27 @@ class AuthRepository {
       }),
     );
 
-    if (response.statusCode == 201) {
-      final data = jsonDecode(response.body);
+    if (response.statusCode == 200) {
+      //final data = jsonDecode(response.body);
       // Registration successful, but no token is returned
       // User needs to login separately
       return true;
     } else {
       throw Exception('Failed to register: ${response.body}');
+    }
+  }
+
+  // Register and login in one step
+  Future<User> registerAndLogin(
+      String email, String password, String name) async {
+    // First register the user
+    final registerSuccess = await register(email, password, name);
+
+    if (registerSuccess) {
+      // Then login the user
+      return await login(email, password);
+    } else {
+      throw Exception('Registration failed');
     }
   }
 
