@@ -21,6 +21,18 @@ class ProfilePage extends ConsumerWidget {
           _buildStatsCard(profile),
           const SizedBox(height: 20),
           if (profile.isGuest) _buildGuestMessage(context, ref),
+          if (!profile.isGuest) ...[
+            const SizedBox(height: 40),
+            Center(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: AppColors.darkBlue,
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                child: _buildLogoutButton(context, ref),
+              ),
+            ),
+          ],
         ],
       ),
     );
