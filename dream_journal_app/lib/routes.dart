@@ -7,9 +7,11 @@ import 'features/auth/presentation/pages/login_page.dart';
 import 'features/auth/presentation/pages/register_page.dart';
 import 'features/feedback/presentation/pages/feedback_page.dart';
 import 'features/about/presentation/pages/about_page.dart';
+import 'features/shared/screens/main_screen.dart';
 
 class AppRoutes {
   static const String main = '/';
+  static const String home = '/home';
   static const String dreams = '/dreams';
   static const String profile = '/profile';
   static const String addDream = '/add-dream';
@@ -22,6 +24,7 @@ class AppRoutes {
   static Map<String, WidgetBuilder> getRoutes() {
     return {
       main: (context) => const AuthWrapper(),
+      home: (context) => const MainScreen(),
       dreams: (context) => const DreamsPage(),
       profile: (context) => const ProfilePage(),
       addDream: (context) => const AddDreamPage(),

@@ -20,15 +20,6 @@ class User {
     );
   }
 
-  factory User.guest() {
-    return User(
-      id: 0,
-      email: 'guest@example.com',
-      name: 'Guest',
-      isGuest: true,
-    );
-  }
-
   Map<String, dynamic> toJson() {
     return {
       'id': id,

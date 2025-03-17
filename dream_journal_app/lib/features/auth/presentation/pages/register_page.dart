@@ -4,6 +4,7 @@ import '../providers/auth_provider.dart';
 import '../widgets/auth_button.dart';
 import '../widgets/auth_text_field.dart';
 import '../../../../features/shared/widgets/loading_indicator.dart';
+import '../../../dreams/providers/dreams_provider.dart';
 
 class RegisterPage extends ConsumerStatefulWidget {
   const RegisterPage({Key? key}) : super(key: key);
@@ -66,7 +67,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             );
 
         if (mounted) {
-          _showRegistrationSuccessDialog();
+          _navigateToHome();
         }
       } catch (e) {
         setState(() {
@@ -77,37 +78,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     }
   }
 
-  void _showRegistrationSuccessDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          title: const Row(
-            children: [
-              Icon(Icons.check_circle_outline, color: Colors.green, size: 30),
-              SizedBox(width: 10),
-              Text('Registration Successful',
-                  style: TextStyle(color: Colors.white)),
-            ],
-          ),
-          content: const Text(
-            'Your account has been created successfully and you are now logged in!',
-            style: TextStyle(color: Colors.white70),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.of(context).pop();
-              },
-              child: const Text('Continue'),
-            ),
-          ],
-        );
-      },
-    );
+  void _navigateToHome() {
+    // Navigate to the home page after successful registration
+    Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
   }
 
   @override

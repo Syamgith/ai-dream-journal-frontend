@@ -4,6 +4,7 @@ import '../providers/auth_provider.dart';
 import '../widgets/auth_button.dart';
 import '../widgets/auth_text_field.dart';
 import 'register_page.dart';
+import '../../../dreams/providers/dreams_provider.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -18,6 +19,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
   String? _errorMessage;
+  bool _isLoggingIn = false;
 
   @override
   void dispose() {
@@ -36,6 +38,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     if (_formKey.currentState!.validate()) {
       setState(() {
         _errorMessage = null;
+        _isLoggingIn = true;
       });
 
       try {
@@ -43,10 +46,21 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               _emailController.text.trim(),
               _passwordController.text,
             );
+
+        // After successful login, navigate to the home page
+        if (mounted && context.mounted) {
+          Navigator.of(context).pushReplacementNamed('/home');
+        }
       } catch (e) {
         setState(() {
           _errorMessage = e.toString();
         });
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoggingIn = false;
+          });
+        }
       }
     }
   }
@@ -54,14 +68,26 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   Future<void> _loginAsGuest() async {
     setState(() {
       _errorMessage = null;
+      _isLoggingIn = true;
     });
 
     try {
       await ref.read(authProvider.notifier).loginAsGuest();
+
+      // After successful guest login, navigate to the home page
+      if (mounted && context.mounted) {
+        Navigator.of(context).pushReplacementNamed('/home');
+      }
     } catch (e) {
       setState(() {
         _errorMessage = e.toString();
       });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoggingIn = false;
+        });
+      }
     }
   }
 
@@ -74,7 +100,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
-    final isLoading = authState is AsyncLoading;
+    final isLoading = authState is AsyncLoading || _isLoggingIn;
 
     return Scaffold(
       body: SafeArea(
@@ -185,6 +211,16 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         isLoading: isLoading,
                         backgroundColor: Colors.transparent,
                         textColor: Colors.white,
+                        borderColor: Colors.white70,
+                      ),
+
+                      const SizedBox(height: 8),
+
+                      // Guest login description
+                      const Text(
+                        'No account needed. Try the app without registration.',
+                        style: TextStyle(color: Colors.white70, fontSize: 12),
+                        textAlign: TextAlign.center,
                       ),
 
                       const SizedBox(height: 24),

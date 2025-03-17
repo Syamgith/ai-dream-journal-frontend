@@ -157,17 +157,41 @@ class ProfilePage extends ConsumerWidget {
               style: TextStyle(color: AppColors.lightBlue),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 12),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryBlue,
-                minimumSize: const Size(double.infinity, 45),
-              ),
-              onPressed: () {
-                // Navigate to login page
-                ref.read(authProvider.notifier).logout();
-              },
-              child: const Text('Sign in to save your dreams'),
+            const SizedBox(height: 8),
+            const Text(
+              'Your dreams are saved locally but will be lost if you logout',
+              style: TextStyle(color: AppColors.lightBlue, fontSize: 12),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryBlue,
+                      minimumSize: const Size(double.infinity, 45),
+                    ),
+                    onPressed: () {
+                      // Navigate to login page
+                      ref.read(authProvider.notifier).logout();
+                    },
+                    child: const Text('Sign in'),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: AppColors.primaryBlue),
+                      minimumSize: const Size(double.infinity, 45),
+                    ),
+                    onPressed: () => _showLogoutConfirmation(context, ref),
+                    child: const Text('Logout',
+                        style: TextStyle(color: AppColors.primaryBlue)),
+                  ),
+                ),
+              ],
             ),
           ],
         ),

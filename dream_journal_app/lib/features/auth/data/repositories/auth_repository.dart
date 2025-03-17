@@ -67,10 +67,20 @@ class AuthRepository {
 
   // Login as guest
   Future<User> loginAsGuest() async {
-    // Create a guest user
-    final user = User.guest();
-    // No token is saved for guest users
-    return user;
+    final response = await http.post(
+      Uri.parse('$_baseUrl/users/guest'),
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      // Save the tokens
+      await AuthService.setToken(data['access_token']);
+      await AuthService.setRefreshToken(data['refresh_token']);
+      return User.fromJson(data['user']);
+    } else {
+      throw Exception('Failed to login as guest: ${response.body}');
+    }
   }
 
   // Logout
@@ -109,6 +119,44 @@ class AuthRepository {
     } catch (e) {
       await logout();
       return null;
+    }
+  }
+
+  // Get current user information
+  Future<User?> getCurrentUser() async {
+    final token = await AuthService.getToken();
+
+    if (token == null) {
+      return null;
+    }
+
+    try {
+      final response = await http.get(
+        Uri.parse('$_baseUrl/users/me'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return User.fromJson(data);
+      } else if (response.statusCode == 401) {
+        // Token is invalid, try to refresh it
+        final newToken = await refreshToken();
+        if (newToken != null) {
+          // Try again with the new token
+          return await getCurrentUser();
+        } else {
+          // Refresh failed, user needs to login again
+          return null;
+        }
+      } else {
+        throw Exception('Failed to get user information: ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Error getting user information: $e');
     }
   }
 }

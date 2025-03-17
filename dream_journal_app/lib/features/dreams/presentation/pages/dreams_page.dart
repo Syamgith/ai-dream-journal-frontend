@@ -11,6 +11,7 @@ class DreamsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dreams = ref.watch(dreamsProvider);
+    final isLoading = ref.watch(dreamsLoadingProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -43,13 +44,35 @@ class DreamsPage extends ConsumerWidget {
           //   ),
           // ),
           Expanded(
-            child: ListView.builder(
-              itemCount: dreams.length,
-              itemBuilder: (context, index) {
-                final dream = dreams[dreams.length - 1 - index];
-                return DreamCard(dream: dream);
-              },
-            ),
+            child: isLoading
+                ? const Center(
+                    child: CircularProgressIndicator(),
+                  )
+                : dreams.isEmpty
+                    ? Center(
+                        child: GestureDetector(
+                          onTap: () =>
+                              Navigator.pushNamed(context, '/add-dream'),
+                          child: const Text(
+                            'Add your first dream!',
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                      )
+                    : RefreshIndicator(
+                        onRefresh: () =>
+                            ref.read(dreamsProvider.notifier).loadDreams(),
+                        child: ListView.builder(
+                          itemCount: dreams.length,
+                          itemBuilder: (context, index) {
+                            final dream = dreams[dreams.length - 1 - index];
+                            return DreamCard(dream: dream);
+                          },
+                        ),
+                      ),
           ),
           //SleepingIcon()
         ],

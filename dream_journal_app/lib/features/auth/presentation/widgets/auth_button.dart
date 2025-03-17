@@ -7,6 +7,7 @@ class AuthButton extends StatelessWidget {
   final bool isLoading;
   final Color backgroundColor;
   final Color textColor;
+  final Color? borderColor;
 
   const AuthButton({
     Key? key,
@@ -15,6 +16,7 @@ class AuthButton extends StatelessWidget {
     this.isLoading = false,
     this.backgroundColor = AppColors.primaryBlue,
     this.textColor = AppColors.white,
+    this.borderColor,
   }) : super(key: key);
 
   @override
@@ -29,6 +31,9 @@ class AuthButton extends StatelessWidget {
           foregroundColor: textColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
+            side: borderColor != null
+                ? BorderSide(color: borderColor!)
+                : BorderSide.none,
           ),
           elevation: 3,
         ),
