@@ -1,6 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../features/auth/presentation/providers/auth_provider.dart';
 import '../../../../../features/auth/domain/models/user.dart';
+import '../../../../../features/dreams/providers/dreams_provider.dart';
+import '../../../../../features/dreams/data/models/dream_entry.dart';
+import 'package:intl/intl.dart';
 
 class ProfileState {
   final String name;
@@ -8,7 +11,6 @@ class ProfileState {
   final String memberSince;
   final int totalDreams;
   final int dreamStreak;
-  final double averageSleep;
   final bool isGuest;
 
   ProfileState({
@@ -17,7 +19,6 @@ class ProfileState {
     required this.memberSince,
     required this.totalDreams,
     required this.dreamStreak,
-    required this.averageSleep,
     required this.isGuest,
   });
 
@@ -28,7 +29,6 @@ class ProfileState {
     String? memberSince,
     int? totalDreams,
     int? dreamStreak,
-    double? averageSleep,
     bool? isGuest,
   }) {
     return ProfileState(
@@ -37,7 +37,6 @@ class ProfileState {
       memberSince: memberSince ?? this.memberSince,
       totalDreams: totalDreams ?? this.totalDreams,
       dreamStreak: dreamStreak ?? this.dreamStreak,
-      averageSleep: averageSleep ?? this.averageSleep,
       isGuest: isGuest ?? this.isGuest,
     );
   }
@@ -48,21 +47,94 @@ final profileProvider =
     StateNotifierProvider<ProfileNotifier, ProfileState>((ref) {
   final authState = ref.watch(authProvider);
   final user = authState.value;
+  final dreams = ref.watch(dreamsProvider);
 
-  return ProfileNotifier(user);
+  return ProfileNotifier(user, dreams);
 });
 
 class ProfileNotifier extends StateNotifier<ProfileState> {
-  ProfileNotifier(User? user)
+  ProfileNotifier(User? user, List<DreamEntry> dreams)
       : super(ProfileState(
           name: user?.name ?? 'Guest User',
           email: user?.email ?? 'guest@example.com',
-          memberSince: 'Jan 2024', // This could be fetched from the backend
-          totalDreams: 42,
-          dreamStreak: 7,
-          averageSleep: 7.5,
+          memberSince: _calculateMemberSince(user, dreams),
+          totalDreams: dreams.length,
+          dreamStreak: _calculateDreamStreak(dreams),
           isGuest: user?.isGuest ?? true,
         ));
+
+  // Calculate member since date based on the first dream entry
+  static String _calculateMemberSince(User? user, List<DreamEntry> dreams) {
+    if (dreams.isEmpty) {
+      return user?.isGuest ?? true ? 'Today' : 'Unknown';
+    }
+
+    // Find the oldest dream
+    final sortedDreams = List<DreamEntry>.from(dreams)
+      ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
+
+    // Use the date of the oldest dream as member since date
+    final firstDreamDate = sortedDreams.first.timestamp;
+    return DateFormat('MMM yyyy').format(firstDreamDate);
+  }
+
+  // Calculate dream streak
+  static int _calculateDreamStreak(List<DreamEntry> dreams) {
+    if (dreams.isEmpty) {
+      return 0;
+    }
+
+    // Sort dreams by date, newest first
+    final sortedDreams = List<DreamEntry>.from(dreams)
+      ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+
+    // Check if there's a dream from today
+    final today = DateTime.now();
+    final todayFormatted = DateTime(today.year, today.month, today.day);
+
+    bool hasDreamToday = false;
+    int streak = 0;
+    DateTime? lastDate;
+
+    for (var dream in sortedDreams) {
+      final dreamDate = DateTime(
+        dream.timestamp.year,
+        dream.timestamp.month,
+        dream.timestamp.day,
+      );
+
+      // First dream in the loop
+      if (lastDate == null) {
+        lastDate = dreamDate;
+        streak = 1;
+
+        if (dreamDate.isAtSameMomentAs(todayFormatted)) {
+          hasDreamToday = true;
+        } else {
+          // If first dream is not today, check if it's yesterday
+          final yesterday = todayFormatted.subtract(const Duration(days: 1));
+          if (!dreamDate.isAtSameMomentAs(yesterday)) {
+            // If first dream is not yesterday, streak is broken
+            return 0;
+          }
+        }
+        continue;
+      }
+
+      // Check if this dream is from the day before the last one
+      final expectedPreviousDay = lastDate.subtract(const Duration(days: 1));
+
+      if (dreamDate.isAtSameMomentAs(expectedPreviousDay)) {
+        streak++;
+        lastDate = dreamDate;
+      } else if (dreamDate.isBefore(expectedPreviousDay)) {
+        // Found a gap, streak is broken
+        break;
+      }
+    }
+
+    return streak;
+  }
 
   void updateProfile({
     String? name,
@@ -70,7 +142,6 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
     String? memberSince,
     int? totalDreams,
     int? dreamStreak,
-    double? averageSleep,
     bool? isGuest,
   }) {
     state = state.copyWith(
@@ -79,7 +150,6 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
       memberSince: memberSince,
       totalDreams: totalDreams,
       dreamStreak: dreamStreak,
-      averageSleep: averageSleep,
       isGuest: isGuest,
     );
   }

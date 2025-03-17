@@ -490,8 +490,7 @@ class ProfilePage extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             _buildStatItem('Total Dreams', '${profile.totalDreams}'),
-            _buildStatItem('Dream Streak', '${profile.dreamStreak} days'),
-            _buildStatItem('Average Sleep', '${profile.averageSleep} hours'),
+            _buildStatItem('Dream Streak', '${profile.dreamStreak} days')
           ],
         ),
       ),
