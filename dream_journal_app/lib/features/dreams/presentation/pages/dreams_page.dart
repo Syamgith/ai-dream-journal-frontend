@@ -14,24 +14,6 @@ class DreamsPage extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text(
-          'Dreams',
-          style: TextStyle(color: AppColors.white),
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.menu, color: AppColors.white),
-          onPressed: () {},
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search, color: AppColors.white),
-            onPressed: () {},
-          ),
-        ],
-      ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

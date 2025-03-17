@@ -13,17 +13,6 @@ class ProfilePage extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text(
-          'Profile',
-          style: TextStyle(color: AppColors.white),
-        ),
-        actions: [
-          _buildLogoutButton(context, ref),
-        ],
-      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
