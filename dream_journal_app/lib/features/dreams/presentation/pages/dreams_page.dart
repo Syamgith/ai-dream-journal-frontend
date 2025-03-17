@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../providers/dreams_provider.dart';
 import '../widgets/dream_card.dart';
+import 'package:flutter/foundation.dart';
 //import '../widgets/dream_icon.dart';
 
 class DreamsPage extends ConsumerWidget {
@@ -12,6 +13,7 @@ class DreamsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final dreams = ref.watch(dreamsProvider);
     final isLoading = ref.watch(dreamsLoadingProvider);
+    final hasInitialLoad = ref.watch(dreamsInitialLoadProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -44,7 +46,7 @@ class DreamsPage extends ConsumerWidget {
           //   ),
           // ),
           Expanded(
-            child: isLoading
+            child: isLoading && !hasInitialLoad
                 ? const Center(
                     child: CircularProgressIndicator(),
                   )
@@ -63,20 +65,39 @@ class DreamsPage extends ConsumerWidget {
                         ),
                       )
                     : RefreshIndicator(
-                        onRefresh: () =>
-                            ref.read(dreamsProvider.notifier).loadDreams(),
-                        child: ListView.builder(
-                          itemCount: dreams.length,
-                          itemBuilder: (context, index) {
-                            final dream = dreams[dreams.length - 1 - index];
-                            return DreamCard(dream: dream);
-                          },
-                        ),
+                        onRefresh: () => ref
+                            .read(dreamsProvider.notifier)
+                            .loadDreams(forceRefresh: true),
+                        child: _DreamsList(dreams: dreams),
                       ),
           ),
           //SleepingIcon()
         ],
       ),
+    );
+  }
+}
+
+// A separate widget for the dreams list to optimize rebuilds
+class _DreamsList extends StatelessWidget {
+  final List<dynamic> dreams;
+
+  const _DreamsList({required this.dreams});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      physics: const AlwaysScrollableScrollPhysics(),
+      itemCount: dreams.length,
+      itemBuilder: (context, index) {
+        final dream = dreams[dreams.length - 1 - index];
+        return KeyedSubtree(
+          // Use the dream ID as a key to maintain widget identity
+          key: ValueKey(
+              dream.id ?? 'dream-${dream.timestamp.millisecondsSinceEpoch}'),
+          child: DreamCard(dream: dream),
+        );
+      },
     );
   }
 }

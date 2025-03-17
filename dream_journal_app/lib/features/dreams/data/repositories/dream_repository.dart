@@ -4,10 +4,29 @@ import '../models/dream_entry.dart';
 import '../../../../core/config/config.dart';
 
 class DreamRepository {
+  // In-memory cache of dreams
   final List<DreamEntry> _dreams = [];
   final String _apiURL = Config.apiURL;
+  DateTime? _lastFetchTime;
 
-  Future<List<DreamEntry>> getDreams() async {
+  // Clear the dreams cache
+  void clearCache() {
+    _dreams.clear();
+    _lastFetchTime = null;
+  }
+
+  // Get dreams from cache if available and recent, otherwise fetch from API
+  Future<List<DreamEntry>> getDreams({bool forceRefresh = false}) async {
+    // If we have dreams in cache and it's been less than 5 minutes since last fetch
+    // and we're not forcing a refresh, return the cached dreams
+    final now = DateTime.now();
+    if (!forceRefresh &&
+        _dreams.isNotEmpty &&
+        _lastFetchTime != null &&
+        now.difference(_lastFetchTime!).inMinutes < 5) {
+      return _dreams;
+    }
+
     try {
       final headers = await Config.getAuthHeaders();
       final response = await http.get(
@@ -21,9 +40,63 @@ class DreamRepository {
             dreamsJson.map((json) => DreamEntry.fromJson(json)).toList();
         _dreams.clear();
         _dreams.addAll(dreams);
+        _lastFetchTime = now;
         return dreams;
       } else {
+        // If API call fails but we have cached dreams, return those
+        if (_dreams.isNotEmpty) {
+          return _dreams;
+        }
         throw Exception('Failed to load dreams: ${response.statusCode}');
+      }
+    } catch (e) {
+      // If there's an error but we have cached dreams, return those
+      if (_dreams.isNotEmpty) {
+        return _dreams;
+      }
+      throw Exception('Failed to connect to the server: $e');
+    }
+  }
+
+  // Get a single dream by ID, first checking cache
+  Future<DreamEntry?> getDreamById(int id) async {
+    // First check if the dream is in the cache
+    final cachedDream = _dreams.firstWhere(
+      (dream) => dream.id == id,
+      orElse: () => DreamEntry(
+        id: -1,
+        description: '',
+        timestamp: DateTime.now(),
+      ),
+    );
+
+    if (cachedDream.id != -1) {
+      return cachedDream;
+    }
+
+    // If not in cache, fetch from API
+    try {
+      final headers = await Config.getAuthHeaders();
+      final response = await http.get(
+        Uri.parse('$_apiURL/dreams/$id/'),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        final dreamJson = jsonDecode(response.body);
+        final dream = DreamEntry.fromJson(dreamJson);
+
+        // Update the dream in the cache
+        final index = _dreams.indexWhere((d) => d.id == id);
+        if (index != -1) {
+          _dreams[index] = dream;
+        } else {
+          _dreams.add(dream);
+        }
+
+        return dream;
+      } else {
+        throw Exception('Failed to load dream: ${response.statusCode}');
       }
     } catch (e) {
       throw Exception('Failed to connect to the server: $e');
@@ -31,10 +104,8 @@ class DreamRepository {
   }
 
   Future<DreamEntry> addDream(DreamEntry dream) async {
-    print('$_apiURL/dreams/');
     try {
       final headers = await Config.getAuthHeaders();
-      print(headers);
 
       final response = await http.post(
         Uri.parse('$_apiURL/dreams/'),
@@ -44,11 +115,16 @@ class DreamRepository {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final interpretedDream = DreamEntry.fromJson(jsonDecode(response.body));
-        _dreams.add(interpretedDream);
+
+        // Add to cache if not already present
+        if (!_dreams.any((d) => d.id == interpretedDream.id)) {
+          _dreams.add(interpretedDream);
+        }
+
         return interpretedDream;
       } else {
-        print(response.statusCode);
-        throw Exception('Failed to get dream interpretation');
+        throw Exception(
+            'Failed to get dream interpretation: ${response.statusCode}');
       }
     } catch (e) {
       throw Exception('Failed to connect to the server: $e');
@@ -65,6 +141,7 @@ class DreamRepository {
       );
 
       if (response.statusCode == 200) {
+        // Update in cache
         final index = _dreams.indexWhere((d) => d.id == dream.id);
         if (index != -1) {
           _dreams[index] = dream;
@@ -88,6 +165,7 @@ class DreamRepository {
       );
 
       if (response.statusCode == 204) {
+        // Remove from cache
         _dreams.removeWhere((dream) => dream.id == id);
       } else {
         throw Exception('Failed to delete dream: ${response.statusCode}');

@@ -311,21 +311,24 @@ class _AddDreamPageState extends ConsumerState<AddDreamPage> {
             : null,
         description: _descriptionController.text.trim(),
         timestamp: _selectedDate,
+        interpretation: widget.dream?.interpretation,
       );
 
       if (widget.dream != null) {
-        ref.read(dreamsProvider.notifier).updateDream(dream);
+        await ref.read(dreamsProvider.notifier).updateDream(dream);
+        if (mounted) {
+          Navigator.pop(context);
+        }
       } else {
         final interpretedDream =
             await ref.read(dreamsProvider.notifier).addDream(dream);
-        setState(() {
-          _interpretation = interpretedDream.interpretation;
-        });
-        return; // Don't pop the page, show interpretation instead
-      }
 
-      if (mounted) {
-        Navigator.pop(context);
+        if (mounted) {
+          setState(() {
+            _interpretation = interpretedDream.interpretation;
+          });
+        }
+        return; // Don't pop the page, show interpretation instead
       }
     } catch (e) {
       if (mounted) {

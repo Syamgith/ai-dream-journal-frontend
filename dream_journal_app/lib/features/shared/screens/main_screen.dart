@@ -24,7 +24,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   @override
   void initState() {
     super.initState();
-    // Refresh dreams data when the main screen is loaded
+    // Refresh dreams data when the main screen is loaded, but only if needed
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _refreshDreamsData();
     });
@@ -32,7 +32,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
   Future<void> _refreshDreamsData() async {
     try {
-      await ref.read(dreamsProvider.notifier).loadDreams();
+      // Force refresh dreams data when manually refreshing
+      await ref.read(dreamsProvider.notifier).loadDreams(forceRefresh: true);
     } catch (e) {
       // Log the error but don't show it to the user
       print('Error refreshing dreams data: $e');

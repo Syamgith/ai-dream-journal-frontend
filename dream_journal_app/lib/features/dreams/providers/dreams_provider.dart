@@ -7,6 +7,9 @@ final dreamRepositoryProvider = Provider((ref) => DreamRepository());
 // Provider to track loading state for dreams
 final dreamsLoadingProvider = StateProvider<bool>((ref) => false);
 
+// Provider to track if initial loading has been done
+final dreamsInitialLoadProvider = StateProvider<bool>((ref) => false);
+
 final dreamsProvider =
     StateNotifierProvider<DreamsNotifier, List<DreamEntry>>((ref) {
   final repository = ref.watch(dreamRepositoryProvider);
@@ -16,21 +19,49 @@ final dreamsProvider =
 class DreamsNotifier extends StateNotifier<List<DreamEntry>> {
   final DreamRepository _repository;
   final Ref _ref;
+  bool _hasInitialLoad = false;
 
   DreamsNotifier(this._repository, this._ref) : super([]) {
     loadDreams();
   }
 
-  Future<void> loadDreams() async {
-    try {
-      // Set loading state to true
-      _ref.read(dreamsLoadingProvider.notifier).state = true;
+  // Check if initial load has been done
+  bool get hasInitialLoad => _hasInitialLoad;
 
-      // Fetch dreams from the repository
-      final dreams = await _repository.getDreams();
+  // Reset state when user logs out
+  void reset() {
+    // Clear the repository cache
+    _repository.clearCache();
+    // Reset state to empty
+    state = [];
+    // Reset initial load flag
+    _hasInitialLoad = false;
+    _ref.read(dreamsInitialLoadProvider.notifier).state = false;
+  }
+
+  // Load dreams with force refresh option
+  Future<void> loadDreams({bool forceRefresh = false}) async {
+    try {
+      // If we already have dreams in the cache and this isn't the first load,
+      // don't show the loading indicator to avoid UI flicker
+      final bool showLoading =
+          state.isEmpty || !_hasInitialLoad || forceRefresh;
+
+      if (showLoading) {
+        _ref.read(dreamsLoadingProvider.notifier).state = true;
+      }
+
+      // Fetch dreams from the repository with force refresh if needed
+      final dreams = await _repository.getDreams(forceRefresh: forceRefresh);
 
       // Update the state with the fetched dreams
       state = dreams;
+
+      // Mark that we've done the initial load
+      if (!_hasInitialLoad) {
+        _hasInitialLoad = true;
+        _ref.read(dreamsInitialLoadProvider.notifier).state = true;
+      }
     } catch (e) {
       // Log the error but keep the current state
       print('Error loading dreams: $e');
@@ -40,23 +71,41 @@ class DreamsNotifier extends StateNotifier<List<DreamEntry>> {
     }
   }
 
+  // Add a dream without triggering a full reload
   Future<DreamEntry> addDream(DreamEntry dream) async {
     try {
-      _ref.read(dreamsLoadingProvider.notifier).state = true;
+      // Only show loading indicator if this is the first dream
+      final bool showLoading = state.isEmpty;
+      if (showLoading) {
+        _ref.read(dreamsLoadingProvider.notifier).state = true;
+      }
+
       final interpretedDream = await _repository.addDream(dream);
-      state = state.contains(interpretedDream)
-          ? [...state]
-          : [...state, interpretedDream];
+
+      // Update the state by adding the new dream to the existing list
+      // This avoids a full reload and preserves the existing dream cards
+      if (!state.contains(interpretedDream)) {
+        state = [...state, interpretedDream];
+      }
+
       return interpretedDream;
     } finally {
       _ref.read(dreamsLoadingProvider.notifier).state = false;
     }
   }
 
+  // Update a dream without triggering a full reload
   Future<void> updateDream(DreamEntry dream) async {
     try {
-      _ref.read(dreamsLoadingProvider.notifier).state = true;
+      // Don't show loading indicator for updates to avoid UI flicker
+      final bool showLoading = false;
+      if (showLoading) {
+        _ref.read(dreamsLoadingProvider.notifier).state = true;
+      }
+
       await _repository.updateDream(dream);
+
+      // Update only the specific dream in the list
       state = [
         for (final item in state)
           if (item.id == dream.id) dream else item
@@ -66,13 +115,46 @@ class DreamsNotifier extends StateNotifier<List<DreamEntry>> {
     }
   }
 
+  // Delete a dream without triggering a full reload
   Future<void> deleteDream(int? id) async {
+    if (id == null) return;
+
     try {
-      _ref.read(dreamsLoadingProvider.notifier).state = true;
+      // Don't show loading indicator for deletions to avoid UI flicker
+      final bool showLoading = false;
+      if (showLoading) {
+        _ref.read(dreamsLoadingProvider.notifier).state = true;
+      }
+
       await _repository.deleteDream(id);
+
+      // Remove the specific dream from the list
       state = state.where((dream) => dream.id != id).toList();
     } finally {
       _ref.read(dreamsLoadingProvider.notifier).state = false;
+    }
+  }
+
+  // Method to refresh a specific dream by ID
+  Future<void> refreshDream(int id) async {
+    try {
+      // Get the updated dream from the repository
+      final updatedDreams = await _repository.getDreams();
+      final updatedDream = updatedDreams.firstWhere(
+        (dream) => dream.id == id,
+        orElse: () => state.firstWhere(
+          (dream) => dream.id == id,
+          orElse: () => throw Exception('Dream not found'),
+        ),
+      );
+
+      // Update only this specific dream in the state
+      state = [
+        for (final item in state)
+          if (item.id == id) updatedDream else item
+      ];
+    } catch (e) {
+      print('Error refreshing dream: $e');
     }
   }
 }

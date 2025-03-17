@@ -35,8 +35,9 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
               final user = await _repository.getCurrentUser();
               if (user != null) {
                 state = AsyncValue.data(user);
-                // Refresh dreams data when user is already logged in
-                await _refreshDreamsData();
+                // Reset dreams cache and force refresh dreams data when user is already logged in
+                _ref.read(dreamsProvider.notifier).reset();
+                await _refreshDreamsData(forceRefresh: true);
                 return; // Successfully authenticated with existing token
               }
             } catch (e) {
@@ -51,34 +52,47 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
               final user = await _repository.getCurrentUser();
               if (user != null) {
                 state = AsyncValue.data(user);
-                // Refresh dreams data when user is already logged in
-                await _refreshDreamsData();
+                // Reset dreams cache and force refresh dreams data when user is authenticated with refreshed token
+                _ref.read(dreamsProvider.notifier).reset();
+                await _refreshDreamsData(forceRefresh: true);
               } else {
                 // User info not found but we won't log out automatically
                 // Just set state to null but keep tokens
                 state = const AsyncValue.data(null);
+                // Reset dreams cache since we're not authenticated
+                _ref.read(dreamsProvider.notifier).reset();
               }
             } else {
               // Token refresh failed, but we'll still keep the tokens
               // and let the user try to authenticate again
               state = const AsyncValue.data(null);
+              // Reset dreams cache since we're not authenticated
+              _ref.read(dreamsProvider.notifier).reset();
             }
           } catch (e) {
             // Error during authentication process
             // We'll set state to null but won't delete tokens
             print('Error during authentication check: $e');
             state = const AsyncValue.data(null);
+            // Reset dreams cache due to authentication error
+            _ref.read(dreamsProvider.notifier).reset();
           }
         } else {
           state = const AsyncValue.data(null);
+          // Reset dreams cache since we don't have a token
+          _ref.read(dreamsProvider.notifier).reset();
         }
       } else {
         state = const AsyncValue.data(null);
+        // Reset dreams cache since user is not logged in
+        _ref.read(dreamsProvider.notifier).reset();
       }
     } catch (e) {
       // Error checking auth status
       print('Error checking auth status: $e');
       state = AsyncValue.error(e, StackTrace.current);
+      // Reset dreams cache due to auth status error
+      _ref.read(dreamsProvider.notifier).reset();
     }
   }
 
@@ -101,11 +115,14 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
       String email, String password, String name) async {
     state = const AsyncValue.loading();
     try {
+      // Clear any existing dreams before registration
+      _ref.read(dreamsProvider.notifier).reset();
+
       final user = await _repository.registerAndLogin(email, password, name);
       state = AsyncValue.data(user);
 
-      // Refresh dreams data after successful registration and login
-      await _refreshDreamsData();
+      // Force refresh dreams data after successful registration and login
+      await _refreshDreamsData(forceRefresh: true);
 
       return user;
     } catch (e) {
@@ -118,11 +135,14 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
   Future<void> login(String email, String password) async {
     state = const AsyncValue.loading();
     try {
+      // Clear any existing dreams before login
+      _ref.read(dreamsProvider.notifier).reset();
+
       final user = await _repository.login(email, password);
       state = AsyncValue.data(user);
 
-      // Refresh dreams data after successful login
-      await _refreshDreamsData();
+      // Force refresh dreams data after successful login
+      await _refreshDreamsData(forceRefresh: true);
     } catch (e) {
       state = AsyncValue.error(e, StackTrace.current);
       rethrow;
@@ -133,11 +153,14 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
   Future<void> loginAsGuest() async {
     state = const AsyncValue.loading();
     try {
+      // Clear any existing dreams before login
+      _ref.read(dreamsProvider.notifier).reset();
+
       final user = await _repository.loginAsGuest();
       state = AsyncValue.data(user);
 
-      // Refresh dreams data after successful guest login
-      await _refreshDreamsData();
+      // Force refresh dreams data after successful guest login
+      await _refreshDreamsData(forceRefresh: true);
     } catch (e) {
       state = AsyncValue.error(e, StackTrace.current);
       rethrow;
@@ -152,8 +175,8 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
       final user = await _repository.convertGuestUser(name, email, password);
       state = AsyncValue.data(user);
 
-      // Refresh dreams data after successful conversion
-      await _refreshDreamsData();
+      // Force refresh dreams data after successful conversion
+      await _refreshDreamsData(forceRefresh: true);
     } catch (e) {
       state = AsyncValue.error(e, StackTrace.current);
       rethrow;
@@ -161,10 +184,20 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
   }
 
   // Refresh dreams data
-  Future<void> _refreshDreamsData() async {
+  Future<void> _refreshDreamsData({bool forceRefresh = false}) async {
     try {
-      // Access the dreams notifier and refresh the dreams data
-      await _ref.read(dreamsProvider.notifier).loadDreams();
+      // Check if we already have dreams loaded
+      final hasInitialLoad = _ref.read(dreamsInitialLoadProvider);
+      final dreams = _ref.read(dreamsProvider);
+
+      // When forceRefresh is true, always load dreams
+      // Otherwise, only load dreams if we haven't loaded them yet or if the list is empty
+      if (forceRefresh || !hasInitialLoad || dreams.isEmpty) {
+        // Access the dreams notifier and refresh the dreams data
+        await _ref
+            .read(dreamsProvider.notifier)
+            .loadDreams(forceRefresh: forceRefresh);
+      }
     } catch (e) {
       // Log the error but don't rethrow it to avoid disrupting the login flow
       print('Error refreshing dreams data: $e');
@@ -175,6 +208,9 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
   Future<void> logout() async {
     state = const AsyncValue.loading();
     try {
+      // Clear the dreams cache before logout
+      _ref.read(dreamsProvider.notifier).reset();
+
       await _repository.logout();
       state = const AsyncValue.data(null);
     } catch (e) {
