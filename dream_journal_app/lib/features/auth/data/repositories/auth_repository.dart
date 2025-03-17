@@ -159,4 +159,41 @@ class AuthRepository {
       throw Exception('Error getting user information: $e');
     }
   }
+
+  // Convert guest user to regular user
+  Future<User> convertGuestUser(
+      String name, String email, String password) async {
+    final token = await AuthService.getToken();
+
+    if (token == null) {
+      throw Exception('Not authenticated');
+    }
+
+    try {
+      final response = await http.post(
+        Uri.parse('$_baseUrl/users/convert-guest'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'name': name,
+          'email': email,
+          'password': password,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        // Save the new tokens
+        await AuthService.setToken(data['access_token']);
+        await AuthService.setRefreshToken(data['refresh_token']);
+        return User.fromJson(data['user']);
+      } else {
+        throw Exception('Failed to convert guest user: ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Error converting guest user: $e');
+    }
+  }
 }

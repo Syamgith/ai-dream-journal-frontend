@@ -128,6 +128,22 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
     }
   }
 
+  // Convert guest user to regular user
+  Future<void> convertGuestUser(
+      String name, String email, String password) async {
+    state = const AsyncValue.loading();
+    try {
+      final user = await _repository.convertGuestUser(name, email, password);
+      state = AsyncValue.data(user);
+
+      // Refresh dreams data after successful conversion
+      await _refreshDreamsData();
+    } catch (e) {
+      state = AsyncValue.error(e, StackTrace.current);
+      rethrow;
+    }
+  }
+
   // Refresh dreams data
   Future<void> _refreshDreamsData() async {
     try {

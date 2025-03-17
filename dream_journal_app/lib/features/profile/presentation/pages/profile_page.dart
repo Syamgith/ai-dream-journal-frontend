@@ -164,6 +164,15 @@ class ProfilePage extends ConsumerWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryBlue,
+                minimumSize: const Size(double.infinity, 45),
+              ),
+              onPressed: () => _showConvertGuestDialog(context, ref),
+              child: const Text('Convert to Regular Account'),
+            ),
+            const SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
@@ -195,6 +204,232 @@ class ProfilePage extends ConsumerWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showConvertGuestDialog(BuildContext context, WidgetRef ref) {
+    final nameController = TextEditingController();
+    final emailController = TextEditingController();
+    final passwordController = TextEditingController();
+    final confirmPasswordController = TextEditingController();
+    bool obscurePassword = true;
+    bool obscureConfirmPassword = true;
+    String? errorMessage;
+    bool isConverting = false;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            backgroundColor: AppColors.darkBlue,
+            title: const Text('Create Your Account',
+                style: TextStyle(color: AppColors.white)),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'Convert your guest account to a regular account to save your dreams permanently.',
+                    style: TextStyle(color: AppColors.lightBlue, fontSize: 14),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: nameController,
+                    style: const TextStyle(color: AppColors.white),
+                    decoration: const InputDecoration(
+                      labelText: 'Name',
+                      labelStyle: TextStyle(color: AppColors.lightBlue),
+                      enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: AppColors.lightBlue),
+                      ),
+                      focusedBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: AppColors.primaryBlue),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    style: const TextStyle(color: AppColors.white),
+                    decoration: const InputDecoration(
+                      labelText: 'Email',
+                      labelStyle: TextStyle(color: AppColors.lightBlue),
+                      enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: AppColors.lightBlue),
+                      ),
+                      focusedBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: AppColors.primaryBlue),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: passwordController,
+                    obscureText: obscurePassword,
+                    style: const TextStyle(color: AppColors.white),
+                    decoration: InputDecoration(
+                      labelText: 'Password',
+                      labelStyle: const TextStyle(color: AppColors.lightBlue),
+                      enabledBorder: const UnderlineInputBorder(
+                        borderSide: BorderSide(color: AppColors.lightBlue),
+                      ),
+                      focusedBorder: const UnderlineInputBorder(
+                        borderSide: BorderSide(color: AppColors.primaryBlue),
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          obscurePassword
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                          color: AppColors.lightBlue,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            obscurePassword = !obscurePassword;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: confirmPasswordController,
+                    obscureText: obscureConfirmPassword,
+                    style: const TextStyle(color: AppColors.white),
+                    decoration: InputDecoration(
+                      labelText: 'Confirm Password',
+                      labelStyle: const TextStyle(color: AppColors.lightBlue),
+                      enabledBorder: const UnderlineInputBorder(
+                        borderSide: BorderSide(color: AppColors.lightBlue),
+                      ),
+                      focusedBorder: const UnderlineInputBorder(
+                        borderSide: BorderSide(color: AppColors.primaryBlue),
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          obscureConfirmPassword
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                          color: AppColors.lightBlue,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            obscureConfirmPassword = !obscureConfirmPassword;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                  if (errorMessage != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16),
+                      child: Text(
+                        errorMessage!,
+                        style: const TextStyle(color: Colors.red),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed:
+                    isConverting ? null : () => Navigator.of(context).pop(),
+                child: const Text('Cancel',
+                    style: TextStyle(color: AppColors.primaryBlue)),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryBlue,
+                ),
+                onPressed: isConverting
+                    ? null
+                    : () async {
+                        // Validate inputs
+                        if (nameController.text.trim().isEmpty) {
+                          setState(() {
+                            errorMessage = 'Please enter your name';
+                          });
+                          return;
+                        }
+                        if (emailController.text.trim().isEmpty) {
+                          setState(() {
+                            errorMessage = 'Please enter your email';
+                          });
+                          return;
+                        }
+                        if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                            .hasMatch(emailController.text.trim())) {
+                          setState(() {
+                            errorMessage = 'Please enter a valid email';
+                          });
+                          return;
+                        }
+                        if (passwordController.text.length < 6) {
+                          setState(() {
+                            errorMessage =
+                                'Password must be at least 6 characters';
+                          });
+                          return;
+                        }
+                        if (passwordController.text !=
+                            confirmPasswordController.text) {
+                          setState(() {
+                            errorMessage = 'Passwords do not match';
+                          });
+                          return;
+                        }
+
+                        // Convert guest user
+                        setState(() {
+                          errorMessage = null;
+                          isConverting = true;
+                        });
+
+                        try {
+                          await ref
+                              .read(authProvider.notifier)
+                              .convertGuestUser(
+                                nameController.text.trim(),
+                                emailController.text.trim(),
+                                passwordController.text,
+                              );
+                          if (context.mounted) {
+                            Navigator.of(context).pop();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                    'Your account has been successfully created!'),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                          }
+                        } catch (e) {
+                          setState(() {
+                            errorMessage = e.toString();
+                            isConverting = false;
+                          });
+                        }
+                      },
+                child: isConverting
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          color: AppColors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Text('Create Account'),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

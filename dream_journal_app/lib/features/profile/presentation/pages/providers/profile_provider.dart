@@ -43,6 +43,7 @@ class ProfileState {
   }
 }
 
+// Profile provider that automatically updates when auth state changes
 final profileProvider =
     StateNotifierProvider<ProfileNotifier, ProfileState>((ref) {
   final authState = ref.watch(authProvider);
@@ -70,6 +71,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
     int? totalDreams,
     int? dreamStreak,
     double? averageSleep,
+    bool? isGuest,
   }) {
     state = state.copyWith(
       name: name,
@@ -78,6 +80,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
       totalDreams: totalDreams,
       dreamStreak: dreamStreak,
       averageSleep: averageSleep,
+      isGuest: isGuest,
     );
   }
 }
