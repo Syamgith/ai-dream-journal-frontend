@@ -24,11 +24,16 @@ class TokenInterceptor {
       Future<http.Response> Function(String) retryWithToken) async {
     // If the response is 401 Unauthorized, try to refresh the token
     if (response.statusCode == 401) {
-      final newToken = await _authRepository.refreshToken();
+      try {
+        final newToken = await _authRepository.refreshToken();
 
-      if (newToken != null) {
-        // Retry the original request with the new token
-        return await retryWithToken(newToken);
+        if (newToken != null) {
+          // Retry the original request with the new token
+          return await retryWithToken(newToken);
+        }
+      } catch (e) {
+        // Log the error but don't throw it to avoid disrupting the app flow
+        print('Error during token refresh in interceptor: $e');
       }
     }
 

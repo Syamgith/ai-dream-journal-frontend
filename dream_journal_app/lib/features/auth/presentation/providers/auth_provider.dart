@@ -30,29 +30,43 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
         final token = await AuthService.getToken();
         if (token != null) {
           try {
-            // Attempt to refresh the token to ensure it's still valid
-            final tokenRefreshed = await refreshToken();
-            if (tokenRefreshed) {
-              // Fetch user info from API
+            // First try to get the current user with the existing token
+            try {
               final user = await _repository.getCurrentUser();
               if (user != null) {
                 state = AsyncValue.data(user);
+                // Refresh dreams data when user is already logged in
+                await _refreshDreamsData();
+                return; // Successfully authenticated with existing token
+              }
+            } catch (e) {
+              // If getting user with existing token fails, try refreshing the token
+              print('Error getting user with existing token: $e');
+            }
 
+            // Attempt to refresh the token
+            final tokenRefreshed = await refreshToken();
+            if (tokenRefreshed) {
+              // Fetch user info from API with the refreshed token
+              final user = await _repository.getCurrentUser();
+              if (user != null) {
+                state = AsyncValue.data(user);
                 // Refresh dreams data when user is already logged in
                 await _refreshDreamsData();
               } else {
-                // User info not found, user needs to login again
-                await _repository.logout();
+                // User info not found but we won't log out automatically
+                // Just set state to null but keep tokens
                 state = const AsyncValue.data(null);
               }
             } else {
-              // Token refresh failed, user needs to login again
-              await _repository.logout();
+              // Token refresh failed, but we'll still keep the tokens
+              // and let the user try to authenticate again
               state = const AsyncValue.data(null);
             }
           } catch (e) {
-            // Error refreshing token, user needs to login again
-            await _repository.logout();
+            // Error during authentication process
+            // We'll set state to null but won't delete tokens
+            print('Error during authentication check: $e');
             state = const AsyncValue.data(null);
           }
         } else {
@@ -62,6 +76,8 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
         state = const AsyncValue.data(null);
       }
     } catch (e) {
+      // Error checking auth status
+      print('Error checking auth status: $e');
       state = AsyncValue.error(e, StackTrace.current);
     }
   }
@@ -173,6 +189,8 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
       final newToken = await _repository.refreshToken();
       return newToken != null;
     } catch (e) {
+      print('Error refreshing token in AuthNotifier: $e');
+      // Don't throw the error, just return false to indicate refresh failed
       return false;
     }
   }

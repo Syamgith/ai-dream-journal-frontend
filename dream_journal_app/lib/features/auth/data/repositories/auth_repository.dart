@@ -59,7 +59,12 @@ class AuthRepository {
       // Save the tokens
       await AuthService.setToken(data['access_token']);
       await AuthService.setRefreshToken(data['refresh_token']);
-      return User.fromJson(data['user']);
+
+      // Save user data locally for offline access
+      final user = User.fromJson(data['user']);
+      await AuthService.setUserData(jsonEncode(user.toJson()));
+
+      return user;
     } else {
       throw Exception('Failed to login: ${response.body}');
     }
@@ -77,7 +82,12 @@ class AuthRepository {
       // Save the tokens
       await AuthService.setToken(data['access_token']);
       await AuthService.setRefreshToken(data['refresh_token']);
-      return User.fromJson(data['user']);
+
+      // Save user data locally for offline access
+      final user = User.fromJson(data['user']);
+      await AuthService.setUserData(jsonEncode(user.toJson()));
+
+      return user;
     } else {
       throw Exception('Failed to login as guest: ${response.body}');
     }
@@ -85,8 +95,7 @@ class AuthRepository {
 
   // Logout
   Future<void> logout() async {
-    await AuthService.deleteToken();
-    await AuthService.deleteRefreshToken();
+    await AuthService.clearAllAuthData();
   }
 
   // Refresh token
@@ -110,14 +119,21 @@ class AuthRepository {
         final data = jsonDecode(response.body);
         final newToken = data['access_token'];
         await AuthService.setToken(newToken);
+        // If the response also contains a new refresh token, save it
+        if (data.containsKey('refresh_token')) {
+          await AuthService.setRefreshToken(data['refresh_token']);
+        }
         return newToken;
       } else {
-        // If refresh token is invalid, logout the user
-        await logout();
+        // Don't automatically logout on refresh failure
+        // Just return null to indicate refresh failed
+        print('Token refresh failed with status code: ${response.statusCode}');
         return null;
       }
     } catch (e) {
-      await logout();
+      // Don't automatically logout on refresh failure
+      // Just return null to indicate refresh failed
+      print('Error refreshing token: $e');
       return null;
     }
   }
@@ -127,6 +143,16 @@ class AuthRepository {
     final token = await AuthService.getToken();
 
     if (token == null) {
+      // Try to get user from local storage if token is not available
+      final userData = await AuthService.getUserData();
+      if (userData != null) {
+        try {
+          return User.fromJson(jsonDecode(userData));
+        } catch (e) {
+          print('Error parsing stored user data: $e');
+          return null;
+        }
+      }
       return null;
     }
 
@@ -141,7 +167,12 @@ class AuthRepository {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return User.fromJson(data);
+        final user = User.fromJson(data);
+
+        // Update stored user data
+        await AuthService.setUserData(jsonEncode(user.toJson()));
+
+        return user;
       } else if (response.statusCode == 401) {
         // Token is invalid, try to refresh it
         final newToken = await refreshToken();
@@ -149,13 +180,43 @@ class AuthRepository {
           // Try again with the new token
           return await getCurrentUser();
         } else {
-          // Refresh failed, user needs to login again
+          // Refresh failed, but don't force logout
+          // Try to get user from local storage
+          final userData = await AuthService.getUserData();
+          if (userData != null) {
+            try {
+              return User.fromJson(jsonDecode(userData));
+            } catch (e) {
+              print('Error parsing stored user data: $e');
+              return null;
+            }
+          }
           return null;
         }
       } else {
+        // Try to get user from local storage if API call fails
+        final userData = await AuthService.getUserData();
+        if (userData != null) {
+          try {
+            return User.fromJson(jsonDecode(userData));
+          } catch (e) {
+            print('Error parsing stored user data: $e');
+            throw Exception('Failed to get user information: ${response.body}');
+          }
+        }
         throw Exception('Failed to get user information: ${response.body}');
       }
     } catch (e) {
+      // Try to get user from local storage if API call fails
+      final userData = await AuthService.getUserData();
+      if (userData != null) {
+        try {
+          return User.fromJson(jsonDecode(userData));
+        } catch (e2) {
+          print('Error parsing stored user data: $e2');
+          throw Exception('Error getting user information: $e');
+        }
+      }
       throw Exception('Error getting user information: $e');
     }
   }
@@ -188,7 +249,12 @@ class AuthRepository {
         // Save the new tokens
         await AuthService.setToken(data['access_token']);
         await AuthService.setRefreshToken(data['refresh_token']);
-        return User.fromJson(data['user']);
+
+        // Save user data locally for offline access
+        final user = User.fromJson(data['user']);
+        await AuthService.setUserData(jsonEncode(user.toJson()));
+
+        return user;
       } else {
         throw Exception('Failed to convert guest user: ${response.body}');
       }
