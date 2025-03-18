@@ -1,11 +1,49 @@
 import 'dart:convert';
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:http/http.dart' as http;
+import 'package:google_sign_in/google_sign_in.dart';
 import '../../../../core/config/config.dart';
+import '../../../../core/config/auth_config.dart';
 import '../../../../core/auth/auth_service.dart';
 import '../../domain/models/user.dart';
 
 class AuthRepository {
   final String _baseUrl = Config.apiURL;
+
+  // Initialize Google Sign-In with platform-specific configuration
+  late final GoogleSignIn _googleSignIn = _initGoogleSignIn();
+
+  // Initialize Google Sign-In based on platform
+  GoogleSignIn _initGoogleSignIn() {
+    print("web client id: ");
+    print(AuthConfig.webClientId);
+    if (kIsWeb) {
+      // Web platform
+      return GoogleSignIn(
+        scopes: ['openid', 'email', 'profile'],
+        clientId: AuthConfig.webClientId,
+      );
+    } else if (Platform.isAndroid) {
+      // Android platform
+      return GoogleSignIn(
+        scopes: ['openid', 'email', 'profile'],
+        // Android doesn't need clientId here as it's configured via OAuth in Google Cloud Console
+        // and uses the SHA-1 certificate fingerprint
+      );
+    } else if (Platform.isIOS) {
+      // iOS platform
+      return GoogleSignIn(
+        scopes: ['openid', 'email', 'profile'],
+        clientId: AuthConfig.iOSClientId,
+      );
+    } else {
+      // Default case
+      return GoogleSignIn(
+        scopes: ['email', 'profile'],
+      );
+    }
+  }
 
   // Register a new user
   Future<bool> register(String email, String password, String name) async {
@@ -93,8 +131,67 @@ class AuthRepository {
     }
   }
 
+  // Login with Google
+  Future<User> loginWithGoogle() async {
+    try {
+      // Start the Google Sign-In process
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+
+      if (googleUser == null) {
+        // User canceled the sign-in process
+        throw Exception('Google sign-in was canceled');
+      }
+
+      // Get authentication details from Google
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+
+      print('Google User: $googleUser');
+      print('Google Auth: $googleAuth');
+      print('ID Token: ${googleAuth.idToken}');
+      print('Access Token: ${googleAuth.accessToken}');
+
+      // Send the ID token to your backend
+      final response = await http.post(
+        Uri.parse('$_baseUrl/users/auth/google'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'token': googleAuth.idToken,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        // Save the tokens
+        await AuthService.setToken(data['access_token']);
+        await AuthService.setRefreshToken(data['refresh_token']);
+
+        // Save user data locally for offline access
+        final user = User.fromJson(data['user']);
+        await AuthService.setUserData(jsonEncode(user.toJson()));
+
+        return user;
+      } else {
+        throw Exception('Failed to login with Google: ${response.body}');
+      }
+    } catch (e) {
+      // Ensure sign out from Google when there's an error
+      await _googleSignIn.signOut();
+      throw Exception('Error during Google sign-in: $e');
+    }
+  }
+
   // Logout
   Future<void> logout() async {
+    try {
+      // Sign out from Google if the user signed in with Google
+      await _googleSignIn.signOut();
+    } catch (e) {
+      print('Error signing out from Google: $e');
+      // Continue with logout even if Google sign-out fails
+    }
+
     await AuthService.clearAllAuthData();
   }
 

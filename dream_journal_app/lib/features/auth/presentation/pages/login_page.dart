@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/auth_button.dart';
 import '../widgets/auth_text_field.dart';
+import '../widgets/google_sign_in_button.dart';
 import 'register_page.dart';
 import '../../../dreams/providers/dreams_provider.dart';
 
@@ -75,6 +76,32 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       await ref.read(authProvider.notifier).loginAsGuest();
 
       // After successful guest login, navigate to the home page
+      if (mounted && context.mounted) {
+        Navigator.of(context).pushReplacementNamed('/home');
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = e.toString();
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoggingIn = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _loginWithGoogle() async {
+    setState(() {
+      _errorMessage = null;
+      _isLoggingIn = true;
+    });
+
+    try {
+      await ref.read(authProvider.notifier).loginWithGoogle();
+
+      // After successful Google login, navigate to the home page
       if (mounted && context.mounted) {
         Navigator.of(context).pushReplacementNamed('/home');
       }
@@ -200,6 +227,23 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         text: 'Login',
                         onPressed: _login,
                         isLoading: isLoading,
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Google Sign-In Button
+                      GoogleSignInButton(
+                        onPressed: _loginWithGoogle,
+                        isLoading: isLoading,
+                      ),
+
+                      const SizedBox(height: 4),
+
+                      // Google sign-in description
+                      const Text(
+                        'Sign in with your Google account',
+                        style: TextStyle(color: Colors.white70, fontSize: 12),
+                        textAlign: TextAlign.center,
                       ),
 
                       const SizedBox(height: 16),

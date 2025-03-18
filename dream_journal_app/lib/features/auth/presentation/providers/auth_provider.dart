@@ -149,6 +149,24 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
     }
   }
 
+  // Login with Google
+  Future<void> loginWithGoogle() async {
+    state = const AsyncValue.loading();
+    try {
+      // Clear any existing dreams before login
+      _ref.read(dreamsProvider.notifier).reset();
+
+      final user = await _repository.loginWithGoogle();
+      state = AsyncValue.data(user);
+
+      // Force refresh dreams data after successful Google login
+      await _refreshDreamsData(forceRefresh: true);
+    } catch (e) {
+      state = AsyncValue.error(e, StackTrace.current);
+      rethrow;
+    }
+  }
+
   // Login as guest
   Future<void> loginAsGuest() async {
     state = const AsyncValue.loading();
