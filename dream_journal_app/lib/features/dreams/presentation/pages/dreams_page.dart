@@ -86,11 +86,15 @@ class _DreamsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Sort dreams by timestamp in descending order (newest first)
+    final sortedDreams = List.from(dreams)
+      ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+
     return ListView.builder(
       physics: const AlwaysScrollableScrollPhysics(),
-      itemCount: dreams.length,
+      itemCount: sortedDreams.length,
       itemBuilder: (context, index) {
-        final dream = dreams[dreams.length - 1 - index];
+        final dream = sortedDreams[index];
         return KeyedSubtree(
           // Use the dream ID as a key to maintain widget identity
           key: ValueKey(
