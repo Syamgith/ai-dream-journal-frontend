@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../data/repositories/feedback_repository.dart';
 
 class FeedbackPage extends StatefulWidget {
   const FeedbackPage({super.key});
@@ -11,6 +12,7 @@ class FeedbackPage extends StatefulWidget {
 class _FeedbackPageState extends State<FeedbackPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _feedbackController = TextEditingController();
+  final _feedbackRepository = FeedbackRepository();
   bool _isSubmitting = false;
 
   @override
@@ -25,23 +27,37 @@ class _FeedbackPageState extends State<FeedbackPage> {
         _isSubmitting = true;
       });
 
-      // TODO: Implement actual API call to submit feedback
-      await Future.delayed(
-          const Duration(seconds: 1)); // Simulate network request
+      try {
+        await _feedbackRepository
+            .submitFeedback(_feedbackController.text.trim());
 
-      if (mounted) {
-        setState(() {
-          _isSubmitting = false;
-        });
+        if (mounted) {
+          setState(() {
+            _isSubmitting = false;
+          });
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Thank you for your feedback!'),
-            backgroundColor: AppColors.primaryBlue,
-          ),
-        );
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Thank you for your feedback!'),
+              backgroundColor: AppColors.primaryBlue,
+            ),
+          );
 
-        _feedbackController.clear();
+          _feedbackController.clear();
+        }
+      } catch (e) {
+        if (mounted) {
+          setState(() {
+            _isSubmitting = false;
+          });
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error submitting feedback: ${e.toString()}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     }
   }
