@@ -1,0 +1,20 @@
+{
+  "buildFiles": [
+    "/Users/syamgith/flutter/packages/flutter_tools/gradle/src/main/groovy/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/Users/syamgith/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+      "-C",
+      "/Users/syamgith/Documents/Apps/ai-dream-journal-frontend/dream_journal_app/android/app/.cxx/Debug/2w3z6x3u/armeabi-v7a",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/Users/syamgith/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+    "-C",
+    "/Users/syamgith/Documents/Apps/ai-dream-journal-frontend/dream_journal_app/android/app/.cxx/Debug/2w3z6x3u/armeabi-v7a",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {}
+}
