@@ -388,7 +388,7 @@ class _AddDreamPageState extends ConsumerState<AddDreamPage>
                   ),
                 ),
               const SizedBox(height: 24),
-              if (widget.dream == null)
+              if (widget.dream == null && !_isLoading)
                 Center(
                   child: Container(
                     height: 46,
