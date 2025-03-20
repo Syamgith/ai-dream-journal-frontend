@@ -151,12 +151,24 @@ class AuthRepository {
       print('ID Token: ${googleAuth.idToken}');
       print('Access Token: ${googleAuth.accessToken}');
 
-      // Send the ID token to your backend
+      // Use idToken if available, otherwise fall back to accessToken
+      final tokenToUse = googleAuth.idToken ?? googleAuth.accessToken;
+
+      if (tokenToUse == null) {
+        throw Exception('Failed to obtain authentication token from Google');
+      }
+
+      // Determine which type of token we're sending
+      final tokenType =
+          googleAuth.idToken != null ? 'id_token' : 'access_token';
+
+      // Send the token to your backend
       final response = await http.post(
         Uri.parse('$_baseUrl/users/auth/google'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'token': googleAuth.idToken,
+          'token': tokenToUse,
+          'token_type': tokenType,
         }),
       );
 
