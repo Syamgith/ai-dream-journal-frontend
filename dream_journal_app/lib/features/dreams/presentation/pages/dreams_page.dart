@@ -54,15 +54,12 @@ class DreamsPage extends ConsumerWidget {
                     )
                   : dreams.isEmpty
                       ? Center(
-                          child: GestureDetector(
-                            onTap: () =>
-                                Navigator.pushNamed(context, '/add-dream'),
-                            child: const Text(
-                              'Add your first dream!',
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 16,
-                              ),
+                          child: MouseRegion(
+                            cursor: SystemMouseCursors.click,
+                            child: _HoverText(
+                              text: 'Add your first dream!',
+                              onTap: () =>
+                                  Navigator.pushNamed(context, '/add-dream'),
                             ),
                           ),
                         )
@@ -383,4 +380,51 @@ class _StarryBackgroundPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_StarryBackgroundPainter oldDelegate) => false;
+}
+
+// Add this new widget class at the end of the file
+class _HoverText extends StatefulWidget {
+  final String text;
+  final VoidCallback onTap;
+
+  const _HoverText({
+    required this.text,
+    required this.onTap,
+  });
+
+  @override
+  State<_HoverText> createState() => _HoverTextState();
+}
+
+class _HoverTextState extends State<_HoverText> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: widget.onTap,
+      child: AnimatedDefaultTextStyle(
+        duration: const Duration(milliseconds: 200),
+        style: TextStyle(
+          color: _isHovered ? Colors.white : Colors.white70,
+          fontSize: 16,
+          letterSpacing: _isHovered ? 0.5 : 0,
+          shadows: _isHovered
+              ? [
+                  BoxShadow(
+                    color: Colors.white.withOpacity(0.3),
+                    blurRadius: 8,
+                    spreadRadius: 1,
+                  )
+                ]
+              : [],
+        ),
+        child: MouseRegion(
+          onEnter: (_) => setState(() => _isHovered = true),
+          onExit: (_) => setState(() => _isHovered = false),
+          child: Text(widget.text),
+        ),
+      ),
+    );
+  }
 }

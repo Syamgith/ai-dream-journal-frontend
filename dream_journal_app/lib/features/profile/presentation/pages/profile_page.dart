@@ -19,31 +19,24 @@ class ProfilePage extends ConsumerWidget {
         children: [
           _buildProfileCard(profile, context, ref),
           const SizedBox(height: 20),
-          _buildStatsCard(profile),
+          _buildStatsCard(profile, context, ref),
           const SizedBox(height: 20),
           if (profile.isGuest) _buildGuestMessage(context, ref),
-          if (!profile.isGuest) ...[
-            const SizedBox(height: 40),
-            Center(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: AppColors.darkBlue,
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                child: _buildLogoutButton(context, ref),
-              ),
-            ),
-          ],
         ],
       ),
     );
   }
 
   Widget _buildLogoutButton(BuildContext context, WidgetRef ref) {
-    return IconButton(
+    return ElevatedButton.icon(
       icon: const Icon(Icons.logout, color: AppColors.white),
+      label: const Text('Logout', style: TextStyle(color: AppColors.white)),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: AppColors.darkBlue,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
       onPressed: () => _showLogoutConfirmation(context, ref),
-      tooltip: 'Logout',
     );
   }
 
@@ -473,7 +466,8 @@ class ProfilePage extends ConsumerWidget {
     );
   }
 
-  Widget _buildStatsCard(ProfileState profile) {
+  Widget _buildStatsCard(
+      ProfileState profile, BuildContext context, WidgetRef ref) {
     return Card(
       color: AppColors.darkBlue,
       child: Padding(
@@ -490,7 +484,14 @@ class ProfilePage extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             _buildStatItem('Total Dreams', '${profile.totalDreams}'),
-            _buildStatItem('Dream Streak', '${profile.dreamStreak} days')
+            _buildStatItem('Dream Streak', '${profile.dreamStreak} days'),
+            if (!profile.isGuest) ...[
+              const Divider(color: AppColors.lightBlue, height: 24),
+              Align(
+                alignment: Alignment.centerRight,
+                child: _buildLogoutButton(context, ref),
+              ),
+            ],
           ],
         ),
       ),
