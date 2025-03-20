@@ -104,7 +104,7 @@ class _AddDreamPageState extends ConsumerState<AddDreamPage> {
                         ),
                         decoration: InputDecoration(
                           labelText: null,
-                          hintText: 'Give your dream a title...',
+                          hintText: 'Give your dream a title...(optional)',
                           alignLabelWithHint: true,
                           floatingLabelBehavior: FloatingLabelBehavior.never,
                           counterText: '',
@@ -192,6 +192,49 @@ class _AddDreamPageState extends ConsumerState<AddDreamPage> {
                             fontWeight: FontWeight.w500,
                           ),
                         ),
+                        if (widget.dream != null) const Spacer(),
+                        if (widget.dream != null)
+                          Container(
+                            height: 36,
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [
+                                  AppColors.primaryBlue,
+                                  AppColors.lightBlue,
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(18),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.primaryBlue.withAlpha(60),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: ElevatedButton(
+                              onPressed: _saveDream,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                shadowColor: Colors.transparent,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(18),
+                                ),
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 16),
+                              ),
+                              child: const Text(
+                                'Update Dream',
+                                style: TextStyle(
+                                  color: AppColors.white,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ),
                       ],
                     ),
                   ],
@@ -243,55 +286,74 @@ class _AddDreamPageState extends ConsumerState<AddDreamPage> {
                   ),
                 ),
               const SizedBox(height: 24),
-              Center(
-                child: Container(
-                  height: 56,
-                  width: double.infinity,
-                  margin: const EdgeInsets.symmetric(horizontal: 20),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [
-                        AppColors.primaryBlue,
-                        AppColors.lightBlue,
+              if (widget.dream == null)
+                Center(
+                  child: Container(
+                    height: 56,
+                    width: double.infinity,
+                    margin: const EdgeInsets.symmetric(horizontal: 20),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [
+                          AppColors.primaryBlue,
+                          AppColors.lightBlue,
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(28),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primaryBlue.withAlpha(77),
+                          blurRadius: 16,
+                          offset: const Offset(0, 8),
+                        ),
                       ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
                     ),
-                    borderRadius: BorderRadius.circular(28),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.primaryBlue.withAlpha(77),
-                        blurRadius: 16,
-                        offset: const Offset(0, 8),
+                    child: ElevatedButton(
+                      onPressed: _interpretation != null
+                          ? _navigateToHome
+                          : _saveDream,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(28),
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
                       ),
-                    ],
-                  ),
-                  child: ElevatedButton(
-                    onPressed: _saveDream,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      shadowColor: Colors.transparent,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(28),
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                    ),
-                    child: Text(
-                      widget.dream != null ? 'Update Dream' : 'Save Dream',
-                      style: const TextStyle(
-                        color: AppColors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (_interpretation != null)
+                            const Icon(
+                              Icons.home,
+                              color: AppColors.white,
+                              size: 20,
+                            ),
+                          if (_interpretation != null) const SizedBox(width: 8),
+                          Text(
+                            _interpretation != null ? 'Home' : 'Save Dream',
+                            style: const TextStyle(
+                              color: AppColors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
                 ),
-              ),
             ],
           ),
         ),
       ),
     );
+  }
+
+  void _navigateToHome() {
+    Navigator.pop(context);
   }
 
   void _saveDream() async {
