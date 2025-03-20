@@ -195,67 +195,88 @@ class _AddDreamPageState extends ConsumerState<AddDreamPage>
                       ),
                     ),
                     const SizedBox(height: 20),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.calendar_today,
-                          color: AppColors.white.withAlpha(179),
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          DateFormat('dd MMM yyyy').format(_selectedDate),
-                          style: TextStyle(
-                            color: AppColors.white.withAlpha(230),
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
+                    GestureDetector(
+                      onTap: _showDatePicker,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 8, horizontal: 12),
+                        decoration: BoxDecoration(
+                          color: AppColors.background,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: AppColors.primaryBlue.withAlpha(77),
+                            width: 1,
                           ),
                         ),
-                        if (widget.dream != null) const Spacer(),
-                        if (widget.dream != null)
-                          Container(
-                            height: 36,
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [
-                                  AppColors.primaryBlue,
-                                  AppColors.lightBlue,
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              borderRadius: BorderRadius.circular(18),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppColors.primaryBlue.withAlpha(60),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.calendar_today,
+                              color: AppColors.white.withAlpha(179),
+                              size: 20,
                             ),
-                            child: ElevatedButton(
-                              onPressed: _saveDream,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.transparent,
-                                shadowColor: Colors.transparent,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(18),
-                                ),
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 16),
-                              ),
-                              child: const Text(
-                                'Update Dream',
-                                style: TextStyle(
-                                  color: AppColors.white,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                            const SizedBox(width: 8),
+                            Text(
+                              DateFormat('dd MMM yyyy').format(_selectedDate),
+                              style: TextStyle(
+                                color: AppColors.white.withAlpha(230),
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
-                          ),
-                      ],
+                            const SizedBox(width: 4),
+                            Icon(
+                              Icons.arrow_drop_down,
+                              color: AppColors.white.withAlpha(179),
+                              size: 20,
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
+                    const SizedBox(height: 20),
+                    if (widget.dream != null)
+                      Container(
+                        height: 36,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [
+                              AppColors.primaryBlue,
+                              AppColors.lightBlue,
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(18),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.primaryBlue.withAlpha(60),
+                              blurRadius: 8,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: ElevatedButton(
+                          onPressed: _saveDream,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            shadowColor: Colors.transparent,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                          ),
+                          child: const Text(
+                            'Update Dream',
+                            style: TextStyle(
+                              color: AppColors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -463,6 +484,43 @@ class _AddDreamPageState extends ConsumerState<AddDreamPage>
 
   void _navigateToHome() {
     Navigator.pop(context);
+  }
+
+  void _showDatePicker() async {
+    final DateTime now = DateTime.now();
+    final DateTime oneYearAgo = DateTime(now.year - 1, now.month, now.day);
+
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: oneYearAgo,
+      lastDate: now,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.dark(
+              primary: AppColors.primaryBlue,
+              onPrimary: AppColors.white,
+              surface: AppColors.darkBlue,
+              onSurface: AppColors.white,
+            ),
+            dialogBackgroundColor: AppColors.background,
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.white,
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (pickedDate != null && pickedDate != _selectedDate) {
+      setState(() {
+        _selectedDate = pickedDate;
+      });
+    }
   }
 
   void _saveDream() async {
