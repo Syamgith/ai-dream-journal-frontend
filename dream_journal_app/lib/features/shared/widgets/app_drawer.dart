@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../routes.dart';
+import '../../../features/auth/presentation/providers/auth_provider.dart';
 
-class AppDrawer extends StatelessWidget {
+class AppDrawer extends ConsumerWidget {
   const AppDrawer({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Drawer(
       backgroundColor: AppColors.background,
-      child: ListView(
-        padding: EdgeInsets.zero,
+      child: Column(
         children: [
           DrawerHeader(
             decoration: const BoxDecoration(
@@ -39,27 +40,78 @@ class AppDrawer extends StatelessWidget {
               ],
             ),
           ),
-          ListTile(
-            leading: const Icon(Icons.feedback, color: Colors.white),
-            title: const Text(
-              'Feedback',
-              style: TextStyle(color: Colors.white),
+          Expanded(
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.feedback, color: Colors.white),
+                  title: const Text(
+                    'Feedback',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context); // Close the drawer
+                    Navigator.pushNamed(context, AppRoutes.feedback);
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.info, color: Colors.white),
+                  title: const Text(
+                    'About',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context); // Close the drawer
+                    Navigator.pushNamed(context, AppRoutes.about);
+                  },
+                ),
+              ],
             ),
-            onTap: () {
-              Navigator.pop(context); // Close the drawer
-              Navigator.pushNamed(context, AppRoutes.feedback);
-            },
           ),
-          ListTile(
-            leading: const Icon(Icons.info, color: Colors.white),
-            title: const Text(
-              'About',
-              style: TextStyle(color: Colors.white),
+          const Divider(color: AppColors.lightBlue),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16.0),
+            child: ListTile(
+              leading: const Icon(Icons.logout, color: Colors.white),
+              title: const Text(
+                'Logout',
+                style: TextStyle(color: Colors.white),
+              ),
+              onTap: () {
+                Navigator.pop(context); // Close the drawer
+                _showLogoutConfirmation(context, ref);
+              },
             ),
-            onTap: () {
-              Navigator.pop(context); // Close the drawer
-              Navigator.pushNamed(context, AppRoutes.about);
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showLogoutConfirmation(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.darkBlue,
+        title: const Text('Logout', style: TextStyle(color: AppColors.white)),
+        content: const Text('Are you sure you want to logout?',
+            style: TextStyle(color: AppColors.lightBlue)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel',
+                style: TextStyle(color: AppColors.primaryBlue)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryBlue,
+            ),
+            onPressed: () {
+              Navigator.of(context).pop();
+              ref.read(authProvider.notifier).logout();
             },
+            child: const Text('Logout'),
           ),
         ],
       ),
