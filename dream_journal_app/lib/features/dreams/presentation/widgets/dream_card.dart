@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../data/models/dream_entry.dart';
-import '../pages/add_dream_page.dart';
+import '../pages/dream_details_page.dart';
 
 class DreamCard extends StatelessWidget {
   final DreamEntry dream;
@@ -47,7 +47,7 @@ class DreamCard extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => AddDreamPage(dream: dream),
+                  builder: (context) => DreamDetailsPage(dream: dream),
                 ),
               );
             },

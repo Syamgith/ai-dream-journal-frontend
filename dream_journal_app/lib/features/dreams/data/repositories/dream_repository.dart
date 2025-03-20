@@ -164,7 +164,7 @@ class DreamRepository {
         headers: headers,
       );
 
-      if (response.statusCode == 204) {
+      if (response.statusCode == 200) {
         // Remove from cache
         _dreams.removeWhere((dream) => dream.id == id);
       } else {
