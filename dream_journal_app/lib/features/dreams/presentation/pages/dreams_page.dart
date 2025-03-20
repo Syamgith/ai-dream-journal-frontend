@@ -18,65 +18,64 @@ class DreamsPage extends ConsumerWidget {
     final hasInitialLoad = ref.watch(dreamsInitialLoadProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Padding(
-          //   padding: const EdgeInsets.all(20),
-          //   child: Column(
-          //     crossAxisAlignment: CrossAxisAlignment.start,
-          //     children: [
-          //       Text(
-          //         'December',
-          //         style: AppTextStyles.monthTitle,
-          //       ),
-          //       Row(
-          //         children: [
-          //           Text(
-          //             '10',
-          //             style: AppTextStyles.dayNumber,
-          //           ),
-          //           const SizedBox(width: 8),
-          //           Text(
-          //             'Tue',
-          //             style: AppTextStyles.dayText,
-          //           ),
-          //         ],
-          //       ),
-          //     ],
-          //   ),
-          // ),
-          Expanded(
-            child: isLoading && !hasInitialLoad
-                ? const Center(
-                    child: CircularProgressIndicator(),
-                  )
-                : dreams.isEmpty
-                    ? Center(
-                        child: GestureDetector(
-                          onTap: () =>
-                              Navigator.pushNamed(context, '/add-dream'),
-                          child: const Text(
-                            'Add your first dream!',
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 16,
+        backgroundColor: AppColors.background,
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Padding(
+            //   padding: const EdgeInsets.all(20),
+            //   child: Column(
+            //     crossAxisAlignment: CrossAxisAlignment.start,
+            //     children: [
+            //       Text(
+            //         'December',
+            //         style: AppTextStyles.monthTitle,
+            //       ),
+            //       Row(
+            //         children: [
+            //           Text(
+            //             '10',
+            //             style: AppTextStyles.dayNumber,
+            //           ),
+            //           const SizedBox(width: 8),
+            //           Text(
+            //             'Tue',
+            //             style: AppTextStyles.dayText,
+            //           ),
+            //         ],
+            //       ),
+            //     ],
+            //   ),
+            // ),
+            Expanded(
+              child: isLoading && !hasInitialLoad
+                  ? const Center(
+                      child: CircularProgressIndicator(),
+                    )
+                  : dreams.isEmpty
+                      ? Center(
+                          child: GestureDetector(
+                            onTap: () =>
+                                Navigator.pushNamed(context, '/add-dream'),
+                            child: const Text(
+                              'Add your first dream!',
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 16,
+                              ),
                             ),
                           ),
+                        )
+                      : RefreshIndicator(
+                          onRefresh: () => ref
+                              .read(dreamsProvider.notifier)
+                              .loadDreams(forceRefresh: true),
+                          child: _DreamsList(dreams: dreams),
                         ),
-                      )
-                    : RefreshIndicator(
-                        onRefresh: () => ref
-                            .read(dreamsProvider.notifier)
-                            .loadDreams(forceRefresh: true),
-                        child: _DreamsList(dreams: dreams),
-                      ),
-          ),
-          //SleepingIcon()
-        ],
-      ),
-    );
+            ),
+            //SleepingIcon()
+          ],
+        ));
   }
 }
 
@@ -104,6 +103,99 @@ class _DreamsList extends StatelessWidget {
           child: DreamCard(dream: dream),
         );
       },
+    );
+  }
+}
+
+// A more subtle and elegant floating action button that matches the app theme
+class _DreamFAB extends StatefulWidget {
+  final VoidCallback onPressed;
+
+  const _DreamFAB({required this.onPressed});
+
+  @override
+  State<_DreamFAB> createState() => _DreamFABState();
+}
+
+class _DreamFABState extends State<_DreamFAB>
+    with SingleTickerProviderStateMixin {
+  bool _isHovered = false;
+  late AnimationController _pulseController;
+  late Animation<double> _pulseAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(
+      duration: const Duration(milliseconds: 1800),
+      vsync: this,
+    )..repeat(reverse: true);
+
+    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.08).animate(
+      CurvedAnimation(
+        parent: _pulseController,
+        curve: Curves.easeInOutSine,
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: AnimatedBuilder(
+        animation: _pulseAnimation,
+        builder: (context, child) {
+          return Transform.scale(
+            scale: _isHovered ? 1.05 : _pulseAnimation.value,
+            child: Container(
+              height: 58,
+              width: 58,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    AppColors.primaryBlue.withOpacity(0.9),
+                    AppColors.primaryBlue.withOpacity(0.6),
+                  ],
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primaryBlue
+                        .withOpacity(_isHovered ? 0.3 : 0.2),
+                    blurRadius: _isHovered ? 12 : 8,
+                    spreadRadius: _isHovered ? 1 : 0,
+                  ),
+                ],
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: widget.onPressed,
+                  borderRadius: BorderRadius.circular(30),
+                  splashColor: Colors.white24,
+                  child: Center(
+                    child: Icon(
+                      Icons.add,
+                      color: Colors.white.withOpacity(0.95),
+                      size: 28,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 }

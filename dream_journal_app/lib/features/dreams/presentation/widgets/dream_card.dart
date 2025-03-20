@@ -31,7 +31,7 @@ class _DreamCardState extends State<DreamCard>
   void initState() {
     super.initState();
     _shimmerController = AnimationController(
-      duration: const Duration(seconds: 3),
+      duration: const Duration(seconds: 4),
       vsync: this,
     )..repeat();
 
@@ -52,7 +52,7 @@ class _DreamCardState extends State<DreamCard>
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 350),
         curve: Curves.easeOutCubic,
         margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         decoration: BoxDecoration(
@@ -62,30 +62,36 @@ class _DreamCardState extends State<DreamCard>
             end: Alignment.bottomRight,
             colors: [
               _isHovered
-                  ? AppColors.primaryBlue.withOpacity(0.3)
+                  ? AppColors.darkBlue.withOpacity(0.8)
                   : AppColors.darkBlue,
               _isHovered
-                  ? AppColors.darkBlue.withOpacity(0.9)
+                  ? AppColors.primaryBlue.withOpacity(0.15)
                   : AppColors.darkBlue.withAlpha(204),
             ],
           ),
           boxShadow: [
             BoxShadow(
               color: _isHovered
-                  ? AppColors.primaryBlue.withOpacity(0.3)
-                  : Colors.black.withAlpha(51),
-              blurRadius: _isHovered ? 15 : 10,
-              spreadRadius: _isHovered ? 1 : 0,
-              offset: const Offset(0, 5),
+                  ? AppColors.primaryBlue.withOpacity(0.2)
+                  : Colors.black.withAlpha(40),
+              blurRadius: _isHovered ? 12 : 8,
+              spreadRadius: _isHovered ? 0.5 : 0,
+              offset: const Offset(0, 4),
             ),
           ],
+          border: Border.all(
+            color: _isHovered
+                ? AppColors.primaryBlue.withOpacity(0.3)
+                : Colors.transparent,
+            width: 1.0,
+          ),
         ),
         transform: _isHovered
-            ? (Matrix4.identity()..translate(0, -3))
+            ? (Matrix4.identity()..translate(0, -2))
             : Matrix4.identity(),
         child: Stack(
           children: [
-            // Shimmer effect (only visible on hover)
+            // Subtle edge glow (only visible on hover)
             if (_isHovered)
               Positioned.fill(
                 child: AnimatedBuilder(
@@ -94,14 +100,14 @@ class _DreamCardState extends State<DreamCard>
                     return ClipRRect(
                       borderRadius: BorderRadius.circular(20),
                       child: Opacity(
-                        opacity: 0.1,
+                        opacity: 0.07,
                         child: ShaderMask(
                           blendMode: BlendMode.srcIn,
                           shaderCallback: (bounds) {
                             return LinearGradient(
                               colors: [
                                 Colors.transparent,
-                                Colors.white,
+                                AppColors.primaryBlue.withOpacity(0.7),
                                 Colors.transparent,
                               ],
                               stops: const [0.0, 0.5, 1.0],
@@ -122,7 +128,7 @@ class _DreamCardState extends State<DreamCard>
                 ),
               ),
 
-            // Stars background effect (only visible on hover)
+            // Very subtle stars background effect (only visible on hover)
             if (_isHovered)
               Positioned.fill(
                 child: ClipRRect(
@@ -164,9 +170,9 @@ class _DreamCardState extends State<DreamCard>
                             border: Border(
                               right: BorderSide(
                                 color: _isHovered
-                                    ? AppColors.primaryBlue.withAlpha(125)
+                                    ? AppColors.primaryBlue.withAlpha(100)
                                     : AppColors.primaryBlue.withAlpha(77),
-                                width: _isHovered ? 2.5 : 2,
+                                width: _isHovered ? 2 : 1.5,
                               ),
                             ),
                           ),
@@ -176,9 +182,9 @@ class _DreamCardState extends State<DreamCard>
                                 duration: const Duration(milliseconds: 300),
                                 style: TextStyle(
                                   color: _isHovered
-                                      ? AppColors.white.withAlpha(255)
-                                      : AppColors.white.withAlpha(230),
-                                  fontSize: _isHovered ? 20 : 18,
+                                      ? AppColors.white.withAlpha(240)
+                                      : AppColors.white.withAlpha(215),
+                                  fontSize: _isHovered ? 19 : 18,
                                   fontWeight: FontWeight.bold,
                                   height: 1.2,
                                 ),
@@ -200,9 +206,9 @@ class _DreamCardState extends State<DreamCard>
                                 duration: const Duration(milliseconds: 300),
                                 style: TextStyle(
                                   color: _isHovered
-                                      ? AppColors.white
-                                      : AppColors.white.withAlpha(242),
-                                  fontSize: _isHovered ? 22 : 20,
+                                      ? AppColors.white.withAlpha(240)
+                                      : AppColors.white.withAlpha(220),
+                                  fontSize: _isHovered ? 21 : 20,
                                   fontWeight: FontWeight.bold,
                                   letterSpacing: 0.5,
                                 ),
@@ -215,8 +221,8 @@ class _DreamCardState extends State<DreamCard>
                                 duration: const Duration(milliseconds: 300),
                                 style: TextStyle(
                                   color: _isHovered
-                                      ? AppColors.white.withAlpha(230)
-                                      : AppColors.white.withAlpha(204),
+                                      ? AppColors.white.withAlpha(215)
+                                      : AppColors.white.withAlpha(190),
                                   fontSize: 16,
                                   height: 1.4,
                                 ),
@@ -235,35 +241,6 @@ class _DreamCardState extends State<DreamCard>
                 ),
               ),
             ),
-
-            // Moon icon indicator (only visible on hover)
-            if (_isHovered)
-              Positioned(
-                right: 15,
-                bottom: 15,
-                child: Container(
-                  height: 22,
-                  width: 22,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: RadialGradient(
-                      colors: [
-                        Colors.white.withOpacity(0.9),
-                        AppColors.primaryBlue.withOpacity(0.7),
-                      ],
-                      center: const Alignment(0.3, -0.3),
-                      radius: 0.8,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.white.withOpacity(0.5),
-                        blurRadius: 8,
-                        spreadRadius: 1,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
           ],
         ),
       ),
@@ -271,20 +248,20 @@ class _DreamCardState extends State<DreamCard>
   }
 }
 
-// Custom painter to draw small stars in the card background
+// Custom painter to draw small stars in the card background - now more subtle
 class _StarsPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final Random random = Random(42); // Fixed seed for consistent star pattern
     final paint = Paint()
-      ..color = Colors.white.withOpacity(0.3)
+      ..color = Colors.white.withOpacity(0.15)
       ..style = PaintingStyle.fill;
 
-    // Draw tiny stars
-    for (int i = 0; i < 30; i++) {
+    // Draw fewer, more subtle stars
+    for (int i = 0; i < 20; i++) {
       final x = random.nextDouble() * size.width;
       final y = random.nextDouble() * size.height;
-      final starSize = random.nextDouble() * 1.2 + 0.4;
+      final starSize = random.nextDouble() * 0.8 + 0.3;
 
       canvas.drawCircle(Offset(x, y), starSize, paint);
     }
