@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import 'providers/profile_provider.dart';
 import '../../../../../features/auth/presentation/providers/auth_provider.dart';
+import '../../../../core/widgets/custom_snackbar.dart';
 
 class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
@@ -401,12 +402,11 @@ class ProfilePage extends ConsumerWidget {
                               );
                           if (context.mounted) {
                             Navigator.of(context).pop();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                    'Your account has been successfully created!'),
-                                backgroundColor: Colors.green,
-                              ),
+                            CustomSnackbar.show(
+                              context: context,
+                              message:
+                                  'Your account has been successfully created!',
+                              type: SnackBarType.success,
                             );
                           }
                         } catch (e) {

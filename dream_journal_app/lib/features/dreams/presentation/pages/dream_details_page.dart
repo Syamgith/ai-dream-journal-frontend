@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/widgets/custom_snackbar.dart';
 import '../../data/models/dream_entry.dart';
 import '../../providers/dreams_provider.dart';
 import 'add_dream_page.dart';
@@ -29,6 +30,18 @@ class DreamDetailsPage extends ConsumerWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: AppColors.white),
+        actions: [
+          // Delete action moved to the right side of the app bar
+          _AnimatedActionIcon(
+            icon: Icons.delete_outline,
+            activeIcon: Icons.delete,
+            tooltip: 'Delete Dream',
+            onTap: () {
+              _showDeleteConfirmationDialog(context, ref);
+            },
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
@@ -142,58 +155,32 @@ class DreamDetailsPage extends ConsumerWidget {
                 ),
               ],
 
-              // Action buttons
-              const SizedBox(height: 32),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  // Edit button
-                  _ActionButton(
-                    icon: Icons.edit,
-                    label: 'Edit',
-                    gradient: const LinearGradient(
-                      colors: [AppColors.primaryBlue, AppColors.lightBlue],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => AddDreamPage(dream: dream),
-                        ),
-                      ).then((_) {
-                        // Refresh the dream when coming back from edit page
-                        if (dream.id != null) {
-                          ref
-                              .read(dreamsProvider.notifier)
-                              .refreshDream(dream.id!);
-                          // Pop back to the dreams list after refreshing
-                          Navigator.pop(context);
-                        }
-                      });
-                    },
-                  ),
-
-                  // Delete button
-                  _ActionButton(
-                    icon: Icons.delete,
-                    label: 'Delete',
-                    gradient: const LinearGradient(
-                      colors: [Colors.red, Colors.redAccent],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    onTap: () {
-                      _showDeleteConfirmationDialog(context, ref);
-                    },
-                  ),
-                ],
-              ),
+              const SizedBox(
+                  height:
+                      40), // Reduced extra space at the bottom for the smaller floating action bar
             ],
           ),
         ),
       ),
+      // Floating edit button at the bottom of the screen
+      floatingActionButton: _DreamEditButton(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AddDreamPage(dream: dream),
+            ),
+          ).then((_) {
+            // Refresh the dream when coming back from edit page
+            if (dream.id != null) {
+              ref.read(dreamsProvider.notifier).refreshDream(dream.id!);
+              // Pop back to the dreams list after refreshing
+              Navigator.pop(context);
+            }
+          });
+        },
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 
@@ -235,24 +222,22 @@ class DreamDetailsPage extends ConsumerWidget {
                 try {
                   await ref.read(dreamsProvider.notifier).deleteDream(dream.id);
                   if (context.mounted) {
-                    // Show success message
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Dream deleted successfully'),
-                        backgroundColor: Colors.green,
-                      ),
+                    // Show success message with custom snackbar
+                    CustomSnackbar.show(
+                      context: context,
+                      message: 'Dream deleted successfully',
+                      type: SnackBarType.success,
                     );
                     // Go back to dreams list
                     Navigator.pop(context);
                   }
                 } catch (e) {
                   if (context.mounted) {
-                    // Show error message
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Error deleting dream: ${e.toString()}'),
-                        backgroundColor: Colors.red,
-                      ),
+                    // Show error message with custom snackbar
+                    CustomSnackbar.show(
+                      context: context,
+                      message: 'Error deleting dream: ${e.toString()}',
+                      type: SnackBarType.error,
                     );
                   }
                 }
@@ -269,55 +254,182 @@ class DreamDetailsPage extends ConsumerWidget {
   }
 }
 
-// Custom action button widget
-class _ActionButton extends StatelessWidget {
+// Animated Icon button for app bar actions
+class _AnimatedActionIcon extends StatefulWidget {
   final IconData icon;
-  final String label;
-  final Gradient gradient;
+  final IconData activeIcon;
+  final String tooltip;
   final VoidCallback onTap;
 
-  const _ActionButton({
+  const _AnimatedActionIcon({
     required this.icon,
-    required this.label,
-    required this.gradient,
+    required this.activeIcon,
+    required this.tooltip,
     required this.onTap,
   });
 
   @override
+  State<_AnimatedActionIcon> createState() => _AnimatedActionIconState();
+}
+
+class _AnimatedActionIconState extends State<_AnimatedActionIcon>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  bool _isHovered = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 140,
+    return MouseRegion(
+      onEnter: (_) {
+        setState(() {
+          _isHovered = true;
+          _controller.forward();
+        });
+      },
+      onExit: (_) {
+        setState(() {
+          _isHovered = false;
+          _controller.reverse();
+        });
+      },
+      child: Tooltip(
+        message: widget.tooltip,
+        child: GestureDetector(
+          onTap: widget.onTap,
+          child: Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color:
+                  _isHovered ? Colors.red.withOpacity(0.2) : Colors.transparent,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: _isHovered
+                  ? [
+                      BoxShadow(
+                        color: Colors.red.withOpacity(0.4),
+                        blurRadius: 8,
+                        spreadRadius: 1,
+                      )
+                    ]
+                  : null,
+            ),
+            child: Center(
+              child: AnimatedCrossFade(
+                firstChild: Icon(
+                  widget.icon,
+                  color: _isHovered ? Colors.red : AppColors.white,
+                  size: 24,
+                ),
+                secondChild: Icon(
+                  widget.activeIcon,
+                  color: Colors.red,
+                  size: 24,
+                ),
+                crossFadeState: _isHovered
+                    ? CrossFadeState.showSecond
+                    : CrossFadeState.showFirst,
+                duration: const Duration(milliseconds: 200),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// Floating edit button with creative design
+class _DreamEditButton extends StatefulWidget {
+  final VoidCallback onTap;
+
+  const _DreamEditButton({
+    required this.onTap,
+  });
+
+  @override
+  State<_DreamEditButton> createState() => _DreamEditButtonState();
+}
+
+class _DreamEditButtonState extends State<_DreamEditButton>
+    with SingleTickerProviderStateMixin {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) {
+        setState(() {
+          _isHovered = true;
+        });
+      },
+      onExit: (_) {
+        setState(() {
+          _isHovered = false;
+        });
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        width: 170,
         height: 48,
         decoration: BoxDecoration(
-          gradient: gradient,
+          gradient: LinearGradient(
+            colors: [
+              AppColors.darkBlue.withOpacity(_isHovered ? 0.9 : 0.7),
+              AppColors.primaryBlue.withOpacity(_isHovered ? 0.9 : 0.7),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withAlpha(26),
-              blurRadius: 10,
-              offset: const Offset(0, 5),
+              color: AppColors.primaryBlue.withOpacity(_isHovered ? 0.6 : 0.2),
+              blurRadius: _isHovered ? 16 : 8,
+              spreadRadius: _isHovered ? 1 : 0,
             ),
           ],
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              color: AppColors.white,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: widget.onTap,
+            borderRadius: BorderRadius.circular(24),
+            splashColor: Colors.white24,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.edit_outlined,
+                  color: AppColors.white.withOpacity(0.9),
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Edit Dream',
+                  style: TextStyle(
+                    color: AppColors.white.withOpacity(0.9),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: const TextStyle(
-                color: AppColors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'dart:math' as math;
+import 'dart:math' show Random;
 import '../../../../core/constants/app_colors.dart';
 import '../../data/models/dream_entry.dart';
 import '../../providers/dreams_provider.dart';
+import '../../../../core/widgets/custom_snackbar.dart';
 
 class AddDreamPage extends ConsumerStatefulWidget {
   final DreamEntry? dream;
@@ -411,68 +413,10 @@ class _AddDreamPageState extends ConsumerState<AddDreamPage>
               const SizedBox(height: 24),
               if (widget.dream == null && !_isLoading)
                 Center(
-                  child: Container(
-                    height: 46,
-                    width: 180,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [
-                          AppColors.primaryBlue,
-                          AppColors.lightBlue,
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(23),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primaryBlue.withAlpha(77),
-                          blurRadius: 12,
-                          offset: const Offset(0, 5),
-                        ),
-                      ],
-                    ),
-                    child: ElevatedButton(
-                      onPressed: _interpretation != null
-                          ? _navigateToHome
-                          : _saveDream,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        shadowColor: Colors.transparent,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(23),
-                        ),
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        elevation: 0,
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          if (_interpretation != null)
-                            const Icon(
-                              Icons.home,
-                              color: AppColors.white,
-                              size: 18,
-                            ),
-                          if (_interpretation != null) const SizedBox(width: 8),
-                          Text(
-                            _interpretation != null ? 'Home' : 'Save Dream',
-                            style: const TextStyle(
-                              color: AppColors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          if (_interpretation == null) const SizedBox(width: 8),
-                          if (_interpretation == null)
-                            const Icon(
-                              Icons.edit_note,
-                              color: AppColors.white,
-                              size: 18,
-                            ),
-                        ],
-                      ),
-                    ),
+                  child: _DreamSaveButton(
+                    onTap:
+                        _interpretation != null ? _navigateToHome : _saveDream,
+                    isHomeButton: _interpretation != null,
                   ),
                 ),
             ],
@@ -561,11 +505,10 @@ class _AddDreamPageState extends ConsumerState<AddDreamPage>
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
+        CustomSnackbar.show(
+          context: context,
+          message: 'Error: ${e.toString()}',
+          type: SnackBarType.error,
         );
       }
     } finally {
@@ -639,4 +582,184 @@ class DreamStarsPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(DreamStarsPainter oldDelegate) => false;
+}
+
+// Custom Dream Save Button with animation effects
+class _DreamSaveButton extends StatefulWidget {
+  final VoidCallback onTap;
+  final bool isHomeButton;
+
+  const _DreamSaveButton({
+    required this.onTap,
+    required this.isHomeButton,
+  });
+
+  @override
+  State<_DreamSaveButton> createState() => _DreamSaveButtonState();
+}
+
+class _DreamSaveButtonState extends State<_DreamSaveButton>
+    with SingleTickerProviderStateMixin {
+  bool _isHovered = false;
+  late AnimationController _shimmerController;
+  late Animation<double> _shimmerAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _shimmerController = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    )..repeat();
+
+    _shimmerAnimation = Tween<double>(begin: -1.0, end: 2.0).animate(
+      CurvedAnimation(parent: _shimmerController, curve: Curves.easeInOutSine),
+    );
+  }
+
+  @override
+  void dispose() {
+    _shimmerController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        width: 160, // Slightly smaller width
+        height: 42, // Slightly smaller height
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: widget.isHomeButton
+                ? [
+                    AppColors.primaryBlue.withOpacity(_isHovered ? 0.9 : 0.7),
+                    AppColors.lightBlue.withOpacity(_isHovered ? 0.9 : 0.7),
+                  ]
+                : [
+                    const Color(0xFF2C3E50)
+                        .withOpacity(_isHovered ? 0.95 : 0.85),
+                    AppColors.primaryBlue.withOpacity(_isHovered ? 0.95 : 0.85),
+                  ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(21),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primaryBlue.withOpacity(_isHovered ? 0.4 : 0.2),
+              blurRadius: _isHovered ? 12 : 8,
+              spreadRadius: _isHovered ? 1 : 0,
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: widget.onTap,
+            borderRadius: BorderRadius.circular(21),
+            splashColor: Colors.white24,
+            child: Stack(
+              children: [
+                // Shimmer effect
+                AnimatedBuilder(
+                  animation: _shimmerAnimation,
+                  builder: (context, child) {
+                    return Positioned.fill(
+                      child: Opacity(
+                        opacity: 0.2,
+                        child: ShaderMask(
+                          blendMode: BlendMode.srcIn,
+                          shaderCallback: (bounds) {
+                            return LinearGradient(
+                              colors: [
+                                Colors.transparent,
+                                Colors.white.withOpacity(0.8),
+                                Colors.transparent,
+                              ],
+                              stops: const [0.0, 0.5, 1.0],
+                              begin: Alignment(_shimmerAnimation.value - 1, 0),
+                              end: Alignment(_shimmerAnimation.value, 0),
+                            ).createShader(bounds);
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(21),
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                // Content
+                Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Moon icon for save, home icon for navigate home
+                      Icon(
+                        widget.isHomeButton
+                            ? Icons.home_rounded
+                            : Icons.nightlight_round,
+                        color: AppColors.white.withOpacity(0.9),
+                        size: 18,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        widget.isHomeButton ? 'Home' : 'Save Dream',
+                        style: TextStyle(
+                          color: AppColors.white.withOpacity(0.9),
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Stars effect (visible on hover)
+                if (_isHovered)
+                  Positioned.fill(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(21),
+                      child: CustomPaint(
+                        painter: _StarsPainter(),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// Custom painter to draw small stars in the button background
+class _StarsPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Random random = Random(42); // Fixed seed for consistent star pattern
+    final paint = Paint()
+      ..color = Colors.white.withOpacity(0.5)
+      ..style = PaintingStyle.fill;
+
+    // Draw tiny stars
+    for (int i = 0; i < 20; i++) {
+      final x = random.nextDouble() * size.width;
+      final y = random.nextDouble() * size.height;
+      final starSize = random.nextDouble() * 1.5 + 0.5;
+
+      canvas.drawCircle(Offset(x, y), starSize, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_StarsPainter oldDelegate) => false;
 }

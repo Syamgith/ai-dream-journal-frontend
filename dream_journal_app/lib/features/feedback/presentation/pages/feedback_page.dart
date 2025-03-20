@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/widgets/custom_snackbar.dart';
 import '../../data/repositories/feedback_repository.dart';
 
 class FeedbackPage extends StatefulWidget {
@@ -36,11 +37,10 @@ class _FeedbackPageState extends State<FeedbackPage> {
             _isSubmitting = false;
           });
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Thank you for your feedback!'),
-              backgroundColor: AppColors.primaryBlue,
-            ),
+          CustomSnackbar.show(
+            context: context,
+            message: 'Thank you for your feedback!',
+            type: SnackBarType.info,
           );
 
           _feedbackController.clear();
@@ -51,11 +51,10 @@ class _FeedbackPageState extends State<FeedbackPage> {
             _isSubmitting = false;
           });
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error submitting feedback: ${e.toString()}'),
-              backgroundColor: Colors.red,
-            ),
+          CustomSnackbar.show(
+            context: context,
+            message: 'Error submitting feedback: ${e.toString()}',
+            type: SnackBarType.error,
           );
         }
       }
