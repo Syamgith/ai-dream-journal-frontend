@@ -7,10 +7,9 @@ This guide provides step-by-step instructions to fix the Google Sign-In issue on
 When attempting to sign in with Google on Android, the authentication fails because the ID token is null, as shown in the logs:
 
 ```
-I/flutter (15594): Google User: GoogleSignInAccount:{displayName: Syamgith, email: syamgithksudheesh@gmail.com, id: 104758106366272972413, photoUrl: https://lh3.googleusercontent.com/a/ACg8ocK1y852SA7OLmQ7Ny-QAPhaVDzILzcF-tGlw9xBLomLMy-P9mGi, serverAuthCode: null}
 I/flutter (15594): Google Auth: GoogleSignInAuthentication:Instance of 'GoogleSignInTokenData'
 I/flutter (15594): ID Token: null
-I/flutter (15594): Access Token: ya29.a0AeXRPp7tPX9FwFFHnPEqG0SK3-MBuoBAtoAnqG26NIoR-HCSQy8lZJYyA7PAFiF-otGHx5NUjKE6qiLskvAoVHWaOwYJJYjiBuOZEig688PZEf4zI_9XVrXvLj8gctMNenFVm3Uzkg2AIKzRewy4KJ4Uv73k3xBpffzsiszTaCgYKAUYSARMSFQHGX2Min95D9jx9pcpZBA-xbrTtDA0175
+
 ```
 
 ## Solution
