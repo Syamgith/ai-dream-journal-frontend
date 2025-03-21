@@ -161,7 +161,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
                   // App Subtitle
                   const Text(
-                    'Record and analyze your dreams',
+                    'Record and explore your dreams',
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.white70,

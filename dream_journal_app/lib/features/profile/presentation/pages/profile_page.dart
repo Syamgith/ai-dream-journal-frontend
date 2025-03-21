@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../auth/presentation/widgets/auth_button.dart';
 import 'providers/profile_provider.dart';
 import '../../../../../features/auth/presentation/providers/auth_provider.dart';
 import '../../../../core/widgets/custom_snackbar.dart';
@@ -14,29 +15,37 @@ class ProfilePage extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          _buildProfileCard(profile, context, ref),
-          const SizedBox(height: 20),
-          _buildStatsCard(profile, context, ref),
-          const SizedBox(height: 20),
-          if (profile.isGuest) _buildGuestMessage(context, ref),
-        ],
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 600),
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              _buildProfileCard(profile, context, ref),
+              const SizedBox(height: 20),
+              _buildStatsCard(profile, context, ref),
+              const SizedBox(height: 20),
+              if (profile.isGuest) _buildGuestMessage(context, ref),
+            ],
+          ),
+        ),
       ),
     );
   }
 
   Widget _buildLogoutButton(BuildContext context, WidgetRef ref) {
-    return ElevatedButton.icon(
-      icon: const Icon(Icons.logout, color: AppColors.white),
-      label: const Text('Logout', style: TextStyle(color: AppColors.white)),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.darkBlue,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+    return SizedBox(
+      width: 150,
+      child: ElevatedButton.icon(
+        icon: const Icon(Icons.logout, color: AppColors.white),
+        label: const Text('Logout', style: TextStyle(color: AppColors.white)),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.darkBlue,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+        onPressed: () => _showLogoutConfirmation(context, ref),
       ),
-      onPressed: () => _showLogoutConfirmation(context, ref),
     );
   }
 
@@ -80,39 +89,44 @@ class ProfilePage extends ConsumerWidget {
         title: const Text('Edit Profile',
             style: TextStyle(color: AppColors.white)),
         content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                style: const TextStyle(color: AppColors.white),
-                decoration: const InputDecoration(
-                  labelText: 'Name',
-                  labelStyle: TextStyle(color: AppColors.lightBlue),
-                  enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.lightBlue),
-                  ),
-                  focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.primaryBlue),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              // Email is displayed but not editable
-              TextField(
-                controller: TextEditingController(text: profile.email),
-                style: const TextStyle(color: AppColors.white),
-                enabled: false,
-                decoration: InputDecoration(
-                  labelText: 'Email (cannot be changed)',
-                  labelStyle: const TextStyle(color: AppColors.lightBlue),
-                  disabledBorder: UnderlineInputBorder(
-                    borderSide:
-                        BorderSide(color: AppColors.lightBlue.withOpacity(0.5)),
+          child: SizedBox(
+            width: 320,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: nameController,
+                  style: const TextStyle(color: AppColors.white),
+                  decoration: const InputDecoration(
+                    labelText: 'Name',
+                    labelStyle: TextStyle(color: AppColors.lightBlue),
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.lightBlue),
+                    ),
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.primaryBlue),
+                    ),
+                    constraints: BoxConstraints(maxWidth: 320),
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 8),
+                // Email is displayed but not editable
+                TextField(
+                  controller: TextEditingController(text: profile.email),
+                  style: const TextStyle(color: AppColors.white),
+                  enabled: false,
+                  decoration: InputDecoration(
+                    labelText: 'Email (cannot be changed)',
+                    labelStyle: const TextStyle(color: AppColors.lightBlue),
+                    constraints: const BoxConstraints(maxWidth: 320),
+                    disabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(
+                          color: AppColors.lightBlue.withOpacity(0.5)),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
         actions: [
@@ -121,18 +135,21 @@ class ProfilePage extends ConsumerWidget {
             child: const Text('Cancel',
                 style: TextStyle(color: AppColors.primaryBlue)),
           ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryBlue,
+          SizedBox(
+            width: 100,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryBlue,
+              ),
+              onPressed: () {
+                // Update profile with new name
+                ref.read(profileProvider.notifier).updateProfile(
+                      name: nameController.text.trim(),
+                    );
+                Navigator.of(context).pop();
+              },
+              child: const Text('Save'),
             ),
-            onPressed: () {
-              // Update profile with new name
-              ref.read(profileProvider.notifier).updateProfile(
-                    name: nameController.text.trim(),
-                  );
-              Navigator.of(context).pop();
-            },
-            child: const Text('Save'),
           ),
         ],
       ),
@@ -143,58 +160,57 @@ class ProfilePage extends ConsumerWidget {
     return Card(
       color: AppColors.darkBlue,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             const Text(
               'You are currently using a guest account',
-              style: TextStyle(color: AppColors.lightBlue),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Your dreams are saved locally but will be lost if you logout',
               style: TextStyle(color: AppColors.lightBlue, fontSize: 12),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryBlue,
-                minimumSize: const Size(double.infinity, 45),
-              ),
-              onPressed: () => _showConvertGuestDialog(context, ref),
-              child: const Text('Convert to Regular Account'),
+            const SizedBox(height: 4),
+            const Text(
+              'Convert to a regular account to save your dreams permanently',
+              style: TextStyle(color: AppColors.lightBlue, fontSize: 10),
+              textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryBlue,
-                      minimumSize: const Size(double.infinity, 45),
-                    ),
-                    onPressed: () {
-                      // Navigate to login page
-                      ref.read(authProvider.notifier).logout();
-                    },
-                    child: const Text('Sign in'),
-                  ),
+            const SizedBox(height: 8),
+            Center(
+              child: SizedBox(
+                width: 300,
+                height: 36,
+                child: AuthButton(
+                  text: 'Convert to Regular Account',
+                  onPressed: () => _showConvertGuestDialog(context, ref),
+                  isLoading: false,
+                  backgroundColor: AppColors.primaryBlue,
+                  textColor: AppColors.white,
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: AppColors.primaryBlue),
-                      minimumSize: const Size(double.infinity, 45),
-                    ),
-                    onPressed: () => _showLogoutConfirmation(context, ref),
-                    child: const Text('Logout',
-                        style: TextStyle(color: AppColors.primaryBlue)),
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Your dreams will be lost if you logout',
+              style: TextStyle(color: AppColors.lightBlue, fontSize: 10),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 4),
+            Center(
+              child: SizedBox(
+                width: 140,
+                height: 36,
+                child: OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: AppColors.primaryBlue),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
                   ),
+                  onPressed: () => _showLogoutConfirmation(context, ref),
+                  child: const Text('Logout',
+                      style: TextStyle(color: AppColors.primaryBlue)),
                 ),
-              ],
+              ),
             ),
           ],
         ),
@@ -222,112 +238,121 @@ class ProfilePage extends ConsumerWidget {
             title: const Text('Create Your Account',
                 style: TextStyle(color: AppColors.white)),
             content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    'Convert your guest account to a regular account to save your dreams permanently.',
-                    style: TextStyle(color: AppColors.lightBlue, fontSize: 14),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: nameController,
-                    style: const TextStyle(color: AppColors.white),
-                    decoration: const InputDecoration(
-                      labelText: 'Name',
-                      labelStyle: TextStyle(color: AppColors.lightBlue),
-                      enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: AppColors.lightBlue),
-                      ),
-                      focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: AppColors.primaryBlue),
-                      ),
+              child: SizedBox(
+                width: 320,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'Convert your guest account to a regular account to save your dreams permanently.',
+                      style:
+                          TextStyle(color: AppColors.lightBlue, fontSize: 14),
+                      textAlign: TextAlign.center,
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    style: const TextStyle(color: AppColors.white),
-                    decoration: const InputDecoration(
-                      labelText: 'Email',
-                      labelStyle: TextStyle(color: AppColors.lightBlue),
-                      enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: AppColors.lightBlue),
-                      ),
-                      focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: AppColors.primaryBlue),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: passwordController,
-                    obscureText: obscurePassword,
-                    style: const TextStyle(color: AppColors.white),
-                    decoration: InputDecoration(
-                      labelText: 'Password',
-                      labelStyle: const TextStyle(color: AppColors.lightBlue),
-                      enabledBorder: const UnderlineInputBorder(
-                        borderSide: BorderSide(color: AppColors.lightBlue),
-                      ),
-                      focusedBorder: const UnderlineInputBorder(
-                        borderSide: BorderSide(color: AppColors.primaryBlue),
-                      ),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          obscurePassword
-                              ? Icons.visibility_off
-                              : Icons.visibility,
-                          color: AppColors.lightBlue,
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: nameController,
+                      style: const TextStyle(color: AppColors.white),
+                      decoration: const InputDecoration(
+                        labelText: 'Name',
+                        labelStyle: TextStyle(color: AppColors.lightBlue),
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: AppColors.lightBlue),
                         ),
-                        onPressed: () {
-                          setState(() {
-                            obscurePassword = !obscurePassword;
-                          });
-                        },
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: confirmPasswordController,
-                    obscureText: obscureConfirmPassword,
-                    style: const TextStyle(color: AppColors.white),
-                    decoration: InputDecoration(
-                      labelText: 'Confirm Password',
-                      labelStyle: const TextStyle(color: AppColors.lightBlue),
-                      enabledBorder: const UnderlineInputBorder(
-                        borderSide: BorderSide(color: AppColors.lightBlue),
-                      ),
-                      focusedBorder: const UnderlineInputBorder(
-                        borderSide: BorderSide(color: AppColors.primaryBlue),
-                      ),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          obscureConfirmPassword
-                              ? Icons.visibility_off
-                              : Icons.visibility,
-                          color: AppColors.lightBlue,
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: AppColors.primaryBlue),
                         ),
-                        onPressed: () {
-                          setState(() {
-                            obscureConfirmPassword = !obscureConfirmPassword;
-                          });
-                        },
+                        constraints: BoxConstraints(maxWidth: 320),
                       ),
                     ),
-                  ),
-                  if (errorMessage != null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 16),
-                      child: Text(
-                        errorMessage!,
-                        style: const TextStyle(color: Colors.red),
-                        textAlign: TextAlign.center,
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      style: const TextStyle(color: AppColors.white),
+                      decoration: const InputDecoration(
+                        labelText: 'Email',
+                        labelStyle: TextStyle(color: AppColors.lightBlue),
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: AppColors.lightBlue),
+                        ),
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: AppColors.primaryBlue),
+                        ),
+                        constraints: BoxConstraints(maxWidth: 320),
                       ),
                     ),
-                ],
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: passwordController,
+                      obscureText: obscurePassword,
+                      style: const TextStyle(color: AppColors.white),
+                      decoration: InputDecoration(
+                        labelText: 'Password',
+                        labelStyle: const TextStyle(color: AppColors.lightBlue),
+                        enabledBorder: const UnderlineInputBorder(
+                          borderSide: BorderSide(color: AppColors.lightBlue),
+                        ),
+                        focusedBorder: const UnderlineInputBorder(
+                          borderSide: BorderSide(color: AppColors.primaryBlue),
+                        ),
+                        constraints: const BoxConstraints(maxWidth: 320),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            obscurePassword
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                            color: AppColors.lightBlue,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              obscurePassword = !obscurePassword;
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: confirmPasswordController,
+                      obscureText: obscureConfirmPassword,
+                      style: const TextStyle(color: AppColors.white),
+                      decoration: InputDecoration(
+                        labelText: 'Confirm Password',
+                        labelStyle: const TextStyle(color: AppColors.lightBlue),
+                        enabledBorder: const UnderlineInputBorder(
+                          borderSide: BorderSide(color: AppColors.lightBlue),
+                        ),
+                        focusedBorder: const UnderlineInputBorder(
+                          borderSide: BorderSide(color: AppColors.primaryBlue),
+                        ),
+                        constraints: const BoxConstraints(maxWidth: 320),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            obscureConfirmPassword
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                            color: AppColors.lightBlue,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              obscureConfirmPassword = !obscureConfirmPassword;
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                    if (errorMessage != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 16),
+                        child: Text(
+                          errorMessage!,
+                          style: const TextStyle(color: Colors.red),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ),
             actions: [
@@ -337,88 +362,105 @@ class ProfilePage extends ConsumerWidget {
                 child: const Text('Cancel',
                     style: TextStyle(color: AppColors.primaryBlue)),
               ),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryBlue,
-                ),
-                onPressed: isConverting
-                    ? null
-                    : () async {
-                        // Validate inputs
-                        if (nameController.text.trim().isEmpty) {
-                          setState(() {
-                            errorMessage = 'Please enter your name';
-                          });
-                          return;
-                        }
-                        if (emailController.text.trim().isEmpty) {
-                          setState(() {
-                            errorMessage = 'Please enter your email';
-                          });
-                          return;
-                        }
-                        if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                            .hasMatch(emailController.text.trim())) {
-                          setState(() {
-                            errorMessage = 'Please enter a valid email';
-                          });
-                          return;
-                        }
-                        if (passwordController.text.length < 6) {
-                          setState(() {
-                            errorMessage =
-                                'Password must be at least 6 characters';
-                          });
-                          return;
-                        }
-                        if (passwordController.text !=
-                            confirmPasswordController.text) {
-                          setState(() {
-                            errorMessage = 'Passwords do not match';
-                          });
-                          return;
-                        }
-
-                        // Convert guest user
-                        setState(() {
-                          errorMessage = null;
-                          isConverting = true;
-                        });
-
-                        try {
-                          await ref
-                              .read(authProvider.notifier)
-                              .convertGuestUser(
-                                nameController.text.trim(),
-                                emailController.text.trim(),
-                                passwordController.text,
-                              );
-                          if (context.mounted) {
-                            Navigator.of(context).pop();
-                            CustomSnackbar.show(
-                              context: context,
-                              message:
-                                  'Your account has been successfully created!',
-                              type: SnackBarType.success,
-                            );
+              SizedBox(
+                width: 180,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryBlue,
+                    minimumSize: const Size(180, 40),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8)),
+                    elevation: 2,
+                  ),
+                  onPressed: isConverting
+                      ? null
+                      : () async {
+                          // Validate inputs
+                          if (nameController.text.trim().isEmpty) {
+                            setState(() {
+                              errorMessage = 'Please enter your name';
+                            });
+                            return;
                           }
-                        } catch (e) {
+                          if (emailController.text.trim().isEmpty) {
+                            setState(() {
+                              errorMessage = 'Please enter your email';
+                            });
+                            return;
+                          }
+                          if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                              .hasMatch(emailController.text.trim())) {
+                            setState(() {
+                              errorMessage = 'Please enter a valid email';
+                            });
+                            return;
+                          }
+                          if (passwordController.text.length < 6) {
+                            setState(() {
+                              errorMessage =
+                                  'Password must be at least 6 characters';
+                            });
+                            return;
+                          }
+                          if (passwordController.text !=
+                              confirmPasswordController.text) {
+                            setState(() {
+                              errorMessage = 'Passwords do not match';
+                            });
+                            return;
+                          }
+
+                          // Convert guest user
                           setState(() {
-                            errorMessage = e.toString();
-                            isConverting = false;
+                            errorMessage = null;
+                            isConverting = true;
                           });
-                        }
-                      },
-                child: isConverting
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          color: AppColors.white,
-                          strokeWidth: 2,
+
+                          try {
+                            await ref
+                                .read(authProvider.notifier)
+                                .convertGuestUser(
+                                  nameController.text.trim(),
+                                  emailController.text.trim(),
+                                  passwordController.text,
+                                );
+                            if (context.mounted) {
+                              Navigator.of(context).pop();
+                              CustomSnackbar.show(
+                                context: context,
+                                message:
+                                    'Your account has been successfully created!',
+                                type: SnackBarType.success,
+                              );
+                            }
+                          } catch (e) {
+                            setState(() {
+                              errorMessage = e.toString();
+                              isConverting = false;
+                            });
+                          }
+                        },
+                  child: isConverting
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            color: AppColors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : const Text(
+                          'Create Account',
+                          style: TextStyle(
+                            color: AppColors.white,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.5,
+                          ),
                         ),
-                      )
-                    : const Text('Create Account'),
+                ),
               ),
             ],
           );
