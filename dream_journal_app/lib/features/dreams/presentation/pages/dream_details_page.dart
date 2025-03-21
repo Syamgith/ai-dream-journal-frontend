@@ -134,7 +134,7 @@ class DreamDetailsPage extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'Dream Interpretation',
+                        'Dream Exploration',
                         style: TextStyle(
                           color: AppColors.white,
                           fontSize: 18,
