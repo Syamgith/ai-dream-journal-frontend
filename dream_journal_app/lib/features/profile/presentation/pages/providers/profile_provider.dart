@@ -66,7 +66,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
   // Calculate member since date based on the first dream entry
   static String _calculateMemberSince(User? user, List<DreamEntry> dreams) {
     if (dreams.isEmpty) {
-      return user?.isGuest ?? true ? 'Today' : 'Unknown';
+      return user?.isGuest ?? true ? '2025' : '2025';
     }
 
     // Find the oldest dream
