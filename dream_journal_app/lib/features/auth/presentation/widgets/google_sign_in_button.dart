@@ -42,6 +42,7 @@ class GoogleSignInButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(10),
           ),
           elevation: 3,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         ),
       ),
     );

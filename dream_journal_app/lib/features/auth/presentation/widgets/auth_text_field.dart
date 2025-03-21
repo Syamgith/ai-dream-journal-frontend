@@ -22,7 +22,7 @@ class AuthTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 0.0),
       child: TextFormField(
         controller: controller,
         obscureText: obscureText,
@@ -50,6 +50,8 @@ class AuthTextField extends StatelessWidget {
             borderSide: const BorderSide(color: Colors.red, width: 2),
           ),
           suffixIcon: suffixIcon,
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
         ),
       ),
     );

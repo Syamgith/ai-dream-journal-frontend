@@ -36,6 +36,7 @@ class AuthButton extends StatelessWidget {
                 : BorderSide.none,
           ),
           elevation: 3,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         ),
         child: isLoading
             ? const CircularProgressIndicator(color: AppColors.white)
