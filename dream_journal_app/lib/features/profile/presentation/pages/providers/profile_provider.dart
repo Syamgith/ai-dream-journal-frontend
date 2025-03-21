@@ -67,8 +67,14 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
           isGuest: user?.isGuest ?? true,
         ));
 
-  // Calculate member since date based on the first dream entry
+  // Calculate member since date based on user's dateCreated or the first dream entry
   static String _calculateMemberSince(User? user, List<DreamEntry> dreams) {
+    // If user has a dateCreated field, use that
+    if (user?.dateCreated != null) {
+      return DateFormat('MMM yyyy').format(user!.dateCreated!);
+    }
+
+    // Fallback to old method if dateCreated is not available
     if (dreams.isEmpty) {
       return user?.isGuest ?? true ? '2025' : '2025';
     }
