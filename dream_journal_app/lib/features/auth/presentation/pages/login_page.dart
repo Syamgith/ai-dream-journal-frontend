@@ -7,6 +7,7 @@ import '../widgets/google_sign_in_button.dart';
 import 'register_page.dart';
 import '../../../dreams/providers/dreams_provider.dart';
 import '../../../../core/widgets/error_message_display.dart';
+import '../../../../core/utils/error_formatter.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -55,7 +56,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         }
       } catch (e) {
         setState(() {
-          _errorMessage = e.toString();
+          _errorMessage = ErrorFormatter.format(e);
         });
       } finally {
         if (mounted) {
@@ -82,7 +83,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       }
     } catch (e) {
       setState(() {
-        _errorMessage = e.toString();
+        _errorMessage = ErrorFormatter.format(e);
       });
     } finally {
       if (mounted) {
@@ -108,7 +109,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       }
     } catch (e) {
       setState(() {
-        _errorMessage = e.toString();
+        _errorMessage = ErrorFormatter.format(e);
       });
     } finally {
       if (mounted) {

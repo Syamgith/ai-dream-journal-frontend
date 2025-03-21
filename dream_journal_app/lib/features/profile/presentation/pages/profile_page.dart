@@ -6,6 +6,7 @@ import 'providers/profile_provider.dart';
 import '../../../../../features/auth/presentation/providers/auth_provider.dart';
 import '../../../../core/widgets/custom_snackbar.dart';
 import '../../../../core/widgets/error_message_display.dart';
+import '../../../../core/utils/error_formatter.dart';
 
 class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
@@ -191,7 +192,7 @@ class ProfilePage extends ConsumerWidget {
                           }
                         } catch (e) {
                           setState(() {
-                            errorMessage = e.toString();
+                            errorMessage = ErrorFormatter.format(e);
                             isLoading = false;
                           });
                         }
@@ -492,7 +493,7 @@ class ProfilePage extends ConsumerWidget {
                             }
                           } catch (e) {
                             setState(() {
-                              errorMessage = e.toString();
+                              errorMessage = ErrorFormatter.format(e);
                               isConverting = false;
                             });
                           }

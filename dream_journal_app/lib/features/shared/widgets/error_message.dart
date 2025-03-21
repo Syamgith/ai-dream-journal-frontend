@@ -1,18 +1,24 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/utils/error_formatter.dart';
 
 class ErrorMessage extends StatelessWidget {
   final String message;
   final VoidCallback? onRetry;
+  final bool formatMessage;
 
   const ErrorMessage({
     Key? key,
     required this.message,
     this.onRetry,
+    this.formatMessage = true,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final displayMessage =
+        formatMessage ? ErrorFormatter.format(message) : message;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -48,7 +54,7 @@ class ErrorMessage extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Text(
-                message,
+                displayMessage,
                 style: const TextStyle(
                   color: AppColors.white,
                   fontSize: 16,

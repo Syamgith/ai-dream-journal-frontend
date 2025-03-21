@@ -6,6 +6,7 @@ import '../widgets/auth_text_field.dart';
 import '../../../../features/shared/widgets/loading_indicator.dart';
 import '../../../dreams/providers/dreams_provider.dart';
 import '../../../../core/widgets/error_message_display.dart';
+import '../../../../core/utils/error_formatter.dart';
 
 class RegisterPage extends ConsumerStatefulWidget {
   const RegisterPage({Key? key}) : super(key: key);
@@ -72,7 +73,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
         }
       } catch (e) {
         setState(() {
-          _errorMessage = e.toString();
+          _errorMessage = ErrorFormatter.format(e);
           _isRegistering = false;
         });
       }

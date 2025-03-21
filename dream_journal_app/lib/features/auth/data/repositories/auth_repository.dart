@@ -58,12 +58,26 @@ class AuthRepository {
     );
 
     if (response.statusCode == 200) {
-      //final data = jsonDecode(response.body);
-      // Registration successful, but no token is returned
-      // User needs to login separately
       return true;
     } else {
-      throw Exception('Failed to register: ${response.body}');
+      // Try to extract a more user-friendly error message
+      String errorMessage = 'Failed to register';
+
+      if (response.body.isNotEmpty) {
+        try {
+          final errorData = jsonDecode(response.body);
+          if (errorData != null && errorData is Map) {
+            if (errorData.containsKey('detail')) {
+              errorMessage = 'Registration failed: ${errorData['detail']}';
+            }
+          }
+        } catch (e) {
+          // If JSON parsing fails, use generic message
+          errorMessage = 'Registration failed. Please try again.';
+        }
+      }
+
+      throw Exception(errorMessage);
     }
   }
 
@@ -104,7 +118,24 @@ class AuthRepository {
 
       return user;
     } else {
-      throw Exception('Failed to login: ${response.body}');
+      // Try to extract a more user-friendly error message
+      String errorMessage = 'Failed to login';
+
+      if (response.body.isNotEmpty) {
+        try {
+          final errorData = jsonDecode(response.body);
+          if (errorData != null && errorData is Map) {
+            if (errorData.containsKey('detail')) {
+              errorMessage = 'Login failed: ${errorData['detail']}';
+            }
+          }
+        } catch (e) {
+          // If JSON parsing fails, use generic message
+          errorMessage = 'Login failed. Please check your credentials.';
+        }
+      }
+
+      throw Exception(errorMessage);
     }
   }
 
@@ -127,7 +158,24 @@ class AuthRepository {
 
       return user;
     } else {
-      throw Exception('Failed to login as guest: ${response.body}');
+      // Try to extract a more user-friendly error message
+      String errorMessage = 'Failed to login as guest';
+
+      if (response.body.isNotEmpty) {
+        try {
+          final errorData = jsonDecode(response.body);
+          if (errorData != null && errorData is Map) {
+            if (errorData.containsKey('detail')) {
+              errorMessage = errorData['detail'];
+            }
+          }
+        } catch (e) {
+          // If JSON parsing fails, use generic message
+          errorMessage = 'Guest login failed. Please try again later.';
+        }
+      }
+
+      throw Exception(errorMessage);
     }
   }
 
@@ -185,12 +233,32 @@ class AuthRepository {
 
         return user;
       } else {
-        throw Exception('Failed to login with Google: ${response.body}');
+        // Try to extract a more user-friendly error message
+        String errorMessage = 'Failed to login with Google';
+
+        if (response.body.isNotEmpty) {
+          try {
+            final errorData = jsonDecode(response.body);
+            if (errorData != null && errorData is Map) {
+              if (errorData.containsKey('detail')) {
+                errorMessage = errorData['detail'];
+              }
+            }
+          } catch (e) {
+            // If JSON parsing fails, use generic message
+            errorMessage = 'Google login failed. Please try again later.';
+          }
+        }
+
+        throw Exception(errorMessage);
       }
     } catch (e) {
       // Ensure sign out from Google when there's an error
       await _googleSignIn.signOut();
-      throw Exception('Error during Google sign-in: $e');
+      if (e is Exception) {
+        rethrow;
+      }
+      throw Exception('Error during Google sign-in. Please try again.');
     }
   }
 

@@ -5,6 +5,7 @@ import 'login_page.dart';
 import '../../../../features/shared/screens/main_screen.dart';
 import '../../../../features/shared/widgets/loading_indicator.dart';
 import '../../../../features/shared/widgets/error_message.dart';
+import '../../../../core/utils/error_formatter.dart';
 
 class AuthWrapper extends ConsumerWidget {
   const AuthWrapper({Key? key}) : super(key: key);
@@ -28,7 +29,7 @@ class AuthWrapper extends ConsumerWidget {
       ),
       error: (error, stackTrace) => Scaffold(
         body: ErrorMessage(
-          message: 'Error: ${error.toString()}',
+          message: ErrorFormatter.format(error),
           onRetry: () => ref.read(authProvider.notifier).checkAuthStatus(),
         ),
       ),

@@ -135,8 +135,30 @@ class ApiClient {
       }
       return jsonDecode(response.body);
     } else {
-      throw Exception(
-          'Request failed with status: ${response.statusCode}. ${response.body}');
+      // Try to extract a more user-friendly error message
+      String errorMessage =
+          'Request failed with status: ${response.statusCode}';
+
+      if (response.body.isNotEmpty) {
+        try {
+          final errorData = jsonDecode(response.body);
+          if (errorData != null && errorData is Map) {
+            if (errorData.containsKey('detail')) {
+              errorMessage = errorData['detail'];
+            } else if (errorData.containsKey('message')) {
+              errorMessage = errorData['message'];
+            } else if (errorData.containsKey('error')) {
+              errorMessage = errorData['error'];
+            }
+          }
+        } catch (e) {
+          // If JSON parsing fails, use the response body as is
+          errorMessage =
+              'Request failed with status: ${response.statusCode}. ${response.body}';
+        }
+      }
+
+      throw Exception(errorMessage);
     }
   }
 }
