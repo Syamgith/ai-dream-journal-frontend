@@ -15,8 +15,8 @@ class AppDrawer extends ConsumerWidget {
         children: [
           DrawerHeader(
             decoration: const BoxDecoration(
-              color: AppColors.primaryBlue,
-            ),
+                //color: AppColors.primaryBlue,
+                ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.end,
