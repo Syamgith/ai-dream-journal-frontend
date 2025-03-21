@@ -24,7 +24,7 @@ class AuthWrapper extends ConsumerWidget {
         }
       },
       loading: () => const Scaffold(
-        body: LoadingIndicator(message: 'Checking authentication status...'),
+        body: LoadingIndicator(message: 'Journeying into your dream realm...'),
       ),
       error: (error, stackTrace) => Scaffold(
         body: ErrorMessage(
