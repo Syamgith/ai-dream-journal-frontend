@@ -390,6 +390,30 @@ class _AddDreamPageState extends ConsumerState<AddDreamPage>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Display the dream title if it's available
+                      if (_titleController.text.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _titleController.text,
+                                style: const TextStyle(
+                                  color: AppColors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              const Divider(
+                                color: AppColors.primaryBlue,
+                                thickness: 0.5,
+                              ),
+                              const SizedBox(height: 16),
+                            ],
+                          ),
+                        ),
                       const Text(
                         'Dream Exploration',
                         style: TextStyle(
@@ -503,6 +527,11 @@ class _AddDreamPageState extends ConsumerState<AddDreamPage>
         if (mounted) {
           setState(() {
             _interpretation = interpretedDream.interpretation;
+            // Update the title controller if API returned a title and user didn't provide one
+            if (_titleController.text.trim().isEmpty &&
+                interpretedDream.title != null) {
+              _titleController.text = interpretedDream.title!;
+            }
           });
         }
         return; // Don't pop the page, show interpretation instead
