@@ -4,6 +4,10 @@ import '../../../../../features/auth/domain/models/user.dart';
 import '../../../../../features/dreams/providers/dreams_provider.dart';
 import '../../../../../features/dreams/data/models/dream_entry.dart';
 import 'package:intl/intl.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import '../../../../../core/config/config.dart';
+import '../../../../../core/auth/auth_service.dart';
 
 class ProfileState {
   final String name;
@@ -136,6 +140,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
     return streak;
   }
 
+  // Update profile data locally
   void updateProfile({
     String? name,
     String? email,
@@ -152,5 +157,38 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
       dreamStreak: dreamStreak,
       isGuest: isGuest,
     );
+  }
+
+  // Update user's name on the backend
+  Future<bool> updateUserName(String name) async {
+    try {
+      final token = await AuthService.getToken();
+      if (token == null) {
+        throw Exception('Not authenticated');
+      }
+
+      final baseUrl = Config.apiURL;
+      final response = await http.put(
+        Uri.parse('$baseUrl/users/me'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'name': name,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        // Update local state after successful API call
+        updateProfile(name: name);
+        return true;
+      } else {
+        throw Exception('Failed to update user name: ${response.body}');
+      }
+    } catch (e) {
+      print('Error updating user name: $e');
+      rethrow;
+    }
   }
 }

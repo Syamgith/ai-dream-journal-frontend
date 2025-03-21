@@ -88,78 +88,131 @@ class ProfilePage extends ConsumerWidget {
   void _showEditProfileDialog(
       BuildContext context, WidgetRef ref, ProfileState profile) {
     final nameController = TextEditingController(text: profile.name);
+    bool isLoading = false;
+    String? errorMessage;
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.darkBlue,
-        title: const Text('Edit Profile',
-            style: TextStyle(color: AppColors.white)),
-        content: SingleChildScrollView(
-          child: SizedBox(
-            width: 320,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: nameController,
-                  style: const TextStyle(color: AppColors.white),
-                  decoration: const InputDecoration(
-                    labelText: 'Name',
-                    labelStyle: TextStyle(color: AppColors.lightBlue),
-                    enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: AppColors.lightBlue),
-                    ),
-                    focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: AppColors.primaryBlue),
-                    ),
-                    constraints: BoxConstraints(maxWidth: 320),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                // Email is displayed but not editable
-                TextField(
-                  controller: TextEditingController(text: profile.email),
-                  style: const TextStyle(color: AppColors.white),
-                  enabled: false,
-                  decoration: InputDecoration(
-                    labelText: 'Email (cannot be changed)',
-                    labelStyle: const TextStyle(color: AppColors.lightBlue),
-                    constraints: const BoxConstraints(maxWidth: 320),
-                    disabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(
-                          color: AppColors.lightBlue.withOpacity(0.5)),
+      builder: (context) => StatefulBuilder(builder: (context, setState) {
+        return AlertDialog(
+          backgroundColor: AppColors.darkBlue,
+          title: const Text('Edit Profile',
+              style: TextStyle(color: AppColors.white)),
+          content: SingleChildScrollView(
+            child: SizedBox(
+              width: 320,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: nameController,
+                    style: const TextStyle(color: AppColors.white),
+                    decoration: const InputDecoration(
+                      labelText: 'Name',
+                      labelStyle: TextStyle(color: AppColors.lightBlue),
+                      enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: AppColors.lightBlue),
+                      ),
+                      focusedBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: AppColors.primaryBlue),
+                      ),
+                      constraints: BoxConstraints(maxWidth: 320),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel',
-                style: TextStyle(color: AppColors.primaryBlue)),
-          ),
-          SizedBox(
-            width: 100,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryBlue,
+                  const SizedBox(height: 8),
+                  // Email is displayed but not editable
+                  TextField(
+                    controller: TextEditingController(text: profile.email),
+                    style: const TextStyle(color: AppColors.white),
+                    enabled: false,
+                    decoration: InputDecoration(
+                      labelText: 'Email (cannot be changed)',
+                      labelStyle: const TextStyle(color: AppColors.lightBlue),
+                      constraints: const BoxConstraints(maxWidth: 320),
+                      disabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(
+                            color: AppColors.lightBlue.withOpacity(0.5)),
+                      ),
+                    ),
+                  ),
+                  if (errorMessage != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16),
+                      child: Text(
+                        errorMessage!,
+                        style: const TextStyle(color: Colors.red),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                ],
               ),
-              onPressed: () {
-                // Update profile with new name
-                ref.read(profileProvider.notifier).updateProfile(
-                      name: nameController.text.trim(),
-                    );
-                Navigator.of(context).pop();
-              },
-              child: const Text('Save'),
             ),
           ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: isLoading ? null : () => Navigator.of(context).pop(),
+              child: const Text('Cancel',
+                  style: TextStyle(color: AppColors.primaryBlue)),
+            ),
+            SizedBox(
+              width: 100,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryBlue,
+                ),
+                onPressed: isLoading
+                    ? null
+                    : () async {
+                        // Validate input
+                        final newName = nameController.text.trim();
+                        if (newName.isEmpty) {
+                          setState(() {
+                            errorMessage = 'Name cannot be empty';
+                          });
+                          return;
+                        }
+
+                        // Set loading state
+                        setState(() {
+                          isLoading = true;
+                          errorMessage = null;
+                        });
+
+                        try {
+                          // Call API to update user name
+                          await ref
+                              .read(profileProvider.notifier)
+                              .updateUserName(newName);
+                          if (context.mounted) {
+                            Navigator.of(context).pop();
+                            CustomSnackbar.show(
+                              context: context,
+                              message: 'Profile updated successfully',
+                              type: SnackBarType.success,
+                            );
+                          }
+                        } catch (e) {
+                          setState(() {
+                            errorMessage = e.toString();
+                            isLoading = false;
+                          });
+                        }
+                      },
+                child: isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          color: AppColors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Text('Save'),
+              ),
+            ),
+          ],
+        );
+      }),
     );
   }
 
