@@ -6,6 +6,7 @@ import '../widgets/auth_text_field.dart';
 import '../widgets/google_sign_in_button.dart';
 import 'register_page.dart';
 import '../../../dreams/providers/dreams_provider.dart';
+import '../../../../core/widgets/error_message_display.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -214,12 +215,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         ),
 
                         if (_errorMessage != null)
-                          Padding(
+                          ErrorMessageDisplay(
+                            message: _errorMessage!,
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
-                            child: Text(
-                              _errorMessage!,
-                              style: const TextStyle(color: Colors.red),
-                            ),
                           ),
 
                         const SizedBox(height: 24),

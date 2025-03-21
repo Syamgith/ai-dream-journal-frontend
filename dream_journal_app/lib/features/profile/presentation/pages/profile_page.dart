@@ -5,6 +5,7 @@ import '../../../auth/presentation/widgets/auth_button.dart';
 import 'providers/profile_provider.dart';
 import '../../../../../features/auth/presentation/providers/auth_provider.dart';
 import '../../../../core/widgets/custom_snackbar.dart';
+import '../../../../core/widgets/error_message_display.dart';
 
 class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
@@ -136,13 +137,10 @@ class ProfilePage extends ConsumerWidget {
                     ),
                   ),
                   if (errorMessage != null)
-                    Padding(
+                    ErrorMessageDisplay(
+                      message: errorMessage!,
+                      compact: true,
                       padding: const EdgeInsets.only(top: 16),
-                      child: Text(
-                        errorMessage!,
-                        style: const TextStyle(color: Colors.red),
-                        textAlign: TextAlign.center,
-                      ),
                     ),
                 ],
               ),
@@ -403,13 +401,10 @@ class ProfilePage extends ConsumerWidget {
                       ),
                     ),
                     if (errorMessage != null)
-                      Padding(
+                      ErrorMessageDisplay(
+                        message: errorMessage!,
+                        compact: true,
                         padding: const EdgeInsets.only(top: 16),
-                        child: Text(
-                          errorMessage!,
-                          style: const TextStyle(color: Colors.red),
-                          textAlign: TextAlign.center,
-                        ),
                       ),
                   ],
                 ),

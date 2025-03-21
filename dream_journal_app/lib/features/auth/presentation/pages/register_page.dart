@@ -5,6 +5,7 @@ import '../widgets/auth_button.dart';
 import '../widgets/auth_text_field.dart';
 import '../../../../features/shared/widgets/loading_indicator.dart';
 import '../../../dreams/providers/dreams_provider.dart';
+import '../../../../core/widgets/error_message_display.dart';
 
 class RegisterPage extends ConsumerStatefulWidget {
   const RegisterPage({Key? key}) : super(key: key);
@@ -185,13 +186,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                               ),
 
                               if (_errorMessage != null)
-                                Padding(
+                                ErrorMessageDisplay(
+                                  message: _errorMessage!,
                                   padding:
                                       const EdgeInsets.symmetric(vertical: 8.0),
-                                  child: Text(
-                                    _errorMessage!,
-                                    style: const TextStyle(color: Colors.red),
-                                  ),
                                 ),
 
                               const SizedBox(height: 24),
