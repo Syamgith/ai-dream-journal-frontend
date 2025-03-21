@@ -211,10 +211,15 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
       // When forceRefresh is true, always load dreams
       // Otherwise, only load dreams if we haven't loaded them yet or if the list is empty
       if (forceRefresh || !hasInitialLoad || dreams.isEmpty) {
-        // Access the dreams notifier and refresh the dreams data
-        await _ref
-            .read(dreamsProvider.notifier)
-            .loadDreams(forceRefresh: forceRefresh);
+        // First, initialize the dreams provider if needed
+        await _ref.read(dreamsProvider.notifier).initialize();
+
+        // If forceRefresh is true, explicitly call loadDreams with forceRefresh
+        if (forceRefresh) {
+          await _ref
+              .read(dreamsProvider.notifier)
+              .loadDreams(forceRefresh: true);
+        }
       }
     } catch (e) {
       // Log the error but don't rethrow it to avoid disrupting the login flow

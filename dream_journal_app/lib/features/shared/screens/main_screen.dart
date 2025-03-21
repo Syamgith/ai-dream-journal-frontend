@@ -32,7 +32,10 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
   Future<void> _refreshDreamsData() async {
     try {
-      // Force refresh dreams data when manually refreshing
+      // First initialize the dreams provider
+      await ref.read(dreamsProvider.notifier).initialize();
+
+      // Then force refresh dreams data when manually refreshing
       await ref.read(dreamsProvider.notifier).loadDreams(forceRefresh: true);
     } catch (e) {
       // Log the error but don't show it to the user

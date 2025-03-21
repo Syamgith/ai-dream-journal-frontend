@@ -13,6 +13,11 @@ class DreamsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Ensure the dreams provider is initialized when this page is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(dreamsProvider.notifier).initialize();
+    });
+
     final dreams = ref.watch(dreamsProvider);
     final isLoading = ref.watch(dreamsLoadingProvider);
     final hasInitialLoad = ref.watch(dreamsInitialLoadProvider);
@@ -64,9 +69,14 @@ class DreamsPage extends ConsumerWidget {
                           ),
                         )
                       : RefreshIndicator(
-                          onRefresh: () => ref
-                              .read(dreamsProvider.notifier)
-                              .loadDreams(forceRefresh: true),
+                          onRefresh: () async {
+                            await ref
+                                .read(dreamsProvider.notifier)
+                                .initialize();
+                            return ref
+                                .read(dreamsProvider.notifier)
+                                .loadDreams(forceRefresh: true);
+                          },
                           child: _DreamsList(dreams: dreams),
                         ),
             ),

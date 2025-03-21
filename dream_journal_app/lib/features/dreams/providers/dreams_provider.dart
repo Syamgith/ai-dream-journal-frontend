@@ -22,7 +22,15 @@ class DreamsNotifier extends StateNotifier<List<DreamEntry>> {
   bool _hasInitialLoad = false;
 
   DreamsNotifier(this._repository, this._ref) : super([]) {
-    loadDreams();
+    // Don't call loadDreams() directly in the constructor
+    // This avoids modifying other providers during initialization
+  }
+
+  // Method to initialize data loading
+  Future<void> initialize() async {
+    if (!_hasInitialLoad) {
+      await loadDreams();
+    }
   }
 
   // Check if initial load has been done
