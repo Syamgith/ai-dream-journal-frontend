@@ -90,13 +90,20 @@ class AppDrawer extends ConsumerWidget {
   }
 
   void _showLogoutConfirmation(BuildContext context, WidgetRef ref) {
+    // Check if the current user is a guest
+    final authState = ref.read(authProvider);
+    final isGuest = authState.value?.isGuest ?? false;
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.darkBlue,
         title: const Text('Logout', style: TextStyle(color: AppColors.white)),
-        content: const Text('Are you sure you want to logout?',
-            style: TextStyle(color: AppColors.lightBlue)),
+        content: Text(
+            isGuest
+                ? 'Are you sure you want to logout? Your dreams will be permanently deleted!'
+                : 'Are you sure you want to logout?',
+            style: const TextStyle(color: AppColors.lightBlue)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -105,7 +112,7 @@ class AppDrawer extends ConsumerWidget {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryBlue,
+              backgroundColor: isGuest ? Colors.red : AppColors.primaryBlue,
             ),
             onPressed: () {
               Navigator.of(context).pop();

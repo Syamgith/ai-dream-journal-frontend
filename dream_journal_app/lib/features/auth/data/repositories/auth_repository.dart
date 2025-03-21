@@ -197,6 +197,22 @@ class AuthRepository {
   // Logout
   Future<void> logout() async {
     try {
+      // Check if current user is a guest user
+      final userData = await AuthService.getUserData();
+      if (userData != null) {
+        try {
+          final user = User.fromJson(jsonDecode(userData));
+          if (user.isGuest) {
+            // If the user is a guest, use the guest logout method
+            await logoutGuestUser();
+            return;
+          }
+        } catch (e) {
+          print('Error parsing user data during logout: $e');
+          // Continue with regular logout
+        }
+      }
+
       // Sign out from Google if the user signed in with Google
       await _googleSignIn.signOut();
     } catch (e) {
@@ -205,6 +221,48 @@ class AuthRepository {
     }
 
     await AuthService.clearAllAuthData();
+  }
+
+  // Logout a guest user (also deletes the user from backend)
+  Future<void> logoutGuestUser() async {
+    try {
+      final token = await AuthService.getToken();
+
+      if (token != null) {
+        // Make DELETE request to delete the guest user
+        try {
+          final response = await http.delete(
+            Uri.parse('$_baseUrl/users/guest/logout'),
+            headers: {'Authorization': 'Bearer $token'},
+          );
+
+          // Log response for debugging
+          print('Guest user logout response: ${response.statusCode}');
+
+          if (response.statusCode != 200 && response.statusCode != 204) {
+            print('Failed to delete guest user: ${response.body}');
+          }
+          await AuthService.clearAllAuthData();
+        } catch (e) {
+          print('Error calling guest logout API: $e');
+          // Continue with regular logout even if the API call fails
+        }
+      }
+
+      // Try signing out from Google (just in case)
+      try {
+        await _googleSignIn.signOut();
+      } catch (e) {
+        print('Error signing out from Google: $e');
+      }
+
+      // Clear local auth data
+      await AuthService.clearAllAuthData();
+    } catch (e) {
+      print('Error during guest user logout: $e');
+      // Still clear auth data even if there was an error
+      await AuthService.clearAllAuthData();
+    }
   }
 
   // Refresh token
