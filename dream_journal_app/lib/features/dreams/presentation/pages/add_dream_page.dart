@@ -461,9 +461,11 @@ class _AddDreamPageState extends ConsumerState<AddDreamPage>
     );
 
     if (pickedDate != null && pickedDate != _selectedDate) {
-      setState(() {
-        _selectedDate = pickedDate;
-      });
+      if (mounted) {
+        setState(() {
+          _selectedDate = pickedDate;
+        });
+      }
     }
   }
 
@@ -472,9 +474,11 @@ class _AddDreamPageState extends ConsumerState<AddDreamPage>
       return;
     }
 
-    setState(() {
-      _isLoading = true;
-    });
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+      });
+    }
 
     try {
       final dream = DreamEntry(

@@ -141,17 +141,10 @@ class _AddDreamButtonState extends State<_AddDreamButton>
                       child: AnimatedSwitcher(
                         duration: const Duration(milliseconds: 200),
                         child: _isHovered
-                            ? Image.asset(
-                                'assets/images/add_dream_icon.png',
-                                key: const ValueKey('hovered'),
+                            ? const Icon(
+                                Icons.add,
                                 color: Colors.white,
-                                // Fallback to a beautiful icon if the asset doesn't exist
-                                errorBuilder: (context, error, stackTrace) =>
-                                    const Icon(
-                                  Icons.add,
-                                  color: Colors.white,
-                                  size: 28,
-                                ),
+                                size: 28,
                               )
                             : const Icon(
                                 Icons.add,

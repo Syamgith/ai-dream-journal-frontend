@@ -55,9 +55,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           Navigator.of(context).pushReplacementNamed('/home');
         }
       } catch (e) {
-        setState(() {
-          _errorMessage = ErrorFormatter.format(e);
-        });
+        if (mounted) {
+          setState(() {
+            _errorMessage = ErrorFormatter.format(e);
+          });
+        }
       } finally {
         if (mounted) {
           setState(() {
@@ -82,9 +84,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         Navigator.of(context).pushReplacementNamed('/home');
       }
     } catch (e) {
-      setState(() {
-        _errorMessage = ErrorFormatter.format(e);
-      });
+      if (mounted) {
+        setState(() {
+          _errorMessage = ErrorFormatter.format(e);
+        });
+      }
     } finally {
       if (mounted) {
         setState(() {
@@ -108,9 +112,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         Navigator.of(context).pushReplacementNamed('/home');
       }
     } catch (e) {
-      setState(() {
-        _errorMessage = ErrorFormatter.format(e);
-      });
+      if (mounted) {
+        setState(() {
+          _errorMessage = ErrorFormatter.format(e);
+        });
+      }
     } finally {
       if (mounted) {
         setState(() {

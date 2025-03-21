@@ -72,10 +72,12 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           _navigateToHome();
         }
       } catch (e) {
-        setState(() {
-          _errorMessage = ErrorFormatter.format(e);
-          _isRegistering = false;
-        });
+        if (mounted) {
+          setState(() {
+            _errorMessage = ErrorFormatter.format(e);
+            _isRegistering = false;
+          });
+        }
       }
     }
   }
