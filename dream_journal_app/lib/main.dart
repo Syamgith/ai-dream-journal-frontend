@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Dream Journal',
+      title: 'Dreami Diary',
       theme: AppTheme.darkTheme,
       initialRoute: AppRoutes.main,
       routes: AppRoutes.getRoutes(),

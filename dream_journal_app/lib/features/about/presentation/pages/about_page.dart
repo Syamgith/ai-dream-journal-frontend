@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/constants/app_colors.dart';
 
 class AboutPage extends StatelessWidget {
   const AboutPage({super.key});
+
+  Future<void> _launchURL(String url) async {
+    final Uri uri = Uri.parse(url);
+    if (!await launchUrl(uri)) {
+      throw Exception('Could not launch $url');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +39,7 @@ class AboutPage extends StatelessWidget {
             const SizedBox(height: 24),
             const Center(
               child: Text(
-                'Dream Journal',
+                'Dreami Diary',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -49,32 +57,29 @@ class AboutPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 32),
-            _buildSectionTitle('About Dream Journal'),
+            _buildSectionTitle('About Dreami Diary'),
             _buildSectionContent(
-              'Dream Journal is an app designed to help you record and analyze your dreams. '
-              'Keep track of your dream patterns, emotions, and recurring themes to gain insights into your subconscious mind.',
+              'Dreami Diary is an app designed to help you record and expore your dreams with AI. '
+              'Keep track of your dream patterns, emotions, and recurring themes to gain insights into your mind.',
             ),
             const SizedBox(height: 24),
             _buildSectionTitle('Features'),
             _buildFeatureItem('Record your dreams with details'),
-            _buildFeatureItem('Track dream patterns and emotions'),
+            _buildFeatureItem('Get insights from your dreams with AI'),
             _buildFeatureItem('Analyze recurring themes'),
             _buildFeatureItem('Secure and private journal'),
             const SizedBox(height: 24),
             _buildSectionTitle('Contact Us'),
             _buildSectionContent(
-              'Have questions or suggestions? Reach out to us at:\nsupport@dreamjournal.app',
+              'Have questions or suggestions? Reach out to us at:\ndreamydiaryai@gmail.com',
             ),
             const SizedBox(height: 24),
             _buildSectionTitle('Privacy Policy'),
-            _buildSectionContent(
-              'We take your privacy seriously. Your dream data is stored securely and never shared with third parties without your consent. '
-              'For more details, please visit our website.',
-            ),
+            _buildPrivacyPolicySection(),
             const SizedBox(height: 32),
             const Center(
               child: Text(
-                '© 2023 Dream Journal',
+                '© 2025 Dreami Diary',
                 style: TextStyle(
                   fontSize: 14,
                   color: Colors.white54,
@@ -135,6 +140,35 @@ class AboutPage extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildPrivacyPolicySection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'We take your privacy seriously. Your dream data is stored securely and never shared with third parties without your consent. '
+          'For more details, please visit our website.',
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.white,
+            height: 1.5,
+          ),
+        ),
+        GestureDetector(
+          onTap: () => _launchURL('https://dreamidiary.com'),
+          child: const Text(
+            'dreamidiary.com',
+            style: TextStyle(
+              fontSize: 16,
+              color: AppColors.primaryBlue,
+              decoration: TextDecoration.underline,
+              height: 1.5,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
