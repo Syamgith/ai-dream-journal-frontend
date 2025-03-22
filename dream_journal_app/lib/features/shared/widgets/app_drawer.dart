@@ -93,6 +93,8 @@ class AppDrawer extends ConsumerWidget {
     // Check if the current user is a guest
     final authState = ref.read(authProvider);
     final isGuest = authState.value?.isGuest ?? false;
+    // Capture the logout function before showing the dialog
+    final logout = ref.read(authProvider.notifier).logout;
 
     showDialog(
       context: context,
@@ -116,7 +118,7 @@ class AppDrawer extends ConsumerWidget {
             ),
             onPressed: () {
               Navigator.of(context).pop();
-              ref.read(authProvider.notifier).logout();
+              logout(); // Use the captured function instead of ref.read
             },
             child: const Text('Logout'),
           ),
