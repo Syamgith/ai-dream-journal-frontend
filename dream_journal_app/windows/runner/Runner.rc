@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "dream_journal_app" "\0"
+            VALUE "FileDescription", "Dreami Diary" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "dream_journal_app" "\0"
+            VALUE "InternalName", "Dreami Diary" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2024 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "dream_journal_app.exe" "\0"
-            VALUE "ProductName", "dream_journal_app" "\0"
+            VALUE "OriginalFilename", "Dreami Diary.exe" "\0"
+            VALUE "ProductName", "Dreami Diary" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

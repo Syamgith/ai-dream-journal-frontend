@@ -158,7 +158,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
                   // App Title
                   const Text(
-                    'Dream Journal',
+                    'Dreami Diary',
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
