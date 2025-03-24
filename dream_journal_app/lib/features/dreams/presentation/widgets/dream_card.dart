@@ -23,8 +23,12 @@ class _DreamCardState extends State<DreamCard>
   late AnimationController _shimmerController;
   late Animation<double> _shimmerAnimation;
 
-  String _formatDate() {
-    return DateFormat('d\nMMM').format(widget.dream.timestamp).toUpperCase();
+  String _formatDayNumber() {
+    return DateFormat('d').format(widget.dream.timestamp);
+  }
+
+  String _formatMonth() {
+    return DateFormat('MMM').format(widget.dream.timestamp).toUpperCase();
   }
 
   @override
@@ -54,6 +58,7 @@ class _DreamCardState extends State<DreamCard>
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 350),
         curve: Curves.easeOutCubic,
+        constraints: const BoxConstraints(minHeight: 120, maxHeight: 140),
         margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
@@ -177,19 +182,36 @@ class _DreamCardState extends State<DreamCard>
                             ),
                           ),
                           child: Column(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
+                              // Day number
                               AnimatedDefaultTextStyle(
                                 duration: const Duration(milliseconds: 300),
                                 style: TextStyle(
                                   color: _isHovered
                                       ? AppColors.white.withAlpha(240)
                                       : AppColors.white.withAlpha(215),
-                                  fontSize: _isHovered ? 19 : 18,
+                                  fontSize: _isHovered ? 20 : 19,
                                   fontWeight: FontWeight.bold,
-                                  height: 1.2,
                                 ),
                                 child: Text(
-                                  _formatDate(),
+                                  _formatDayNumber(),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              // Month
+                              AnimatedDefaultTextStyle(
+                                duration: const Duration(milliseconds: 300),
+                                style: TextStyle(
+                                  color: _isHovered
+                                      ? AppColors.white.withAlpha(240)
+                                      : AppColors.white.withAlpha(215),
+                                  fontSize: _isHovered ? 16 : 15,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                child: Text(
+                                  _formatMonth(),
                                   textAlign: TextAlign.center,
                                 ),
                               ),
@@ -200,6 +222,7 @@ class _DreamCardState extends State<DreamCard>
                         // Content section
                         Expanded(
                           child: Column(
+                            mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               AnimatedDefaultTextStyle(
@@ -217,19 +240,23 @@ class _DreamCardState extends State<DreamCard>
                                 ),
                               ),
                               const SizedBox(height: 8),
-                              AnimatedDefaultTextStyle(
-                                duration: const Duration(milliseconds: 300),
-                                style: TextStyle(
-                                  color: _isHovered
-                                      ? AppColors.white.withAlpha(215)
-                                      : AppColors.white.withAlpha(190),
-                                  fontSize: 16,
-                                  height: 1.4,
-                                ),
-                                child: Text(
-                                  widget.dream.description.length > 100
-                                      ? '${widget.dream.description.substring(0, 100)}...'
-                                      : widget.dream.description,
+                              Flexible(
+                                child: AnimatedDefaultTextStyle(
+                                  duration: const Duration(milliseconds: 300),
+                                  style: TextStyle(
+                                    color: _isHovered
+                                        ? AppColors.white.withAlpha(215)
+                                        : AppColors.white.withAlpha(190),
+                                    fontSize: 16,
+                                    height: 1.4,
+                                  ),
+                                  child: Text(
+                                    widget.dream.description.length > 100
+                                        ? '${widget.dream.description.substring(0, 100)}...'
+                                        : widget.dream.description,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
                               ),
                             ],
