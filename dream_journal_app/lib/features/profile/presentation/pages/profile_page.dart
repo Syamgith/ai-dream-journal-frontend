@@ -208,7 +208,7 @@ class ProfilePage extends ConsumerWidget {
             Center(
               child: SizedBox(
                 width: 300,
-                height: 36,
+                //height: 36,
                 child: AuthButton(
                   text: 'Convert to Regular Account',
                   onPressed: () => _showConvertGuestDialog(context, ref),
