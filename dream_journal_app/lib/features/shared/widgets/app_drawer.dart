@@ -22,7 +22,7 @@ class AppDrawer extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 const Text(
-                  'Dream Journal',
+                  'Dreami Diary',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 24,
