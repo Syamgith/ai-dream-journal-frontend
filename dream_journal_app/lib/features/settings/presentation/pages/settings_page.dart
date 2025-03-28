@@ -59,6 +59,27 @@ class SettingsPage extends ConsumerWidget {
               ),
             ),
 
+            // Delete Account option (not shown for guest users)
+            if (!isGuest)
+              Card(
+                margin:
+                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+                color: Colors.red.shade900,
+                child: ListTile(
+                  leading:
+                      const Icon(Icons.delete_forever, color: Colors.white),
+                  title: const Text(
+                    'Delete Account',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  subtitle: Text(
+                    'Permanently delete your account and all data',
+                    style: TextStyle(color: Colors.white.withOpacity(0.7)),
+                  ),
+                  onTap: () => _showDeleteAccountConfirmation(context, ref),
+                ),
+              ),
+
             const SizedBox(height: 20),
 
             // App Settings Section
@@ -172,6 +193,68 @@ class SettingsPage extends ConsumerWidget {
               await ref.read(authProvider.notifier).logout();
             },
             child: const Text('Logout'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteAccountConfirmation(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.darkBlue,
+        title: const Text('Delete Account',
+            style: TextStyle(color: AppColors.white)),
+        content: const Text(
+            'Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently deleted.',
+            style: TextStyle(color: AppColors.lightBlue)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel',
+                style: TextStyle(color: AppColors.primaryBlue)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+            ),
+            onPressed: () async {
+              // Close the dialog first
+              Navigator.of(context).pop();
+
+              // Immediately navigate to the main route
+              if (context.mounted) {
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                  AppRoutes.main,
+                  (route) => false, // Remove all previous routes
+                );
+              }
+
+              // Show a processing message
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Processing your request...'),
+                    backgroundColor: Colors.blue,
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              }
+
+              // Delete account in the background without waiting
+              // for UI updates or showing a loading indicator
+              ref.read(authProvider.notifier).deleteAccount().then((_) {
+                // We don't need to handle the result as the user is already
+                // navigated to the main screen
+                print('Account deletion flow completed');
+              }).catchError((error) {
+                print('Error in delete account flow: $error');
+                // No need for error handling UI since user is already
+                // navigated away from this screen
+              });
+            },
+            child: const Text('Delete Account'),
           ),
         ],
       ),

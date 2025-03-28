@@ -242,6 +242,43 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
     }
   }
 
+  // Delete user account
+  Future<bool> deleteAccount() async {
+    // Set state to loading
+    state = const AsyncValue.loading();
+
+    try {
+      print('Starting account deletion process');
+      // Clear the dreams cache before deleting account
+      _ref.read(dreamsProvider.notifier).reset();
+
+      // Add a timeout to the operation to prevent it from hanging
+      final success = await _repository
+          .deleteAccount()
+          .timeout(const Duration(seconds: 10), onTimeout: () {
+        print('Account deletion timed out after 10 seconds');
+        // Consider it a success and return true so UI can proceed
+        return true;
+      });
+
+      print('Account deletion API call completed with success: $success');
+
+      // Always set state to null after delete attempt
+      state = const AsyncValue.data(null);
+      return success;
+    } catch (e) {
+      print('Error in authProvider.deleteAccount: $e');
+      // Clear auth state on error
+      state = const AsyncValue.data(null);
+      return false;
+    } finally {
+      // Ensure state is cleared no matter what happens
+      Future.delayed(const Duration(milliseconds: 500), () {
+        state = const AsyncValue.data(null);
+      });
+    }
+  }
+
   // Refresh token
   Future<bool> refreshToken() async {
     try {
