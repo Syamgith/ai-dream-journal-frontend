@@ -15,7 +15,7 @@ class SettingsPage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
-        backgroundColor: AppColors.primaryBlue,
+        backgroundColor: AppColors.background,
       ),
       body: Container(
         color: AppColors.background,
