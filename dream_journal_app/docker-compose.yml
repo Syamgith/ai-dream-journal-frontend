@@ -1,0 +1,14 @@
+version: "3.8"
+services:
+  dreamidiaryflutter:
+    image: dreamidiaryflutter-image
+    container_name: dreamidiaryflutter-container
+    build: .
+    ports:
+      - "3001:80" # Map host port 3001 to container port 80
+    networks:
+      - web-network
+
+networks:
+  web-network:
+    driver: bridge
