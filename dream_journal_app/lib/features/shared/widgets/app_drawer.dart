@@ -73,14 +73,14 @@ class AppDrawer extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.only(bottom: 16.0),
             child: ListTile(
-              leading: const Icon(Icons.logout, color: Colors.white),
+              leading: const Icon(Icons.settings, color: Colors.white),
               title: const Text(
-                'Logout',
+                'Settings',
                 style: TextStyle(color: Colors.white),
               ),
               onTap: () {
                 Navigator.pop(context); // Close the drawer
-                _showLogoutConfirmation(context, ref);
+                Navigator.pushNamed(context, AppRoutes.settings);
               },
             ),
           ),

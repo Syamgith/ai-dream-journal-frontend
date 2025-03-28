@@ -7,6 +7,7 @@ import 'features/auth/presentation/pages/login_page.dart';
 import 'features/auth/presentation/pages/register_page.dart';
 import 'features/feedback/presentation/pages/feedback_page.dart';
 import 'features/about/presentation/pages/about_page.dart';
+import 'features/settings/presentation/pages/settings_page.dart';
 import 'features/shared/screens/main_screen.dart';
 
 class AppRoutes {
@@ -20,6 +21,7 @@ class AppRoutes {
   static const String register = '/register';
   static const String feedback = '/feedback';
   static const String about = '/about';
+  static const String settings = '/settings';
 
   static Map<String, WidgetBuilder> getRoutes() {
     return {
@@ -32,6 +34,7 @@ class AppRoutes {
       register: (context) => const RegisterPage(),
       feedback: (context) => const FeedbackPage(),
       about: (context) => const AboutPage(),
+      settings: (context) => const SettingsPage(),
     };
   }
 }
