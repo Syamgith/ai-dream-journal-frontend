@@ -112,8 +112,8 @@ class _AddDreamButtonState extends State<_AddDreamButton>
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.primaryBlue
-                        .withOpacity(_isHovered ? 0.7 : 0.45),
+                    color:
+                        AppColors.primaryBlue.withAlpha(_isHovered ? 179 : 115),
                     blurRadius: _isHovered ? 20 : 15,
                     spreadRadius: _isHovered ? 3 : 2,
                   ),
@@ -131,7 +131,7 @@ class _AddDreamButtonState extends State<_AddDreamButton>
                       shape: BoxShape.circle,
                       color: const Color(0xFF00B0FF), // Bright electric blue
                       border: Border.all(
-                        color: Colors.white.withOpacity(_isHovered ? 0.6 : 0.3),
+                        color: Colors.white.withAlpha(_isHovered ? 153 : 77),
                         width: 2,
                       ),
                     ),

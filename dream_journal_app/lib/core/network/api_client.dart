@@ -1,7 +1,5 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../config/config.dart';
-import '../auth/auth_service.dart';
 import '../../features/auth/data/repositories/auth_repository.dart';
 import 'token_interceptor.dart';
 

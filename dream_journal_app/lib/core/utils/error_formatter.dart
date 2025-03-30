@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 
 class ErrorFormatter {
   /// Formats error messages from various sources to be user-friendly
@@ -23,7 +24,7 @@ class ErrorFormatter {
         }
       } catch (e) {
         // If JSON parsing fails, fall back to standard message
-        print('Error parsing JSON from error message: $e');
+        debugPrint('Error parsing JSON from error message: $e');
       }
     }
 

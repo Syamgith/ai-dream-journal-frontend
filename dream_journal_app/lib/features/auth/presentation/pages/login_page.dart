@@ -5,12 +5,11 @@ import '../widgets/auth_button.dart';
 import '../widgets/auth_text_field.dart';
 import '../widgets/google_sign_in_button.dart';
 import 'register_page.dart';
-import '../../../dreams/providers/dreams_provider.dart';
 import '../../../../core/widgets/error_message_display.dart';
 import '../../../../core/utils/error_formatter.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
-  const LoginPage({Key? key}) : super(key: key);
+  const LoginPage({super.key});
 
   @override
   ConsumerState<LoginPage> createState() => _LoginPageState();

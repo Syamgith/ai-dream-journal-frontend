@@ -165,19 +165,25 @@ class DreamDetailsPage extends ConsumerWidget {
       // Floating edit button at the bottom of the screen
       floatingActionButton: _DreamEditButton(
         onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => AddDreamPage(dream: dream),
-            ),
-          ).then((_) {
+          // Navigate and refresh with context checking
+          void navigateAndRefresh(BuildContext currentContext) async {
+            await Navigator.push(
+              currentContext,
+              MaterialPageRoute(
+                builder: (context) => AddDreamPage(dream: dream),
+              ),
+            );
+
             // Refresh the dream when coming back from edit page
-            if (dream.id != null) {
+            if (dream.id != null && currentContext.mounted) {
               ref.read(dreamsProvider.notifier).refreshDream(dream.id!);
               // Pop back to the dreams list after refreshing
-              Navigator.pop(context);
+              Navigator.pop(currentContext);
             }
-          });
+          }
+
+          // Execute the navigation function with the current context
+          navigateAndRefresh(context);
         },
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
@@ -315,13 +321,12 @@ class _AnimatedActionIconState extends State<_AnimatedActionIcon>
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color:
-                  _isHovered ? Colors.red.withOpacity(0.2) : Colors.transparent,
+              color: _isHovered ? Colors.red.withAlpha(51) : Colors.transparent,
               borderRadius: BorderRadius.circular(20),
               boxShadow: _isHovered
                   ? [
                       BoxShadow(
-                        color: Colors.red.withOpacity(0.4),
+                        color: Colors.red.withAlpha(102),
                         blurRadius: 8,
                         spreadRadius: 1,
                       )
@@ -389,8 +394,8 @@ class _DreamEditButtonState extends State<_DreamEditButton>
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              AppColors.darkBlue.withOpacity(_isHovered ? 0.9 : 0.7),
-              AppColors.primaryBlue.withOpacity(_isHovered ? 0.9 : 0.7),
+              AppColors.darkBlue.withAlpha(_isHovered ? 230 : 179),
+              AppColors.primaryBlue.withAlpha(_isHovered ? 230 : 179),
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -398,7 +403,7 @@ class _DreamEditButtonState extends State<_DreamEditButton>
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: AppColors.primaryBlue.withOpacity(_isHovered ? 0.6 : 0.2),
+              color: AppColors.primaryBlue.withAlpha(_isHovered ? 153 : 51),
               blurRadius: _isHovered ? 16 : 8,
               spreadRadius: _isHovered ? 1 : 0,
             ),
@@ -415,14 +420,14 @@ class _DreamEditButtonState extends State<_DreamEditButton>
               children: [
                 Icon(
                   Icons.edit_outlined,
-                  color: AppColors.white.withOpacity(0.9),
+                  color: AppColors.white.withAlpha(230),
                   size: 20,
                 ),
                 const SizedBox(width: 8),
                 Text(
                   'Edit Dream',
                   style: TextStyle(
-                    color: AppColors.white.withOpacity(0.9),
+                    color: AppColors.white.withAlpha(230),
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
                   ),

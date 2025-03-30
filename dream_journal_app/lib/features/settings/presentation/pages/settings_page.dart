@@ -52,7 +52,7 @@ class SettingsPage extends ConsumerWidget {
                       ? 'Warning: Your dreams will be permanently deleted!'
                       : 'Sign out of your account',
                   style: TextStyle(
-                    color: isGuest ? Colors.red : Colors.white.withOpacity(0.7),
+                    color: isGuest ? Colors.red : Colors.white.withAlpha(179),
                   ),
                 ),
                 onTap: () => _showLogoutConfirmation(context, ref, isGuest),
@@ -74,7 +74,7 @@ class SettingsPage extends ConsumerWidget {
                   ),
                   subtitle: Text(
                     'Permanently delete your account and all data',
-                    style: TextStyle(color: Colors.white.withOpacity(0.7)),
+                    style: TextStyle(color: Colors.white.withAlpha(179)),
                   ),
                   onTap: () => _showDeleteAccountConfirmation(context, ref),
                 ),
@@ -108,7 +108,7 @@ class SettingsPage extends ConsumerWidget {
                 ),
                 subtitle: Text(
                   'Dark Mode',
-                  style: TextStyle(color: Colors.white.withOpacity(0.7)),
+                  style: TextStyle(color: Colors.white.withAlpha(179)),
                 ),
                 onTap: () {
                   // Theme functionality to be implemented in the future
@@ -135,7 +135,7 @@ class SettingsPage extends ConsumerWidget {
                 ),
                 subtitle: Text(
                   'Manage notification settings',
-                  style: TextStyle(color: Colors.white.withOpacity(0.7)),
+                  style: TextStyle(color: Colors.white.withAlpha(179)),
                 ),
                 onTap: () {
                   // Notification settings to be implemented in the future
@@ -247,9 +247,9 @@ class SettingsPage extends ConsumerWidget {
               ref.read(authProvider.notifier).deleteAccount().then((_) {
                 // We don't need to handle the result as the user is already
                 // navigated to the main screen
-                print('Account deletion flow completed');
+                debugPrint('Account deletion flow completed');
               }).catchError((error) {
-                print('Error in delete account flow: $error');
+                debugPrint('Error in delete account flow: $error');
                 // No need for error handling UI since user is already
                 // navigated away from this screen
               });

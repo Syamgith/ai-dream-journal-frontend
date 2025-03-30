@@ -39,7 +39,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       await ref.read(dreamsProvider.notifier).loadDreams(forceRefresh: true);
     } catch (e) {
       // Log the error but don't show it to the user
-      print('Error refreshing dreams data: $e');
+      debugPrint('Error refreshing dreams data: $e');
     }
   }
 

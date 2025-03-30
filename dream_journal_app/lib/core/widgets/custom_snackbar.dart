@@ -85,7 +85,8 @@ class _CustomSnackbarContentState extends State<_CustomSnackbarContent>
             ),
             boxShadow: [
               BoxShadow(
-                color: _getShadowColor().withOpacity(_glowAnimation.value),
+                color: _getShadowColor()
+                    .withAlpha((_glowAnimation.value * 255).toInt()),
                 blurRadius: 15,
                 spreadRadius: 1,
                 offset: const Offset(0, 4),

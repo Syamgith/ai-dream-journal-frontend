@@ -1,4 +1,5 @@
 import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart';
 import '../auth/auth_service.dart';
 import '../../features/auth/data/repositories/auth_repository.dart';
 
@@ -33,7 +34,7 @@ class TokenInterceptor {
         }
       } catch (e) {
         // Log the error but don't throw it to avoid disrupting the app flow
-        print('Error during token refresh in interceptor: $e');
+        debugPrint('Error during token refresh in interceptor: $e');
       }
     }
 

@@ -10,14 +10,14 @@ class AuthButton extends StatelessWidget {
   final Color? borderColor;
 
   const AuthButton({
-    Key? key,
+    super.key,
     required this.text,
     required this.onPressed,
     this.isLoading = false,
     this.backgroundColor = AppColors.primaryBlue,
     this.textColor = AppColors.white,
     this.borderColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -4,8 +4,6 @@ import 'dart:math' show Random;
 import '../../../../core/constants/app_colors.dart';
 import '../../providers/dreams_provider.dart';
 import '../widgets/dream_card.dart';
-import 'package:flutter/foundation.dart';
-import '../pages/add_dream_page.dart';
 //import '../widgets/dream_icon.dart';
 
 class DreamsPage extends ConsumerWidget {
@@ -171,14 +169,14 @@ class _DreamFABState extends State<_DreamFAB>
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    AppColors.primaryBlue.withOpacity(0.9),
-                    AppColors.primaryBlue.withOpacity(0.6),
+                    AppColors.primaryBlue.withAlpha(230),
+                    AppColors.primaryBlue.withAlpha(153),
                   ],
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.primaryBlue
-                        .withOpacity(_isHovered ? 0.3 : 0.2),
+                    color:
+                        AppColors.primaryBlue.withAlpha(_isHovered ? 77 : 51),
                     blurRadius: _isHovered ? 12 : 8,
                     spreadRadius: _isHovered ? 1 : 0,
                   ),
@@ -193,7 +191,7 @@ class _DreamFABState extends State<_DreamFAB>
                   child: Center(
                     child: Icon(
                       Icons.add,
-                      color: Colors.white.withOpacity(0.95),
+                      color: Colors.white.withAlpha(242),
                       size: 28,
                     ),
                   ),
@@ -263,15 +261,18 @@ class _AddDreamButtonState extends State<_AddDreamButton>
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [
+                  colors: const [
                     AppColors.darkBlue,
                     AppColors.primaryBlue,
                   ],
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.primaryBlue
-                        .withOpacity(_isHovered ? 0.5 : 0.3),
+                    color: _isHovered
+                        ? const Color(
+                            0xFF8066CE) // AppColors.primaryBlue.withAlpha(128)
+                        : const Color(
+                            0xFF4D66CE), // AppColors.primaryBlue.withAlpha(77)
                     blurRadius: _isHovered ? 16 : 10,
                     spreadRadius: _isHovered ? 2 : 1,
                   ),
@@ -282,12 +283,12 @@ class _AddDreamButtonState extends State<_AddDreamButton>
                 child: InkWell(
                   onTap: widget.onPressed,
                   borderRadius: BorderRadius.circular(30),
-                  splashColor: Colors.white24,
+                  splashColor: const Color(0x3DFFFFFF), // Colors.white24
                   child: Stack(
                     children: [
                       // Star background
                       if (_isHovered)
-                        Positioned.fill(
+                        const Positioned.fill(
                           child: CustomPaint(
                             painter: _StarryBackgroundPainter(),
                           ),
@@ -297,11 +298,11 @@ class _AddDreamButtonState extends State<_AddDreamButton>
                       Center(
                         child: Stack(
                           alignment: Alignment.center,
-                          children: [
+                          children: const [
                             // Plus sign
                             Icon(
                               Icons.add,
-                              color: Colors.white.withOpacity(0.9),
+                              color: Color(0xFFE6FFFFFF),
                               size: 30,
                             ),
 
@@ -309,26 +310,31 @@ class _AddDreamButtonState extends State<_AddDreamButton>
                             Positioned(
                               top: -4,
                               right: -4,
-                              child: Container(
+                              child: SizedBox(
                                 height: 16,
                                 width: 16,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  gradient: RadialGradient(
-                                    colors: [
-                                      Colors.white.withOpacity(0.9),
-                                      AppColors.lightBlue.withOpacity(0.7),
-                                    ],
-                                    center: const Alignment(0.3, -0.3),
-                                    radius: 0.8,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.white.withOpacity(0.5),
-                                      blurRadius: 6,
-                                      spreadRadius: 1,
+                                child: DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    gradient: RadialGradient(
+                                      colors: [
+                                        Color(
+                                            0xFFE6FFFFFF), // Colors.white.withAlpha(230)
+                                        Color(
+                                            0xFFB3B5C6), // AppColors.lightBlue.withAlpha(179)
+                                      ],
+                                      center: Alignment(0.3, -0.3),
+                                      radius: 0.8,
                                     ),
-                                  ],
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Color(
+                                            0xFF80FFFFFF), // Colors.white.withAlpha(128)
+                                        blurRadius: 6,
+                                        spreadRadius: 1,
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
@@ -344,12 +350,14 @@ class _AddDreamButtonState extends State<_AddDreamButton>
                           child: Container(
                             height: 8,
                             width: 8,
-                            decoration: BoxDecoration(
+                            decoration: const BoxDecoration(
                               shape: BoxShape.circle,
-                              color: Colors.white.withOpacity(0.7),
+                              color: const Color(
+                                  0xFFB3FFFFFF), // Colors.white.withAlpha(179)
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.white.withOpacity(0.5),
+                                  color: const Color(
+                                      0xFF80FFFFFF), // Colors.white.withAlpha(128)
                                   blurRadius: 6,
                                   spreadRadius: 2,
                                 ),
@@ -371,11 +379,13 @@ class _AddDreamButtonState extends State<_AddDreamButton>
 
 // Custom painter for the starry background in the add button
 class _StarryBackgroundPainter extends CustomPainter {
+  const _StarryBackgroundPainter();
+
   @override
   void paint(Canvas canvas, Size size) {
     final Random random = Random(12); // Different seed from other stars
     final paint = Paint()
-      ..color = Colors.white.withOpacity(0.4)
+      ..color = const Color(0xFF66FFFFFF) // Colors.white.withAlpha(102)
       ..style = PaintingStyle.fill;
 
     // Draw tiny stars
@@ -416,18 +426,20 @@ class _HoverTextState extends State<_HoverText> {
       child: AnimatedDefaultTextStyle(
         duration: const Duration(milliseconds: 200),
         style: TextStyle(
-          color: _isHovered ? Colors.white : Colors.white70,
+          color: _isHovered
+              ? const Color(0xFFFFFFFF)
+              : const Color(0xB3FFFFFF), // Colors.white or Colors.white70
           fontSize: 16,
           letterSpacing: _isHovered ? 0.5 : 0,
           shadows: _isHovered
-              ? [
+              ? const [
                   BoxShadow(
-                    color: Colors.white.withOpacity(0.3),
+                    color: Color(0xFF26FFFFFF), // Colors.white.withAlpha(38)
                     blurRadius: 8,
                     spreadRadius: 1,
                   )
                 ]
-              : [],
+              : const [],
         ),
         child: MouseRegion(
           onEnter: (_) => setState(() => _isHovered = true),

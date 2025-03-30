@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../routes.dart';
-import '../../../features/auth/presentation/providers/auth_provider.dart';
 
 class AppDrawer extends ConsumerWidget {
   const AppDrawer({super.key});
@@ -33,7 +32,7 @@ class AppDrawer extends ConsumerWidget {
                 Text(
                   'Explore your dreams',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.8),
+                    color: Colors.white.withAlpha(204),
                     fontSize: 16,
                   ),
                 ),
@@ -83,44 +82,6 @@ class AppDrawer extends ConsumerWidget {
                 Navigator.pushNamed(context, AppRoutes.settings);
               },
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showLogoutConfirmation(BuildContext context, WidgetRef ref) {
-    // Check if the current user is a guest
-    final authState = ref.read(authProvider);
-    final isGuest = authState.value?.isGuest ?? false;
-    // Capture the logout function before showing the dialog
-    final logout = ref.read(authProvider.notifier).logout;
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.darkBlue,
-        title: const Text('Logout', style: TextStyle(color: AppColors.white)),
-        content: Text(
-            isGuest
-                ? 'Are you sure you want to logout? Your dreams will be permanently deleted!'
-                : 'Are you sure you want to logout?',
-            style: const TextStyle(color: AppColors.lightBlue)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel',
-                style: TextStyle(color: AppColors.primaryBlue)),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: isGuest ? Colors.red : AppColors.primaryBlue,
-            ),
-            onPressed: () {
-              Navigator.of(context).pop();
-              logout(); // Use the captured function instead of ref.read
-            },
-            child: const Text('Logout'),
           ),
         ],
       ),

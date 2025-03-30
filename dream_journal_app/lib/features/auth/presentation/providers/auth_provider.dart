@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/foundation.dart';
 import '../../../../core/auth/auth_service.dart';
-import '../../../../core/network/api_provider.dart';
 import '../../data/repositories/auth_repository.dart';
 import '../../domain/models/user.dart';
 import '../../../dreams/providers/dreams_provider.dart';
@@ -42,7 +42,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
               }
             } catch (e) {
               // If getting user with existing token fails, try refreshing the token
-              print('Error getting user with existing token: $e');
+              debugPrint('Error getting user with existing token: $e');
             }
 
             // Attempt to refresh the token
@@ -72,7 +72,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
           } catch (e) {
             // Error during authentication process
             // We'll set state to null but won't delete tokens
-            print('Error during authentication check: $e');
+            debugPrint('Error during authentication check: $e');
             state = const AsyncValue.data(null);
             // Reset dreams cache due to authentication error
             _ref.read(dreamsProvider.notifier).reset();
@@ -89,7 +89,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
       }
     } catch (e) {
       // Error checking auth status
-      print('Error checking auth status: $e');
+      debugPrint('Error checking auth status: $e');
       state = AsyncValue.error(e, StackTrace.current);
       // Reset dreams cache due to auth status error
       _ref.read(dreamsProvider.notifier).reset();
@@ -223,7 +223,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
       }
     } catch (e) {
       // Log the error but don't rethrow it to avoid disrupting the login flow
-      print('Error refreshing dreams data: $e');
+      debugPrint('Error refreshing dreams data: $e');
     }
   }
 
@@ -248,7 +248,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
     state = const AsyncValue.loading();
 
     try {
-      print('Starting account deletion process');
+      debugPrint('Starting account deletion process');
       // Clear the dreams cache before deleting account
       _ref.read(dreamsProvider.notifier).reset();
 
@@ -256,18 +256,18 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
       final success = await _repository
           .deleteAccount()
           .timeout(const Duration(seconds: 10), onTimeout: () {
-        print('Account deletion timed out after 10 seconds');
+        debugPrint('Account deletion timed out after 10 seconds');
         // Consider it a success and return true so UI can proceed
         return true;
       });
 
-      print('Account deletion API call completed with success: $success');
+      debugPrint('Account deletion API call completed with success: $success');
 
       // Always set state to null after delete attempt
       state = const AsyncValue.data(null);
       return success;
     } catch (e) {
-      print('Error in authProvider.deleteAccount: $e');
+      debugPrint('Error in authProvider.deleteAccount: $e');
       // Clear auth state on error
       state = const AsyncValue.data(null);
       return false;
@@ -285,7 +285,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
       final newToken = await _repository.refreshToken();
       return newToken != null;
     } catch (e) {
-      print('Error refreshing token in AuthNotifier: $e');
+      debugPrint('Error refreshing token in AuthNotifier: $e');
       // Don't throw the error, just return false to indicate refresh failed
       return false;
     }

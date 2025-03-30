@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/models/dream_entry.dart';
 import '../data/repositories/dream_repository.dart';
+import 'package:flutter/foundation.dart';
 
 final dreamRepositoryProvider = Provider((ref) => DreamRepository());
 
@@ -72,7 +73,7 @@ class DreamsNotifier extends StateNotifier<List<DreamEntry>> {
       }
     } catch (e) {
       // Log the error but keep the current state
-      print('Error loading dreams: $e');
+      debugPrint('Error loading dreams: $e');
     } finally {
       // Set loading state to false when done
       _ref.read(dreamsLoadingProvider.notifier).state = false;
@@ -105,12 +106,7 @@ class DreamsNotifier extends StateNotifier<List<DreamEntry>> {
   // Update a dream without triggering a full reload
   Future<void> updateDream(DreamEntry dream) async {
     try {
-      // Don't show loading indicator for updates to avoid UI flicker
-      final bool showLoading = false;
-      if (showLoading) {
-        _ref.read(dreamsLoadingProvider.notifier).state = true;
-      }
-
+      // Using a direct update approach without loading indicator to avoid UI flicker
       await _repository.updateDream(dream);
 
       // Update only the specific dream in the list
@@ -119,6 +115,7 @@ class DreamsNotifier extends StateNotifier<List<DreamEntry>> {
           if (item.id == dream.id) dream else item
       ];
     } finally {
+      // Ensure loading state is false when done
       _ref.read(dreamsLoadingProvider.notifier).state = false;
     }
   }
@@ -128,17 +125,13 @@ class DreamsNotifier extends StateNotifier<List<DreamEntry>> {
     if (id == null) return;
 
     try {
-      // Don't show loading indicator for deletions to avoid UI flicker
-      final bool showLoading = false;
-      if (showLoading) {
-        _ref.read(dreamsLoadingProvider.notifier).state = true;
-      }
-
+      // Using a direct delete approach without loading indicator to avoid UI flicker
       await _repository.deleteDream(id);
 
       // Remove the specific dream from the list
       state = state.where((dream) => dream.id != id).toList();
     } finally {
+      // Ensure loading state is false when done
       _ref.read(dreamsLoadingProvider.notifier).state = false;
     }
   }
@@ -162,7 +155,7 @@ class DreamsNotifier extends StateNotifier<List<DreamEntry>> {
           if (item.id == id) updatedDream else item
       ];
     } catch (e) {
-      print('Error refreshing dream: $e');
+      debugPrint('Error refreshing dream: $e');
     }
   }
 }

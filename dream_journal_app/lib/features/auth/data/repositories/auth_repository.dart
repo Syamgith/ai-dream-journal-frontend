@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:io' show Platform;
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb, debugPrint;
 import 'package:http/http.dart' as http;
 import 'package:google_sign_in/google_sign_in.dart';
 import '../../../../core/config/config.dart';
@@ -16,8 +16,8 @@ class AuthRepository {
 
   // Initialize Google Sign-In based on platform
   GoogleSignIn _initGoogleSignIn() {
-    print("web client id: ");
-    print(AuthConfig.webClientId);
+    debugPrint("web client id: ");
+    debugPrint(AuthConfig.webClientId);
     if (kIsWeb) {
       // Web platform
       return GoogleSignIn(
@@ -194,10 +194,10 @@ class AuthRepository {
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
 
-      print('Google User: $googleUser');
-      print('Google Auth: $googleAuth');
-      print('ID Token: ${googleAuth.idToken}');
-      print('Access Token: ${googleAuth.accessToken}');
+      debugPrint('Google User: $googleUser');
+      debugPrint('Google Auth: $googleAuth');
+      debugPrint('ID Token: ${googleAuth.idToken}');
+      debugPrint('Access Token: ${googleAuth.accessToken}');
 
       // Use idToken if available, otherwise fall back to accessToken
       final tokenToUse = googleAuth.idToken ?? googleAuth.accessToken;
@@ -276,7 +276,7 @@ class AuthRepository {
             return;
           }
         } catch (e) {
-          print('Error parsing user data during logout: $e');
+          debugPrint('Error parsing user data during logout: $e');
           // Continue with regular logout
         }
       }
@@ -284,7 +284,7 @@ class AuthRepository {
       // Sign out from Google if the user signed in with Google
       await _googleSignIn.signOut();
     } catch (e) {
-      print('Error signing out from Google: $e');
+      debugPrint('Error signing out from Google: $e');
       // Continue with logout even if Google sign-out fails
     }
 
@@ -305,14 +305,14 @@ class AuthRepository {
           );
 
           // Log response for debugging
-          print('Guest user logout response: ${response.statusCode}');
+          debugPrint('Guest user logout response: ${response.statusCode}');
 
           if (response.statusCode != 200 && response.statusCode != 204) {
-            print('Failed to delete guest user: ${response.body}');
+            debugPrint('Failed to delete guest user: ${response.body}');
           }
           await AuthService.clearAllAuthData();
         } catch (e) {
-          print('Error calling guest logout API: $e');
+          debugPrint('Error calling guest logout API: $e');
           // Continue with regular logout even if the API call fails
         }
       }
@@ -321,13 +321,13 @@ class AuthRepository {
       try {
         await _googleSignIn.signOut();
       } catch (e) {
-        print('Error signing out from Google: $e');
+        debugPrint('Error signing out from Google: $e');
       }
 
       // Clear local auth data
       await AuthService.clearAllAuthData();
     } catch (e) {
-      print('Error during guest user logout: $e');
+      debugPrint('Error during guest user logout: $e');
       // Still clear auth data even if there was an error
       await AuthService.clearAllAuthData();
     }
@@ -362,13 +362,14 @@ class AuthRepository {
       } else {
         // Don't automatically logout on refresh failure
         // Just return null to indicate refresh failed
-        print('Token refresh failed with status code: ${response.statusCode}');
+        debugPrint(
+            'Token refresh failed with status code: ${response.statusCode}');
         return null;
       }
     } catch (e) {
       // Don't automatically logout on refresh failure
       // Just return null to indicate refresh failed
-      print('Error refreshing token: $e');
+      debugPrint('Error refreshing token: $e');
       return null;
     }
   }
@@ -384,7 +385,7 @@ class AuthRepository {
         try {
           return User.fromJson(jsonDecode(userData));
         } catch (e) {
-          print('Error parsing stored user data: $e');
+          debugPrint('Error parsing stored user data: $e');
           return null;
         }
       }
@@ -422,7 +423,7 @@ class AuthRepository {
             try {
               return User.fromJson(jsonDecode(userData));
             } catch (e) {
-              print('Error parsing stored user data: $e');
+              debugPrint('Error parsing stored user data: $e');
               return null;
             }
           }
@@ -435,7 +436,7 @@ class AuthRepository {
           try {
             return User.fromJson(jsonDecode(userData));
           } catch (e) {
-            print('Error parsing stored user data: $e');
+            debugPrint('Error parsing stored user data: $e');
             throw Exception('Failed to get user information: ${response.body}');
           }
         }
@@ -448,7 +449,7 @@ class AuthRepository {
         try {
           return User.fromJson(jsonDecode(userData));
         } catch (e2) {
-          print('Error parsing stored user data: $e2');
+          debugPrint('Error parsing stored user data: $e2');
           throw Exception('Error getting user information: $e');
         }
       }
@@ -505,16 +506,16 @@ class AuthRepository {
     if (token == null) {
       // If token is null, clear auth data anyway and return success
       await AuthService.clearAllAuthData();
-      print('No token found, cleared auth data and returning success');
+      debugPrint('No token found, cleared auth data and returning success');
       return true;
     }
 
     try {
-      print('Attempting to delete account with token');
+      debugPrint('Attempting to delete account with token');
 
       // First clear the auth data immediately to ensure logout works
       await AuthService.clearAllAuthData();
-      print('Auth data cleared preemptively');
+      debugPrint('Auth data cleared preemptively');
 
       // Then make the API call, with timeout
       final response = await http.delete(
@@ -525,19 +526,19 @@ class AuthRepository {
         },
       ).timeout(const Duration(seconds: 8), onTimeout: () {
         // Create a fake response on timeout
-        print('API call timed out - assuming success');
+        debugPrint('API call timed out - assuming success');
         return http.Response(
             '{"message":"Request timed out but account is considered deleted"}',
             200);
       });
 
-      print('Delete account response status code: ${response.statusCode}');
-      print('Delete account response body: ${response.body}');
+      debugPrint('Delete account response status code: ${response.statusCode}');
+      debugPrint('Delete account response body: ${response.body}');
 
       // Always consider it a success, as we've already cleared auth data
       return true;
     } catch (e) {
-      print('Error during account deletion API call: $e');
+      debugPrint('Error during account deletion API call: $e');
       // We've already cleared auth data at the beginning, so just return success
       return true;
     }

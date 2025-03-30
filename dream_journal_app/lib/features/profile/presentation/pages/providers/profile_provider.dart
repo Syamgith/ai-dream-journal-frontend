@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../../../../core/config/config.dart';
 import '../../../../../core/auth/auth_service.dart';
+import 'package:flutter/foundation.dart';
 
 class ProfileState {
   final String name;
@@ -102,7 +103,6 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
     final today = DateTime.now();
     final todayFormatted = DateTime(today.year, today.month, today.day);
 
-    bool hasDreamToday = false;
     int streak = 0;
     DateTime? lastDate;
 
@@ -119,7 +119,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
         streak = 1;
 
         if (dreamDate.isAtSameMomentAs(todayFormatted)) {
-          hasDreamToday = true;
+          // Dream is from today
         } else {
           // If first dream is not today, check if it's yesterday
           final yesterday = todayFormatted.subtract(const Duration(days: 1));
@@ -193,7 +193,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
         throw Exception('Failed to update user name: ${response.body}');
       }
     } catch (e) {
-      print('Error updating user name: $e');
+      debugPrint('Error updating user name: $e');
       rethrow;
     }
   }

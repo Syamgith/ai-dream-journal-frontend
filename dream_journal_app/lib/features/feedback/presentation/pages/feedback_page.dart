@@ -98,7 +98,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
                 maxLines: 5,
                 decoration: InputDecoration(
                   hintText: 'Enter your feedback here...',
-                  hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+                  hintStyle: TextStyle(color: Colors.white.withAlpha(128)),
                   filled: true,
                   fillColor: AppColors.darkBlue,
                   border: OutlineInputBorder(

@@ -8,11 +8,11 @@ class ErrorMessage extends StatelessWidget {
   final bool formatMessage;
 
   const ErrorMessage({
-    Key? key,
+    super.key,
     required this.message,
     this.onRetry,
     this.formatMessage = true,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +36,7 @@ class ErrorMessage extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: AppColors.primaryBlue.withOpacity(0.4),
+                color: AppColors.primaryBlue.withAlpha(102),
                 blurRadius: 15,
                 spreadRadius: 1,
                 offset: const Offset(0, 4),

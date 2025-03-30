@@ -8,7 +8,7 @@ import '../../../../features/shared/widgets/error_message.dart';
 import '../../../../core/utils/error_formatter.dart';
 
 class AuthWrapper extends ConsumerWidget {
-  const AuthWrapper({Key? key}) : super(key: key);
+  const AuthWrapper({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

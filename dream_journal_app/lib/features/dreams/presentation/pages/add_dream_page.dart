@@ -472,7 +472,9 @@ class _AddDreamPageState extends ConsumerState<AddDreamPage>
               surface: AppColors.darkBlue,
               onSurface: AppColors.white,
             ),
-            dialogBackgroundColor: AppColors.background,
+            dialogTheme: const DialogTheme(
+              backgroundColor: AppColors.background,
+            ),
             textButtonTheme: TextButtonThemeData(
               style: TextButton.styleFrom(
                 foregroundColor: AppColors.white,
@@ -605,8 +607,8 @@ class DreamStarsPainter extends CustomPainter {
     final centerPaint = Paint()
       ..shader = RadialGradient(
         colors: [
-          Colors.white.withOpacity(0.8),
-          color.withOpacity(0.0),
+          Colors.white.withAlpha(204), // 0.8 * 255 ≈ 204
+          color.withAlpha(0), // 0.0 * 255 = 0
         ],
       ).createShader(Rect.fromCircle(center: center, radius: radius * 0.6));
 
@@ -669,13 +671,12 @@ class _DreamSaveButtonState extends State<_DreamSaveButton>
           gradient: LinearGradient(
             colors: widget.isHomeButton
                 ? [
-                    AppColors.primaryBlue.withOpacity(_isHovered ? 0.9 : 0.7),
-                    AppColors.lightBlue.withOpacity(_isHovered ? 0.9 : 0.7),
+                    AppColors.primaryBlue.withAlpha(_isHovered ? 230 : 179),
+                    AppColors.lightBlue.withAlpha(_isHovered ? 230 : 179),
                   ]
                 : [
-                    const Color(0xFF2C3E50)
-                        .withOpacity(_isHovered ? 0.95 : 0.85),
-                    AppColors.primaryBlue.withOpacity(_isHovered ? 0.95 : 0.85),
+                    const Color(0xFF2C3E50).withAlpha(_isHovered ? 242 : 217),
+                    AppColors.primaryBlue.withAlpha(_isHovered ? 242 : 217),
                   ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -683,7 +684,7 @@ class _DreamSaveButtonState extends State<_DreamSaveButton>
           borderRadius: BorderRadius.circular(21),
           boxShadow: [
             BoxShadow(
-              color: AppColors.primaryBlue.withOpacity(_isHovered ? 0.4 : 0.2),
+              color: AppColors.primaryBlue.withAlpha(_isHovered ? 102 : 51),
               blurRadius: _isHovered ? 12 : 8,
               spreadRadius: _isHovered ? 1 : 0,
             ),
@@ -710,7 +711,7 @@ class _DreamSaveButtonState extends State<_DreamSaveButton>
                             return LinearGradient(
                               colors: [
                                 Colors.transparent,
-                                Colors.white.withOpacity(0.8),
+                                Colors.white.withAlpha(204), // 0.8 * 255 ≈ 204
                                 Colors.transparent,
                               ],
                               stops: const [0.0, 0.5, 1.0],
@@ -739,14 +740,16 @@ class _DreamSaveButtonState extends State<_DreamSaveButton>
                         widget.isHomeButton
                             ? Icons.home_rounded
                             : Icons.nightlight_round,
-                        color: AppColors.white.withOpacity(0.9),
+                        color:
+                            AppColors.white.withAlpha(230), // 0.9 * 255 = 230
                         size: 18,
                       ),
                       const SizedBox(width: 8),
                       Text(
                         widget.isHomeButton ? 'Home' : 'Save Dream',
                         style: TextStyle(
-                          color: AppColors.white.withOpacity(0.9),
+                          color:
+                              AppColors.white.withAlpha(230), // 0.9 * 255 = 230
                           fontSize: 15,
                           fontWeight: FontWeight.w500,
                           letterSpacing: 0.3,
@@ -780,7 +783,7 @@ class _StarsPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final Random random = Random(42); // Fixed seed for consistent star pattern
     final paint = Paint()
-      ..color = Colors.white.withOpacity(0.5)
+      ..color = Colors.white.withAlpha(128) // 0.5 * 255 = 128
       ..style = PaintingStyle.fill;
 
     // Draw tiny stars

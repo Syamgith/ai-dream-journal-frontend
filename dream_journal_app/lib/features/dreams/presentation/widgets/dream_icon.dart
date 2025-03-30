@@ -15,15 +15,15 @@ class SleepingIcon extends StatelessWidget {
         shape: BoxShape.circle,
         color: Color(0xFF34495E),
       ),
-      child: Stack(
+      child: const Stack(
         children: [
           Positioned(
             top: 20,
             right: 20,
-            child: Container(
+            child: SizedBox(
               width: 40,
               height: 40,
-              child: const Icon(
+              child: Icon(
                 Icons.nightlight,
                 color: AppColors.white,
                 size: 30,

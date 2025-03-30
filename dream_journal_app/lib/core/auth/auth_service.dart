@@ -1,17 +1,18 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter/foundation.dart';
 
 class AuthService {
   static const String _tokenKey = 'TOCKENKEY_JWT';
   static const String _refreshTokenKey = 'REFRESH_TOCKENKEY_JWT';
   static const String _userDataKey = 'USER_DATA_KEY';
-  static final FlutterSecureStorage _storage = FlutterSecureStorage();
+  static const FlutterSecureStorage _storage = FlutterSecureStorage();
 
   // Store JWT token
   static Future<void> setToken(String token) async {
     try {
       await _storage.write(key: _tokenKey, value: token);
     } catch (e) {
-      print('Error storing token: $e');
+      debugPrint('Error storing token: $e');
       // Rethrow to allow caller to handle
       rethrow;
     }
@@ -22,7 +23,7 @@ class AuthService {
     try {
       return await _storage.read(key: _tokenKey);
     } catch (e) {
-      print('Error retrieving token: $e');
+      debugPrint('Error retrieving token: $e');
       return null;
     }
   }
@@ -32,7 +33,7 @@ class AuthService {
     try {
       await _storage.delete(key: _tokenKey);
     } catch (e) {
-      print('Error deleting token: $e');
+      debugPrint('Error deleting token: $e');
       // Rethrow to allow caller to handle
       rethrow;
     }
@@ -43,7 +44,7 @@ class AuthService {
     try {
       await _storage.write(key: _refreshTokenKey, value: token);
     } catch (e) {
-      print('Error storing refresh token: $e');
+      debugPrint('Error storing refresh token: $e');
       // Rethrow to allow caller to handle
       rethrow;
     }
@@ -54,7 +55,7 @@ class AuthService {
     try {
       return await _storage.read(key: _refreshTokenKey);
     } catch (e) {
-      print('Error retrieving refresh token: $e');
+      debugPrint('Error retrieving refresh token: $e');
       return null;
     }
   }
@@ -64,7 +65,7 @@ class AuthService {
     try {
       await _storage.delete(key: _refreshTokenKey);
     } catch (e) {
-      print('Error deleting refresh token: $e');
+      debugPrint('Error deleting refresh token: $e');
       // Rethrow to allow caller to handle
       rethrow;
     }
@@ -75,7 +76,7 @@ class AuthService {
     try {
       await _storage.write(key: _userDataKey, value: userData);
     } catch (e) {
-      print('Error storing user data: $e');
+      debugPrint('Error storing user data: $e');
       // Rethrow to allow caller to handle
       rethrow;
     }
@@ -86,7 +87,7 @@ class AuthService {
     try {
       return await _storage.read(key: _userDataKey);
     } catch (e) {
-      print('Error retrieving user data: $e');
+      debugPrint('Error retrieving user data: $e');
       return null;
     }
   }
@@ -96,7 +97,7 @@ class AuthService {
     try {
       await _storage.delete(key: _userDataKey);
     } catch (e) {
-      print('Error deleting user data: $e');
+      debugPrint('Error deleting user data: $e');
       // Rethrow to allow caller to handle
       rethrow;
     }
@@ -110,7 +111,7 @@ class AuthService {
       return (token != null && token.isNotEmpty) ||
           (refreshToken != null && refreshToken.isNotEmpty);
     } catch (e) {
-      print('Error checking login status: $e');
+      debugPrint('Error checking login status: $e');
       return false;
     }
   }
@@ -122,7 +123,7 @@ class AuthService {
       await deleteRefreshToken();
       await deleteUserData();
     } catch (e) {
-      print('Error clearing auth data: $e');
+      debugPrint('Error clearing auth data: $e');
       rethrow;
     }
   }

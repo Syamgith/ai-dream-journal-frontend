@@ -4,12 +4,11 @@ import '../providers/auth_provider.dart';
 import '../widgets/auth_button.dart';
 import '../widgets/auth_text_field.dart';
 import '../../../../features/shared/widgets/loading_indicator.dart';
-import '../../../dreams/providers/dreams_provider.dart';
 import '../../../../core/widgets/error_message_display.dart';
 import '../../../../core/utils/error_formatter.dart';
 
 class RegisterPage extends ConsumerStatefulWidget {
-  const RegisterPage({Key? key}) : super(key: key);
+  const RegisterPage({super.key});
 
   @override
   ConsumerState<RegisterPage> createState() => _RegisterPageState();

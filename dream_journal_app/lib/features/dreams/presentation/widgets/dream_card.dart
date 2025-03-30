@@ -40,12 +40,12 @@ class _DreamCardState extends State<DreamCard> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
           color: _isHovered
-              ? AppColors.darkBlue.withOpacity(0.9)
-              : AppColors.darkBlue.withOpacity(0.8),
+              ? AppColors.darkBlue.withAlpha(230)
+              : AppColors.darkBlue.withAlpha(204),
           boxShadow: [
             BoxShadow(
               color: _isHovered
-                  ? AppColors.primaryBlue.withOpacity(0.2)
+                  ? AppColors.primaryBlue.withAlpha(51)
                   : Colors.black.withAlpha(40),
               blurRadius: _isHovered ? 10 : 8,
               offset: const Offset(0, 4),
@@ -53,7 +53,7 @@ class _DreamCardState extends State<DreamCard> {
           ],
           border: Border.all(
             color: _isHovered
-                ? AppColors.primaryBlue.withOpacity(0.3)
+                ? AppColors.primaryBlue.withAlpha(77)
                 : Colors.transparent,
             width: 1.0,
           ),
