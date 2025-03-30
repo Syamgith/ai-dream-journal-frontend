@@ -1,4 +1,4 @@
-package com.example.dream_journal_app
+package com.tinystars.dreamidairy
 
 import io.flutter.embedding.android.FlutterActivity
 
