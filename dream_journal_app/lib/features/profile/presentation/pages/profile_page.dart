@@ -7,6 +7,8 @@ import '../../../../../features/auth/presentation/providers/auth_provider.dart';
 import '../../../../core/widgets/custom_snackbar.dart';
 import '../../../../core/widgets/error_message_display.dart';
 import '../../../../core/utils/error_formatter.dart';
+import '../../../../core/widgets/keyboard_dismissible.dart';
+import '../../../../core/utils/keyboard_utils.dart';
 
 class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
@@ -15,20 +17,24 @@ class ProfilePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final profile = ref.watch(profileProvider);
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 600),
-          child: ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              _buildProfileCard(profile, context, ref),
-              const SizedBox(height: 20),
-              _buildStatsCard(profile, context, ref),
-              const SizedBox(height: 20),
-              if (profile.isGuest) _buildGuestMessage(context, ref),
-            ],
+    return KeyboardDismissible(
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 600),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  _buildProfileCard(profile, context, ref),
+                  const SizedBox(height: 20),
+                  _buildStatsCard(profile, context, ref),
+                  const SizedBox(height: 20),
+                  if (profile.isGuest) _buildGuestMessage(context, ref),
+                ],
+              ),
+            ),
           ),
         ),
       ),

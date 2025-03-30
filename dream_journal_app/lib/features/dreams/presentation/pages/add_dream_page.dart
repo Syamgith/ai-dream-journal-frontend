@@ -7,6 +7,8 @@ import '../../../../core/constants/app_colors.dart';
 import '../../data/models/dream_entry.dart';
 import '../../providers/dreams_provider.dart';
 import '../../../../core/widgets/custom_snackbar.dart';
+import '../../../../core/widgets/keyboard_dismissible.dart';
+import '../../../../core/utils/keyboard_utils.dart';
 
 class AddDreamPage extends ConsumerStatefulWidget {
   final DreamEntry? dream;
@@ -67,314 +69,29 @@ class _AddDreamPageState extends ConsumerState<AddDreamPage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: Text(
-          widget.dream != null ? 'Edit Dream' : 'Add Dream',
-          style: const TextStyle(
-            color: AppColors.white,
-            fontWeight: FontWeight.bold,
+    return KeyboardDismissible(
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: AppBar(
+          title: Text(
+            widget.dream != null ? 'Edit Dream' : 'Add Dream',
+            style: const TextStyle(
+              color: AppColors.white,
+              fontWeight: FontWeight.bold,
+            ),
           ),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          iconTheme: const IconThemeData(color: AppColors.white),
         ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: AppColors.white),
-      ),
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                  color: AppColors.darkBlue,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withAlpha(26),
-                      blurRadius: 10,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
-                ),
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      height: 42,
-                      decoration: BoxDecoration(
-                        color: AppColors.background,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          color: AppColors.primaryBlue.withAlpha(77),
-                          width: 1,
-                        ),
-                      ),
-                      child: TextField(
-                        controller: _titleController,
-                        focusNode: _titleFocusNode,
-                        maxLength: 30,
-                        style: const TextStyle(
-                          color: AppColors.white,
-                          fontSize: 14,
-                          letterSpacing: 0.3,
-                        ),
-                        decoration: InputDecoration(
-                          labelText: null,
-                          hintText: 'Give your dream a title...(optional)',
-                          alignLabelWithHint: true,
-                          floatingLabelBehavior: FloatingLabelBehavior.never,
-                          counterText: '',
-                          hintStyle: TextStyle(
-                            color: AppColors.white.withAlpha(128),
-                            fontSize: 14,
-                            letterSpacing: 0.3,
-                          ),
-                          filled: true,
-                          fillColor: Colors.transparent,
-                          isDense: true,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide.none,
-                          ),
-                          contentPadding:
-                              const EdgeInsets.fromLTRB(14, 8, 14, 8),
-                          prefixIcon: Icon(
-                            Icons.edit_outlined,
-                            color: AppColors.white.withAlpha(128),
-                            size: 16,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: AppColors.background,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: AppColors.primaryBlue.withAlpha(77),
-                          width: 1,
-                        ),
-                      ),
-                      child: TextField(
-                        controller: _descriptionController,
-                        focusNode: _descriptionFocusNode,
-                        style: const TextStyle(
-                          color: AppColors.white,
-                          fontSize: 15,
-                          height: 1.5,
-                          letterSpacing: 0.3,
-                        ),
-                        maxLines: 8,
-                        decoration: InputDecoration(
-                          hintText: 'Write about your dream experience...',
-                          hintStyle: TextStyle(
-                            color: AppColors.white.withAlpha(128),
-                            fontSize: 15,
-                            letterSpacing: 0.3,
-                          ),
-                          filled: true,
-                          fillColor: Colors.transparent,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: BorderSide.none,
-                          ),
-                          contentPadding: const EdgeInsets.all(16),
-                          prefixIcon: Padding(
-                            padding: const EdgeInsets.only(left: 16, top: 12),
-                            child: Icon(
-                              Icons.auto_stories_outlined,
-                              color: AppColors.white.withAlpha(128),
-                              size: 20,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    GestureDetector(
-                      onTap: _showDatePicker,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 8, horizontal: 12),
-                        decoration: BoxDecoration(
-                          color: AppColors.background,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: AppColors.primaryBlue.withAlpha(77),
-                            width: 1,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.calendar_today,
-                              color: AppColors.white.withAlpha(179),
-                              size: 20,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              DateFormat('dd MMM yyyy').format(_selectedDate),
-                              style: TextStyle(
-                                color: AppColors.white.withAlpha(230),
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            Icon(
-                              Icons.arrow_drop_down,
-                              color: AppColors.white.withAlpha(179),
-                              size: 20,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    if (widget.dream != null)
-                      Container(
-                        height: 36,
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [
-                              AppColors.primaryBlue,
-                              AppColors.lightBlue,
-                            ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(18),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.primaryBlue.withAlpha(60),
-                              blurRadius: 8,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: ElevatedButton(
-                          onPressed: _saveDream,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.transparent,
-                            shadowColor: Colors.transparent,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(18),
-                            ),
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                          ),
-                          child: const Text(
-                            'Update Dream',
-                            style: TextStyle(
-                              color: AppColors.white,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-              if (_isLoading)
+        body: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
                 Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: AppColors.darkBlue,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withAlpha(26),
-                        blurRadius: 10,
-                        offset: const Offset(0, 5),
-                      ),
-                    ],
-                  ),
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 8),
-                      SizedBox(
-                        height: 60,
-                        width: 60,
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            // Outer rotating ring
-                            AnimatedBuilder(
-                              animation: _starsController,
-                              builder: (context, child) {
-                                return Transform.rotate(
-                                  angle: _starsController.value * 2 * math.pi,
-                                  child: CustomPaint(
-                                    size: const Size(60, 60),
-                                    painter: DreamStarsPainter(
-                                      color: AppColors.lightBlue.withAlpha(200),
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                            // Inner rotating moon
-                            AnimatedBuilder(
-                              animation: _moonController,
-                              builder: (context, child) {
-                                return Transform.rotate(
-                                  angle: -_moonController.value * 2 * math.pi,
-                                  child: Container(
-                                    height: 30,
-                                    width: 30,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      gradient: RadialGradient(
-                                        colors: [
-                                          Colors.white.withAlpha(240),
-                                          AppColors.primaryBlue.withAlpha(180),
-                                        ],
-                                        center: const Alignment(0.3, -0.3),
-                                        radius: 0.8,
-                                      ),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.white.withAlpha(150),
-                                          blurRadius: 10,
-                                          spreadRadius: 1,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      const Text(
-                        "Breaking down your dream...",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: AppColors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                    ],
-                  ),
-                ),
-              if (_interpretation != null)
-                Container(
-                  width: double.infinity,
                   decoration: BoxDecoration(
                     color: AppColors.darkBlue,
                     borderRadius: BorderRadius.circular(16),
@@ -390,60 +107,357 @@ class _AddDreamPageState extends ConsumerState<AddDreamPage>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Display the dream title if it's available
-                      if (_titleController.text.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                      Container(
+                        height: 42,
+                        decoration: BoxDecoration(
+                          color: AppColors.background,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: AppColors.primaryBlue.withAlpha(77),
+                            width: 1,
+                          ),
+                        ),
+                        child: TextField(
+                          controller: _titleController,
+                          focusNode: _titleFocusNode,
+                          maxLength: 30,
+                          style: const TextStyle(
+                            color: AppColors.white,
+                            fontSize: 14,
+                            letterSpacing: 0.3,
+                          ),
+                          onEditingComplete: () =>
+                              _descriptionFocusNode.requestFocus(),
+                          textInputAction: TextInputAction.next,
+                          decoration: InputDecoration(
+                            labelText: null,
+                            hintText: 'Give your dream a title...(optional)',
+                            alignLabelWithHint: true,
+                            floatingLabelBehavior: FloatingLabelBehavior.never,
+                            counterText: '',
+                            hintStyle: TextStyle(
+                              color: AppColors.white.withAlpha(128),
+                              fontSize: 14,
+                              letterSpacing: 0.3,
+                            ),
+                            filled: true,
+                            fillColor: Colors.transparent,
+                            isDense: true,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: BorderSide.none,
+                            ),
+                            contentPadding:
+                                const EdgeInsets.fromLTRB(14, 8, 14, 8),
+                            prefixIcon: Icon(
+                              Icons.edit_outlined,
+                              color: AppColors.white.withAlpha(128),
+                              size: 16,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: AppColors.background,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: AppColors.primaryBlue.withAlpha(77),
+                            width: 1,
+                          ),
+                        ),
+                        child: TextField(
+                          controller: _descriptionController,
+                          focusNode: _descriptionFocusNode,
+                          style: const TextStyle(
+                            color: AppColors.white,
+                            fontSize: 15,
+                            height: 1.5,
+                            letterSpacing: 0.3,
+                          ),
+                          maxLines: 8,
+                          textInputAction: TextInputAction.done,
+                          onEditingComplete: () =>
+                              KeyboardUtils.hideKeyboard(context),
+                          decoration: InputDecoration(
+                            hintText: 'Write about your dream experience...',
+                            hintStyle: TextStyle(
+                              color: AppColors.white.withAlpha(128),
+                              fontSize: 15,
+                              letterSpacing: 0.3,
+                            ),
+                            filled: true,
+                            fillColor: Colors.transparent,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide.none,
+                            ),
+                            contentPadding: const EdgeInsets.all(16),
+                            prefixIcon: Padding(
+                              padding: const EdgeInsets.only(left: 16, top: 12),
+                              child: Icon(
+                                Icons.auto_stories_outlined,
+                                color: AppColors.white.withAlpha(128),
+                                size: 20,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      GestureDetector(
+                        onTap: _showDatePicker,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 8, horizontal: 12),
+                          decoration: BoxDecoration(
+                            color: AppColors.background,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: AppColors.primaryBlue.withAlpha(77),
+                              width: 1,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
+                              Icon(
+                                Icons.calendar_today,
+                                color: AppColors.white.withAlpha(179),
+                                size: 20,
+                              ),
+                              const SizedBox(width: 8),
                               Text(
-                                _titleController.text,
-                                style: const TextStyle(
-                                  color: AppColors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
+                                DateFormat('dd MMM yyyy').format(_selectedDate),
+                                style: TextStyle(
+                                  color: AppColors.white.withAlpha(230),
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
-                              const SizedBox(height: 16),
-                              const Divider(
-                                color: AppColors.primaryBlue,
-                                thickness: 0.5,
+                              const SizedBox(width: 4),
+                              Icon(
+                                Icons.arrow_drop_down,
+                                color: AppColors.white.withAlpha(179),
+                                size: 20,
                               ),
-                              const SizedBox(height: 16),
                             ],
                           ),
                         ),
-                      const Text(
-                        'Dream Exploration',
-                        style: TextStyle(
-                          color: AppColors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
                       ),
-                      const SizedBox(height: 12),
-                      Text(
-                        _interpretation!,
-                        style: const TextStyle(
-                          color: AppColors.white,
-                          fontSize: 15,
-                          height: 1.5,
+                      const SizedBox(height: 20),
+                      if (widget.dream != null)
+                        Container(
+                          height: 36,
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [
+                                AppColors.primaryBlue,
+                                AppColors.lightBlue,
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(18),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.primaryBlue.withAlpha(60),
+                                blurRadius: 8,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: ElevatedButton(
+                            onPressed: _saveDream,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              shadowColor: Colors.transparent,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(18),
+                              ),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 16),
+                            ),
+                            child: const Text(
+                              'Update Dream',
+                              style: TextStyle(
+                                color: AppColors.white,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
                     ],
                   ),
                 ),
-              const SizedBox(height: 24),
-              if (widget.dream == null && !_isLoading)
-                Center(
-                  child: _DreamSaveButton(
-                    onTap:
-                        _interpretation != null ? _navigateToHome : _saveDream,
-                    isHomeButton: _interpretation != null,
+                const SizedBox(height: 24),
+                if (_isLoading)
+                  Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: AppColors.darkBlue,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withAlpha(26),
+                          blurRadius: 10,
+                          offset: const Offset(0, 5),
+                        ),
+                      ],
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 24, horizontal: 20),
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 8),
+                        SizedBox(
+                          height: 60,
+                          width: 60,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              // Outer rotating ring
+                              AnimatedBuilder(
+                                animation: _starsController,
+                                builder: (context, child) {
+                                  return Transform.rotate(
+                                    angle: _starsController.value * 2 * math.pi,
+                                    child: CustomPaint(
+                                      size: const Size(60, 60),
+                                      painter: DreamStarsPainter(
+                                        color:
+                                            AppColors.lightBlue.withAlpha(200),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                              // Inner rotating moon
+                              AnimatedBuilder(
+                                animation: _moonController,
+                                builder: (context, child) {
+                                  return Transform.rotate(
+                                    angle: -_moonController.value * 2 * math.pi,
+                                    child: Container(
+                                      height: 30,
+                                      width: 30,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        gradient: RadialGradient(
+                                          colors: [
+                                            Colors.white.withAlpha(240),
+                                            AppColors.primaryBlue
+                                                .withAlpha(180),
+                                          ],
+                                          center: const Alignment(0.3, -0.3),
+                                          radius: 0.8,
+                                        ),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.white.withAlpha(150),
+                                            blurRadius: 10,
+                                            spreadRadius: 1,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        const Text(
+                          "Breaking down your dream...",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: AppColors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                      ],
+                    ),
                   ),
-                ),
-            ],
+                if (_interpretation != null)
+                  Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: AppColors.darkBlue,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withAlpha(26),
+                          blurRadius: 10,
+                          offset: const Offset(0, 5),
+                        ),
+                      ],
+                    ),
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Display the dream title if it's available
+                        if (_titleController.text.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  _titleController.text,
+                                  style: const TextStyle(
+                                    color: AppColors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                const Divider(
+                                  color: AppColors.primaryBlue,
+                                  thickness: 0.5,
+                                ),
+                                const SizedBox(height: 16),
+                              ],
+                            ),
+                          ),
+                        const Text(
+                          'Dream Exploration',
+                          style: TextStyle(
+                            color: AppColors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          _interpretation!,
+                          style: const TextStyle(
+                            color: AppColors.white,
+                            fontSize: 15,
+                            height: 1.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                const SizedBox(height: 24),
+                if (widget.dream == null && !_isLoading)
+                  Center(
+                    child: _DreamSaveButton(
+                      onTap: _interpretation != null
+                          ? _navigateToHome
+                          : _saveDream,
+                      isHomeButton: _interpretation != null,
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),
@@ -451,10 +465,12 @@ class _AddDreamPageState extends ConsumerState<AddDreamPage>
   }
 
   void _navigateToHome() {
+    KeyboardUtils.hideKeyboard(context);
     Navigator.pop(context);
   }
 
   void _showDatePicker() async {
+    KeyboardUtils.hideKeyboard(context);
     final DateTime now = DateTime.now();
     final DateTime oneYearAgo = DateTime(now.year - 1, now.month, now.day);
 
@@ -496,6 +512,8 @@ class _AddDreamPageState extends ConsumerState<AddDreamPage>
   }
 
   void _saveDream() async {
+    KeyboardUtils.hideKeyboard(context);
+
     if (_descriptionController.text.trim().isEmpty) {
       return;
     }

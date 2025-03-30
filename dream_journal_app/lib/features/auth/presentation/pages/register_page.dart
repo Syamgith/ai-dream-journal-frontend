@@ -6,6 +6,8 @@ import '../widgets/auth_text_field.dart';
 import '../../../../features/shared/widgets/loading_indicator.dart';
 import '../../../../core/widgets/error_message_display.dart';
 import '../../../../core/utils/error_formatter.dart';
+import '../../../../core/widgets/keyboard_dismissible.dart';
+import '../../../../core/utils/keyboard_utils.dart';
 
 class RegisterPage extends ConsumerStatefulWidget {
   const RegisterPage({super.key});
@@ -91,136 +93,146 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     final authState = ref.watch(authProvider);
     final isLoading = authState is AsyncLoading || _isRegistering;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Register'),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ),
-      body: SafeArea(
-        child: isLoading
-            ? const LoadingIndicator(message: 'Creating your account...')
-            : Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 450),
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        // Register Form
-                        Form(
-                          key: _formKey,
-                          child: Column(
-                            children: [
-                              AuthTextField(
-                                label: 'Name',
-                                controller: _nameController,
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please enter your name';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              AuthTextField(
-                                label: 'Email',
-                                controller: _emailController,
-                                keyboardType: TextInputType.emailAddress,
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please enter your email';
-                                  }
-                                  if (!RegExp(
-                                          r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                                      .hasMatch(value)) {
-                                    return 'Please enter a valid email';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              AuthTextField(
-                                label: 'Password',
-                                controller: _passwordController,
-                                obscureText: _obscurePassword,
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please enter a password';
-                                  }
-                                  if (value.length < 6) {
-                                    return 'Password must be at least 6 characters';
-                                  }
-                                  return null;
-                                },
-                                suffixIcon: IconButton(
-                                  icon: Icon(
-                                    _obscurePassword
-                                        ? Icons.visibility_off
-                                        : Icons.visibility,
-                                    color: Colors.white70,
+    return KeyboardDismissible(
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Register'),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+        ),
+        body: SafeArea(
+          child: isLoading
+              ? const LoadingIndicator(message: 'Creating your account...')
+              : Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 450),
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          // Register Form
+                          Form(
+                            key: _formKey,
+                            child: Column(
+                              children: [
+                                AuthTextField(
+                                  label: 'Name',
+                                  controller: _nameController,
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Please enter your name';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                AuthTextField(
+                                  label: 'Email',
+                                  controller: _emailController,
+                                  keyboardType: TextInputType.emailAddress,
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Please enter your email';
+                                    }
+                                    if (!RegExp(
+                                            r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                                        .hasMatch(value)) {
+                                      return 'Please enter a valid email';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                AuthTextField(
+                                  label: 'Password',
+                                  controller: _passwordController,
+                                  obscureText: _obscurePassword,
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Please enter a password';
+                                    }
+                                    if (value.length < 6) {
+                                      return 'Password must be at least 6 characters';
+                                    }
+                                    return null;
+                                  },
+                                  suffixIcon: IconButton(
+                                    icon: Icon(
+                                      _obscurePassword
+                                          ? Icons.visibility_off
+                                          : Icons.visibility,
+                                      color: Colors.white70,
+                                    ),
+                                    onPressed: _togglePasswordVisibility,
                                   ),
-                                  onPressed: _togglePasswordVisibility,
                                 ),
-                              ),
-                              AuthTextField(
-                                label: 'Confirm Password',
-                                controller: _confirmPasswordController,
-                                obscureText: _obscureConfirmPassword,
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please confirm your password';
-                                  }
-                                  if (value != _passwordController.text) {
-                                    return 'Passwords do not match';
-                                  }
-                                  return null;
-                                },
-                                suffixIcon: IconButton(
-                                  icon: Icon(
-                                    _obscureConfirmPassword
-                                        ? Icons.visibility_off
-                                        : Icons.visibility,
-                                    color: Colors.white70,
+                                AuthTextField(
+                                  label: 'Confirm Password',
+                                  controller: _confirmPasswordController,
+                                  obscureText: _obscureConfirmPassword,
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Please confirm your password';
+                                    }
+                                    if (value != _passwordController.text) {
+                                      return 'Passwords do not match';
+                                    }
+                                    return null;
+                                  },
+                                  suffixIcon: IconButton(
+                                    icon: Icon(
+                                      _obscureConfirmPassword
+                                          ? Icons.visibility_off
+                                          : Icons.visibility,
+                                      color: Colors.white70,
+                                    ),
+                                    onPressed: _toggleConfirmPasswordVisibility,
                                   ),
-                                  onPressed: _toggleConfirmPasswordVisibility,
-                                ),
-                              ),
-
-                              if (_errorMessage != null)
-                                ErrorMessageDisplay(
-                                  message: _errorMessage!,
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 8.0),
                                 ),
 
-                              const SizedBox(height: 24),
+                                if (_errorMessage != null)
+                                  ErrorMessageDisplay(
+                                    message: _errorMessage!,
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 8.0),
+                                  ),
 
-                              // Register Button
-                              AuthButton(
-                                text: 'Register',
-                                onPressed: _register,
-                                isLoading: isLoading,
-                              ),
+                                const SizedBox(height: 24),
 
-                              const SizedBox(height: 16),
-
-                              // Back to Login
-                              TextButton(
-                                onPressed: () => Navigator.of(context).pop(),
-                                child: const Text(
-                                  'Already have an account? Login',
-                                  style: TextStyle(color: Colors.white),
+                                // Register Button with keyboard dismissal
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: AuthButton(
+                                    text: 'Register',
+                                    onPressed: () =>
+                                        KeyboardUtils.hideKeyboardThen(
+                                            context, _register),
+                                    isLoading: isLoading,
+                                  ),
                                 ),
-                              ),
-                            ],
+
+                                const SizedBox(height: 16),
+
+                                // Login navigation with keyboard dismissal
+                                TextButton(
+                                  onPressed: () {
+                                    KeyboardUtils.hideKeyboard(context);
+                                    Navigator.pop(context);
+                                  },
+                                  child: const Text(
+                                    'Already have an account? Login',
+                                    style: TextStyle(color: Colors.white70),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
+        ),
       ),
     );
   }
