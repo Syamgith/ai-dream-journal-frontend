@@ -1,18 +1,18 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../../features/auth/data/repositories/auth_repository.dart';
-import 'token_interceptor.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../network/token_interceptor.dart';
 
 class ApiClient {
   final String baseUrl;
-  final AuthRepository authRepository;
+  final Ref _ref;
   late final TokenInterceptor _tokenInterceptor;
 
   ApiClient({
     required this.baseUrl,
-    required this.authRepository,
-  }) {
-    _tokenInterceptor = TokenInterceptor(authRepository);
+    required Ref ref,
+  }) : _ref = ref {
+    _tokenInterceptor = TokenInterceptor(_ref);
   }
 
   // Helper method to get auth headers
@@ -133,29 +133,51 @@ class ApiClient {
       }
       return jsonDecode(response.body);
     } else {
-      // Try to extract a more user-friendly error message
       String errorMessage =
           'Request failed with status: ${response.statusCode}';
+      String rawResponseBody = response.body;
 
-      if (response.body.isNotEmpty) {
+      if (rawResponseBody.isNotEmpty) {
         try {
-          final errorData = jsonDecode(response.body);
+          final errorData = jsonDecode(rawResponseBody);
           if (errorData != null && errorData is Map) {
             if (errorData.containsKey('detail')) {
-              errorMessage = errorData['detail'];
+              final detail = errorData['detail'];
+              if (detail is String) {
+                errorMessage = detail;
+              } else if (detail is List && detail.isNotEmpty) {
+                // Handle Pydantic-style error list
+                final firstError = detail[0];
+                if (firstError is Map) {
+                  final msg = firstError['msg'] ?? 'Invalid input';
+                  final loc = firstError['loc'];
+                  if (loc is List && loc.length > 1) {
+                    errorMessage = 'Error in field ${loc[1]}: $msg';
+                  } else {
+                    errorMessage = msg.toString();
+                  }
+                } else {
+                  errorMessage =
+                      'An unexpected error occurred.'; // Fallback for unknown list format
+                }
+              } else if (detail != null) {
+                errorMessage = detail
+                    .toString(); // Fallback if detail is not string or list
+              }
             } else if (errorData.containsKey('message')) {
               errorMessage = errorData['message'];
             } else if (errorData.containsKey('error')) {
               errorMessage = errorData['error'];
             }
+            // Potentially add more specific key checks if your backend uses other error formats
           }
         } catch (e) {
-          // If JSON parsing fails, use the response body as is
+          // If JSON parsing fails, or if the structure is unexpected,
+          // use the raw response body (if it's not too large or sensitive).
           errorMessage =
-              'Request failed with status: ${response.statusCode}. ${response.body}';
+              'Request failed with status: ${response.statusCode}. Response: $rawResponseBody';
         }
       }
-
       throw Exception(errorMessage);
     }
   }

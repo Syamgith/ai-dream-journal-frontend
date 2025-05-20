@@ -1,13 +1,16 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/dream_entry.dart';
-import '../../../../core/config/config.dart';
+import '../../../../core/network/api_client.dart';
 
 class DreamRepository {
+  final ApiClient _apiClient;
+
   // In-memory cache of dreams
   final List<DreamEntry> _dreams = [];
-  final String _apiURL = Config.apiURL;
   DateTime? _lastFetchTime;
+
+  DreamRepository(this._apiClient);
 
   // Clear the dreams cache
   void clearCache() {
@@ -28,33 +31,21 @@ class DreamRepository {
     }
 
     try {
-      final headers = await Config.getAuthHeaders();
-      final response = await http.get(
-        Uri.parse('$_apiURL/dreams/'),
-        headers: headers,
-      );
+      final dynamic responseData = await _apiClient.get('/dreams/');
 
-      if (response.statusCode == 200) {
-        final List<dynamic> dreamsJson = jsonDecode(response.body);
-        final dreams =
-            dreamsJson.map((json) => DreamEntry.fromJson(json)).toList();
-        _dreams.clear();
-        _dreams.addAll(dreams);
-        _lastFetchTime = now;
-        return dreams;
-      } else {
-        // If API call fails but we have cached dreams, return those
-        if (_dreams.isNotEmpty) {
-          return _dreams;
-        }
-        throw Exception('Failed to load dreams: ${response.statusCode}');
-      }
+      final List<dynamic> dreamsJson = responseData;
+      final dreams =
+          dreamsJson.map((json) => DreamEntry.fromJson(json)).toList();
+      _dreams.clear();
+      _dreams.addAll(dreams);
+      _lastFetchTime = now;
+      return dreams;
     } catch (e) {
       // If there's an error but we have cached dreams, return those
       if (_dreams.isNotEmpty) {
         return _dreams;
       }
-      throw Exception('Failed to connect to the server: $e');
+      rethrow;
     }
   }
 
@@ -76,81 +67,59 @@ class DreamRepository {
 
     // If not in cache, fetch from API
     try {
-      final headers = await Config.getAuthHeaders();
-      final response = await http.get(
-        Uri.parse('$_apiURL/dreams/$id/'),
-        headers: headers,
-      );
+      final dynamic responseData = await _apiClient.get('/dreams/$id/');
 
-      if (response.statusCode == 200) {
-        final dreamJson = jsonDecode(response.body);
-        final dream = DreamEntry.fromJson(dreamJson);
+      final dreamJson = responseData;
+      final dream = DreamEntry.fromJson(dreamJson);
 
-        // Update the dream in the cache
-        final index = _dreams.indexWhere((d) => d.id == id);
-        if (index != -1) {
-          _dreams[index] = dream;
-        } else {
-          _dreams.add(dream);
-        }
-
-        return dream;
+      // Update the dream in the cache
+      final index = _dreams.indexWhere((d) => d.id == id);
+      if (index != -1) {
+        _dreams[index] = dream;
       } else {
-        throw Exception('Failed to load dream: ${response.statusCode}');
+        _dreams.add(dream);
       }
+
+      return dream;
     } catch (e) {
-      throw Exception('Failed to connect to the server: $e');
+      rethrow;
     }
   }
 
   Future<DreamEntry> addDream(DreamEntry dream) async {
     try {
-      final headers = await Config.getAuthHeaders();
-
-      final response = await http.post(
-        Uri.parse('$_apiURL/dreams/'),
-        headers: headers,
-        body: jsonEncode(dream.toJson()),
+      final dynamic responseData = await _apiClient.post(
+        '/dreams/',
+        body: dream.toJson(),
       );
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final interpretedDream = DreamEntry.fromJson(jsonDecode(response.body));
+      final interpretedDream = DreamEntry.fromJson(responseData);
 
-        // Add to cache if not already present
-        if (!_dreams.any((d) => d.id == interpretedDream.id)) {
-          _dreams.add(interpretedDream);
-        }
-
-        return interpretedDream;
-      } else {
-        throw Exception(
-            'Failed to get dream interpretation: ${response.statusCode}');
+      // Add to cache if not already present
+      if (!_dreams.any((d) => d.id == interpretedDream.id)) {
+        _dreams.add(interpretedDream);
       }
+
+      return interpretedDream;
     } catch (e) {
-      throw Exception('Failed to connect to the server: $e');
+      rethrow;
     }
   }
 
   Future<void> updateDream(DreamEntry dream) async {
     try {
-      final headers = await Config.getAuthHeaders();
-      final response = await http.put(
-        Uri.parse('$_apiURL/dreams/${dream.id}/'),
-        headers: headers,
-        body: jsonEncode(dream.toJson()),
+      await _apiClient.put(
+        '/dreams/${dream.id}/',
+        body: dream.toJson(),
       );
 
-      if (response.statusCode == 200) {
-        // Update in cache
-        final index = _dreams.indexWhere((d) => d.id == dream.id);
-        if (index != -1) {
-          _dreams[index] = dream;
-        }
-      } else {
-        throw Exception('Failed to update dream: ${response.statusCode}');
+      // Update in cache
+      final index = _dreams.indexWhere((d) => d.id == dream.id);
+      if (index != -1) {
+        _dreams[index] = dream;
       }
     } catch (e) {
-      throw Exception('Failed to connect to the server: $e');
+      rethrow;
     }
   }
 
@@ -158,20 +127,12 @@ class DreamRepository {
     if (id == null) return;
 
     try {
-      final headers = await Config.getAuthHeaders();
-      final response = await http.delete(
-        Uri.parse('$_apiURL/dreams/$id/'),
-        headers: headers,
-      );
+      await _apiClient.delete('/dreams/$id/');
 
-      if (response.statusCode == 200) {
-        // Remove from cache
-        _dreams.removeWhere((dream) => dream.id == id);
-      } else {
-        throw Exception('Failed to delete dream: ${response.statusCode}');
-      }
+      // Remove from cache
+      _dreams.removeWhere((dream) => dream.id == id);
     } catch (e) {
-      throw Exception('Failed to connect to the server: $e');
+      rethrow;
     }
   }
 }

@@ -1,18 +1,20 @@
-import 'dart:convert';
+import 'dart:convert'; // Re-added
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb, debugPrint;
-import 'package:http/http.dart' as http;
+// import 'package:http/http.dart' as http; // Will be removed after refactoring confirmPasswordReset
 import 'package:google_sign_in/google_sign_in.dart';
-import '../../../../core/config/config.dart';
+import '../../../../core/network/api_client.dart';
 import '../../../../core/config/auth_config.dart';
 import '../../../../core/auth/auth_service.dart';
 import '../../domain/models/user.dart';
 
 class AuthRepository {
-  final String _baseUrl = Config.apiURL;
+  final ApiClient _apiClient;
 
   // Initialize Google Sign-In with platform-specific configuration
   late final GoogleSignIn _googleSignIn = _initGoogleSignIn();
+
+  AuthRepository(this._apiClient);
 
   // Initialize Google Sign-In based on platform
   GoogleSignIn _initGoogleSignIn() {
@@ -47,37 +49,17 @@ class AuthRepository {
 
   // Register a new user
   Future<bool> register(String email, String password, String name) async {
-    final response = await http.post(
-      Uri.parse('$_baseUrl/users/register'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'email': email,
-        'password': password,
-        'name': name,
-      }),
-    );
-
-    if (response.statusCode == 200) {
+    try {
+      await _apiClient.post('/users/register',
+          body: {
+            'email': email,
+            'password': password,
+            'name': name,
+          },
+          requireAuth: false);
       return true;
-    } else {
-      // Try to extract a more user-friendly error message
-      String errorMessage = 'Failed to register';
-
-      if (response.body.isNotEmpty) {
-        try {
-          final errorData = jsonDecode(response.body);
-          if (errorData != null && errorData is Map) {
-            if (errorData.containsKey('detail')) {
-              errorMessage = 'Registration failed: ${errorData['detail']}';
-            }
-          }
-        } catch (e) {
-          // If JSON parsing fails, use generic message
-          errorMessage = 'Registration failed. Please try again.';
-        }
-      }
-
-      throw Exception(errorMessage);
+    } catch (e) {
+      rethrow;
     }
   }
 
@@ -97,17 +79,14 @@ class AuthRepository {
 
   // Login a user
   Future<User> login(String email, String password) async {
-    final response = await http.post(
-      Uri.parse('$_baseUrl/users/login'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'email': email,
-        'password': password,
-      }),
-    );
+    try {
+      final data = await _apiClient.post('/users/login',
+          body: {
+            'email': email,
+            'password': password,
+          },
+          requireAuth: false);
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
       // Save the tokens
       await AuthService.setToken(data['access_token']);
       await AuthService.setRefreshToken(data['refresh_token']);
@@ -117,37 +96,15 @@ class AuthRepository {
       await AuthService.setUserData(jsonEncode(user.toJson()));
 
       return user;
-    } else {
-      // Try to extract a more user-friendly error message
-      String errorMessage = 'Failed to login';
-
-      if (response.body.isNotEmpty) {
-        try {
-          final errorData = jsonDecode(response.body);
-          if (errorData != null && errorData is Map) {
-            if (errorData.containsKey('detail')) {
-              errorMessage = 'Login failed: ${errorData['detail']}';
-            }
-          }
-        } catch (e) {
-          // If JSON parsing fails, use generic message
-          errorMessage = 'Login failed. Please check your credentials.';
-        }
-      }
-
-      throw Exception(errorMessage);
+    } catch (e) {
+      rethrow;
     }
   }
 
   // Login as guest
   Future<User> loginAsGuest() async {
-    final response = await http.post(
-      Uri.parse('$_baseUrl/users/guest'),
-      headers: {'Content-Type': 'application/json'},
-    );
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
+    try {
+      final data = await _apiClient.post('/users/guest', requireAuth: false);
       // Save the tokens
       await AuthService.setToken(data['access_token']);
       await AuthService.setRefreshToken(data['refresh_token']);
@@ -157,25 +114,8 @@ class AuthRepository {
       await AuthService.setUserData(jsonEncode(user.toJson()));
 
       return user;
-    } else {
-      // Try to extract a more user-friendly error message
-      String errorMessage = 'Failed to login as guest';
-
-      if (response.body.isNotEmpty) {
-        try {
-          final errorData = jsonDecode(response.body);
-          if (errorData != null && errorData is Map) {
-            if (errorData.containsKey('detail')) {
-              errorMessage = errorData['detail'];
-            }
-          }
-        } catch (e) {
-          // If JSON parsing fails, use generic message
-          errorMessage = 'Guest login failed. Please try again later.';
-        }
-      }
-
-      throw Exception(errorMessage);
+    } catch (e) {
+      rethrow;
     }
   }
 
@@ -199,348 +139,215 @@ class AuthRepository {
       debugPrint('ID Token: ${googleAuth.idToken}');
       debugPrint('Access Token: ${googleAuth.accessToken}');
 
-      // Use idToken if available, otherwise fall back to accessToken
-      final tokenToUse = googleAuth.idToken ?? googleAuth.accessToken;
+      // Send the ID token to your backend
+      final data = await _apiClient.post('/users/auth/google',
+          body: {'id_token': googleAuth.idToken}, requireAuth: false);
 
-      if (tokenToUse == null) {
-        throw Exception('Failed to obtain authentication token from Google');
-      }
+      // Save the tokens
+      await AuthService.setToken(data['access_token']);
+      await AuthService.setRefreshToken(data['refresh_token']);
 
-      // Determine which type of token we're sending
-      final tokenType =
-          googleAuth.idToken != null ? 'id_token' : 'access_token';
+      // Save user data locally for offline access
+      final user = User.fromJson(data['user']);
+      await AuthService.setUserData(jsonEncode(user.toJson()));
 
-      // Send the token to your backend
-      final response = await http.post(
-        Uri.parse('$_baseUrl/users/auth/google'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'token': tokenToUse,
-          'token_type': tokenType,
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-
-        // Save the tokens
-        await AuthService.setToken(data['access_token']);
-        await AuthService.setRefreshToken(data['refresh_token']);
-
-        // Save user data locally for offline access
-        final user = User.fromJson(data['user']);
-        await AuthService.setUserData(jsonEncode(user.toJson()));
-
-        return user;
-      } else {
-        // Try to extract a more user-friendly error message
-        String errorMessage = 'Failed to login with Google';
-
-        if (response.body.isNotEmpty) {
-          try {
-            final errorData = jsonDecode(response.body);
-            if (errorData != null && errorData is Map) {
-              if (errorData.containsKey('detail')) {
-                errorMessage = errorData['detail'];
-              }
-            }
-          } catch (e) {
-            // If JSON parsing fails, use generic message
-            errorMessage = 'Google login failed. Please try again later.';
-          }
-        }
-
-        throw Exception(errorMessage);
-      }
+      return user;
     } catch (e) {
-      // Ensure sign out from Google when there's an error
-      await _googleSignIn.signOut();
-      if (e is Exception) {
-        rethrow;
-      }
-      throw Exception('Error during Google sign-in. Please try again.');
+      // Handle Google Sign-In specific errors or rethrow general errors
+      debugPrint('Google sign-in error: $e');
+      rethrow;
     }
   }
 
   // Logout
   Future<void> logout() async {
-    try {
-      // Check if current user is a guest user
-      final userData = await AuthService.getUserData();
-      if (userData != null) {
-        try {
-          final user = User.fromJson(jsonDecode(userData));
-          if (user.isGuest) {
-            // If the user is a guest, use the guest logout method
-            await logoutGuestUser();
-            return;
-          }
-        } catch (e) {
-          debugPrint('Error parsing user data during logout: $e');
-          // Continue with regular logout
-        }
+    User? currentUser;
+    final localUserData = await AuthService.getUserData();
+    if (localUserData != null) {
+      try {
+        currentUser = User.fromJson(jsonDecode(localUserData));
+      } catch (e) {
+        debugPrint('Error decoding local user data during logout: $e');
+        // Proceed with generic logout if user data is corrupt
       }
-
-      // Sign out from Google if the user signed in with Google
-      await _googleSignIn.signOut();
-    } catch (e) {
-      debugPrint('Error signing out from Google: $e');
-      // Continue with logout even if Google sign-out fails
     }
 
-    await AuthService.clearAllAuthData();
+    try {
+      if (currentUser != null && currentUser.isGuest) {
+        // Guest user logout: call the specific backend endpoint
+        await _apiClient.delete('/users/guest/logout');
+        debugPrint('Guest user logout API call successful.');
+      } else {
+        // Regular user logout: no backend API call needed as per clarification.
+        // The original code might have called POST /users/logout, which we found doesn't exist for regular users.
+        // So, we'll skip any API call here for regular users.
+        debugPrint('Regular user logout: No backend API call made.');
+      }
+    } catch (e) {
+      // This catch block will now primarily handle errors from the guest logout API call.
+      debugPrint(
+          'Error during API part of logout (likely guest logout): $e. Proceeding with local data clearing.');
+    } finally {
+      await _clearLocalAuthData(); // This clears tokens, user data, and Google sign-out
+    }
   }
 
-  // Logout a guest user (also deletes the user from backend)
-  Future<void> logoutGuestUser() async {
-    try {
-      final token = await AuthService.getToken();
+  Future<void> _clearLocalAuthData() async {
+    await AuthService.clearAllAuthData();
 
-      if (token != null) {
-        // Make DELETE request to delete the guest user
-        try {
-          final response = await http.delete(
-            Uri.parse('$_baseUrl/users/guest/logout'),
-            headers: {'Authorization': 'Bearer $token'},
-          );
-
-          // Log response for debugging
-          debugPrint('Guest user logout response: ${response.statusCode}');
-
-          if (response.statusCode != 200 && response.statusCode != 204) {
-            debugPrint('Failed to delete guest user: ${response.body}');
-          }
-          await AuthService.clearAllAuthData();
-        } catch (e) {
-          debugPrint('Error calling guest logout API: $e');
-          // Continue with regular logout even if the API call fails
-        }
-      }
-
-      // Try signing out from Google (just in case)
-      try {
-        await _googleSignIn.signOut();
-      } catch (e) {
-        debugPrint('Error signing out from Google: $e');
-      }
-
-      // Clear local auth data
-      await AuthService.clearAllAuthData();
-    } catch (e) {
-      debugPrint('Error during guest user logout: $e');
-      // Still clear auth data even if there was an error
-      await AuthService.clearAllAuthData();
+    // If using Google Sign-In, sign out from Google as well
+    if (await _googleSignIn.isSignedIn()) {
+      await _googleSignIn.signOut();
     }
   }
 
   // Refresh token
   Future<String?> refreshToken() async {
     final refreshToken = await AuthService.getRefreshToken();
-
     if (refreshToken == null) {
-      return null;
+      throw Exception('No refresh token available');
     }
 
     try {
-      final response = await http.post(
-        Uri.parse('$_baseUrl/users/refresh'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $refreshToken',
-        },
-      );
+      final data = await _apiClient.post('/users/refresh',
+          body: {'refresh': refreshToken}, requireAuth: false);
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final newToken = data['access_token'];
-        await AuthService.setToken(newToken);
-        // If the response also contains a new refresh token, save it
-        if (data.containsKey('refresh_token')) {
-          await AuthService.setRefreshToken(data['refresh_token']);
-        }
-        return newToken;
-      } else {
-        // Don't automatically logout on refresh failure
-        // Just return null to indicate refresh failed
-        debugPrint(
-            'Token refresh failed with status code: ${response.statusCode}');
-        return null;
+      final newAccessToken = data['access_token'];
+      await AuthService.setToken(newAccessToken);
+      if (data.containsKey('refresh_token')) {
+        await AuthService.setRefreshToken(data['refresh_token']);
       }
+      return newAccessToken;
     } catch (e) {
-      // Don't automatically logout on refresh failure
-      // Just return null to indicate refresh failed
-      debugPrint('Error refreshing token: $e');
-      return null;
+      await logout();
+      rethrow;
     }
   }
 
   // Get current user information
   Future<User?> getCurrentUser() async {
-    final token = await AuthService.getToken();
-
-    if (token == null) {
-      // Try to get user from local storage if token is not available
-      final userData = await AuthService.getUserData();
-      if (userData != null) {
-        try {
-          return User.fromJson(jsonDecode(userData));
-        } catch (e) {
-          debugPrint('Error parsing stored user data: $e');
-          return null;
-        }
+    // First, try to load from local storage for speed
+    final localUserData = await AuthService.getUserData();
+    if (localUserData != null) {
+      try {
+        return User.fromJson(jsonDecode(localUserData));
+      } catch (e) {
+        debugPrint('Error decoding local user data: $e');
+        // Fall through to fetch from API if local data is corrupt
       }
-      return null;
     }
 
     try {
-      final response = await http.get(
-        Uri.parse('$_baseUrl/users/me'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final user = User.fromJson(data);
-
-        // Update stored user data
-        await AuthService.setUserData(jsonEncode(user.toJson()));
-
-        return user;
-      } else if (response.statusCode == 401) {
-        // Token is invalid, try to refresh it
-        final newToken = await refreshToken();
-        if (newToken != null) {
-          // Try again with the new token
-          return await getCurrentUser();
-        } else {
-          // Refresh failed, but don't force logout
-          // Try to get user from local storage
-          final userData = await AuthService.getUserData();
-          if (userData != null) {
-            try {
-              return User.fromJson(jsonDecode(userData));
-            } catch (e) {
-              debugPrint('Error parsing stored user data: $e');
-              return null;
-            }
-          }
-          return null;
-        }
-      } else {
-        // Try to get user from local storage if API call fails
-        final userData = await AuthService.getUserData();
-        if (userData != null) {
-          try {
-            return User.fromJson(jsonDecode(userData));
-          } catch (e) {
-            debugPrint('Error parsing stored user data: $e');
-            throw Exception('Failed to get user information: ${response.body}');
-          }
-        }
-        throw Exception('Failed to get user information: ${response.body}');
-      }
+      final data = await _apiClient.get('/users/me');
+      final user = User.fromJson(data);
+      await AuthService.setUserData(jsonEncode(user.toJson()));
+      return user;
     } catch (e) {
-      // Try to get user from local storage if API call fails
-      final userData = await AuthService.getUserData();
-      if (userData != null) {
-        try {
-          return User.fromJson(jsonDecode(userData));
-        } catch (e2) {
-          debugPrint('Error parsing stored user data: $e2');
-          throw Exception('Error getting user information: $e');
-        }
-      }
-      throw Exception('Error getting user information: $e');
+      debugPrint('Failed to fetch user data from API: $e');
+      return null;
     }
   }
 
-  // Convert guest user to regular user
-  Future<User> convertGuestUser(
-      String name, String email, String password) async {
-    final token = await AuthService.getToken();
-
-    if (token == null) {
-      throw Exception('Not authenticated');
-    }
-
+  // Convert guest user to registered user
+  Future<User> convertGuestToRegisteredUser(
+      String email, String password, String name) async {
     try {
-      final response = await http.post(
-        Uri.parse('$_baseUrl/users/convert-guest'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode({
-          'name': name,
-          'email': email,
-          'password': password,
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        // Save the new tokens
-        await AuthService.setToken(data['access_token']);
-        await AuthService.setRefreshToken(data['refresh_token']);
-
-        // Save user data locally for offline access
-        final user = User.fromJson(data['user']);
-        await AuthService.setUserData(jsonEncode(user.toJson()));
-
-        return user;
-      } else {
-        throw Exception('Failed to convert guest user: ${response.body}');
+      final guestToken =
+          await AuthService.getToken(); // Get current guest token
+      if (guestToken == null) {
+        throw Exception('Guest token not found. Cannot convert user.');
       }
+
+      final data = await _apiClient.post('/users/convert-guest', body: {
+        'email': email,
+        'password': password,
+        'name': name,
+        'token': guestToken, // Add the guest token to the body
+      });
+
+      // After successful conversion, new tokens are issued.
+      // Update local storage with new tokens and user data.
+      await AuthService.setToken(data['access_token']);
+      await AuthService.setRefreshToken(data['refresh_token']);
+      final user = User.fromJson(data['user']);
+      await AuthService.setUserData(jsonEncode(user.toJson()));
+
+      return user;
     } catch (e) {
-      throw Exception('Error converting guest user: $e');
+      // Handle specific errors or rethrow
+      rethrow;
     }
   }
 
   // Delete user account
-  Future<bool> deleteAccount() async {
-    final token = await AuthService.getToken();
+  Future<void> deleteAccount() async {
+    try {
+      await _apiClient.delete('/users/me');
+      await _clearLocalAuthData();
+    } catch (e) {
+      rethrow;
+    }
+  }
 
-    if (token == null) {
-      // If token is null, clear auth data anyway and return success
-      await AuthService.clearAllAuthData();
-      debugPrint('No token found, cleared auth data and returning success');
-      return true;
+  // Get user data
+  Future<User?> getUserData() async {
+    // First, try to load from local storage for speed
+    final localUserData = await AuthService.getUserData();
+    if (localUserData != null) {
+      try {
+        return User.fromJson(jsonDecode(localUserData));
+      } catch (e) {
+        debugPrint('Error decoding local user data: $e');
+        // Fall through to fetch from API if local data is corrupt
+      }
     }
 
     try {
-      debugPrint('Attempting to delete account with token');
-
-      // First clear the auth data immediately to ensure logout works
-      await AuthService.clearAllAuthData();
-      debugPrint('Auth data cleared preemptively');
-
-      // Then make the API call, with timeout
-      final response = await http.delete(
-        Uri.parse('$_baseUrl/users/me'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      ).timeout(const Duration(seconds: 8), onTimeout: () {
-        // Create a fake response on timeout
-        debugPrint('API call timed out - assuming success');
-        return http.Response(
-            '{"message":"Request timed out but account is considered deleted"}',
-            200);
-      });
-
-      debugPrint('Delete account response status code: ${response.statusCode}');
-      debugPrint('Delete account response body: ${response.body}');
-
-      // Always consider it a success, as we've already cleared auth data
-      return true;
+      final data = await _apiClient.get('/users/me');
+      final user = User.fromJson(data);
+      await AuthService.setUserData(jsonEncode(user.toJson()));
+      return user;
     } catch (e) {
-      debugPrint('Error during account deletion API call: $e');
-      // We've already cleared auth data at the beginning, so just return success
-      return true;
+      debugPrint('Failed to fetch user data from API: $e');
+      return null;
+    }
+  }
+
+  // Update user data
+  Future<User?> updateUser(User user) async {
+    try {
+      final data = await _apiClient.put('/users/me', body: user.toJson());
+      final updatedUser = User.fromJson(data);
+      await AuthService.setUserData(jsonEncode(updatedUser.toJson()));
+      return updatedUser;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // Request password reset
+  Future<void> requestPasswordReset(String email) async {
+    try {
+      await _apiClient.post('/users/password-reset/',
+          body: {'email': email}, requireAuth: false);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // Confirm password reset
+  Future<void> confirmPasswordReset(
+      String token, String newPassword, String uid) async {
+    try {
+      await _apiClient.post('/users/password-reset/confirm/',
+          body: {
+            'token': token,
+            'new_password': newPassword,
+            'uid': uid,
+          },
+          requireAuth: false);
+    } catch (e) {
+      rethrow;
     }
   }
 }

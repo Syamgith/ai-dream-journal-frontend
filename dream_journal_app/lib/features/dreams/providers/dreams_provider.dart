@@ -1,9 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/models/dream_entry.dart';
+import './dream_repository_provider.dart';
 import '../data/repositories/dream_repository.dart';
 import 'package:flutter/foundation.dart';
-
-final dreamRepositoryProvider = Provider((ref) => DreamRepository());
 
 // Provider to track loading state for dreams
 final dreamsLoadingProvider = StateProvider<bool>((ref) => false);

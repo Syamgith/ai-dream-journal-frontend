@@ -1,22 +1,25 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/foundation.dart';
 import '../../../../core/auth/auth_service.dart';
+import './auth_providers.dart';
 import '../../data/repositories/auth_repository.dart';
 import '../../domain/models/user.dart';
 import '../../../dreams/providers/dreams_provider.dart';
 
 // Auth repository provider
-final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  return AuthRepository();
-});
+// final authRepositoryProvider = Provider<AuthRepository>((ref) {
+//   return AuthRepository();
+// });
 
 // Auth state notifier
 class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
   final AuthRepository _repository;
   final Ref _ref;
 
-  AuthNotifier(this._repository, this._ref)
-      : super(const AsyncValue.loading()) {
+  AuthNotifier(Ref ref)
+      : _ref = ref,
+        _repository = ref.watch(authRepositoryProvider),
+        super(const AsyncValue.loading()) {
     checkAuthStatus();
   }
 
@@ -190,7 +193,8 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
       String name, String email, String password) async {
     state = const AsyncValue.loading();
     try {
-      final user = await _repository.convertGuestUser(name, email, password);
+      final user =
+          await _repository.convertGuestToRegisteredUser(email, password, name);
       state = AsyncValue.data(user);
 
       // Force refresh dreams data after successful conversion
@@ -203,28 +207,9 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
 
   // Refresh dreams data
   Future<void> _refreshDreamsData({bool forceRefresh = false}) async {
-    try {
-      // Check if we already have dreams loaded
-      final hasInitialLoad = _ref.read(dreamsInitialLoadProvider);
-      final dreams = _ref.read(dreamsProvider);
-
-      // When forceRefresh is true, always load dreams
-      // Otherwise, only load dreams if we haven't loaded them yet or if the list is empty
-      if (forceRefresh || !hasInitialLoad || dreams.isEmpty) {
-        // First, initialize the dreams provider if needed
-        await _ref.read(dreamsProvider.notifier).initialize();
-
-        // If forceRefresh is true, explicitly call loadDreams with forceRefresh
-        if (forceRefresh) {
-          await _ref
-              .read(dreamsProvider.notifier)
-              .loadDreams(forceRefresh: true);
-        }
-      }
-    } catch (e) {
-      // Log the error but don't rethrow it to avoid disrupting the login flow
-      debugPrint('Error refreshing dreams data: $e');
-    }
+    await _ref
+        .read(dreamsProvider.notifier)
+        .loadDreams(forceRefresh: forceRefresh);
   }
 
   // Logout
@@ -243,39 +228,16 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
   }
 
   // Delete user account
-  Future<bool> deleteAccount() async {
-    // Set state to loading
+  Future<void> deleteAccount() async {
     state = const AsyncValue.loading();
-
     try {
-      debugPrint('Starting account deletion process');
-      // Clear the dreams cache before deleting account
+      await _repository.deleteAccount();
+      state = const AsyncValue.data(null);
+      // Clear dreams cache after account deletion
       _ref.read(dreamsProvider.notifier).reset();
-
-      // Add a timeout to the operation to prevent it from hanging
-      final success = await _repository
-          .deleteAccount()
-          .timeout(const Duration(seconds: 10), onTimeout: () {
-        debugPrint('Account deletion timed out after 10 seconds');
-        // Consider it a success and return true so UI can proceed
-        return true;
-      });
-
-      debugPrint('Account deletion API call completed with success: $success');
-
-      // Always set state to null after delete attempt
-      state = const AsyncValue.data(null);
-      return success;
     } catch (e) {
-      debugPrint('Error in authProvider.deleteAccount: $e');
-      // Clear auth state on error
-      state = const AsyncValue.data(null);
-      return false;
-    } finally {
-      // Ensure state is cleared no matter what happens
-      Future.delayed(const Duration(milliseconds: 500), () {
-        state = const AsyncValue.data(null);
-      });
+      state = AsyncValue.error(e, StackTrace.current);
+      rethrow;
     }
   }
 
@@ -286,15 +248,13 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
       return newToken != null;
     } catch (e) {
       debugPrint('Error refreshing token in AuthNotifier: $e');
-      // Don't throw the error, just return false to indicate refresh failed
       return false;
     }
   }
 }
 
-// Auth provider
+// Main auth provider
 final authProvider =
     StateNotifierProvider<AuthNotifier, AsyncValue<User?>>((ref) {
-  final repository = ref.watch(authRepositoryProvider);
-  return AuthNotifier(repository, ref);
+  return AuthNotifier(ref);
 });

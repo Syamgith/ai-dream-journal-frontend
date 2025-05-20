@@ -4,11 +4,9 @@ import '../../../../../features/auth/domain/models/user.dart';
 import '../../../../../features/dreams/providers/dreams_provider.dart';
 import '../../../../../features/dreams/data/models/dream_entry.dart';
 import 'package:intl/intl.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import '../../../../../core/config/config.dart';
-import '../../../../../core/auth/auth_service.dart';
+import '../../../../../core/network/api_client.dart';
 import 'package:flutter/foundation.dart';
+import '../../../../../core/providers/core_providers.dart';
 
 class ProfileState {
   final String name;
@@ -53,12 +51,17 @@ final profileProvider =
   final authState = ref.watch(authProvider);
   final user = authState.value;
   final dreams = ref.watch(dreamsProvider);
+  final apiClient = ref.read(apiClientProvider);
 
-  return ProfileNotifier(user, dreams);
+  return ProfileNotifier(user, dreams, apiClient, ref);
 });
 
 class ProfileNotifier extends StateNotifier<ProfileState> {
-  ProfileNotifier(User? user, List<DreamEntry> dreams)
+  final ApiClient _apiClient;
+  final Ref _ref;
+
+  ProfileNotifier(
+      User? user, List<DreamEntry> dreams, this._apiClient, this._ref)
       : super(ProfileState(
           name: user?.name ?? 'Guest User',
           email: user?.email ?? 'guest@example.com',
@@ -168,30 +171,11 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
   // Update user's name on the backend
   Future<bool> updateUserName(String name) async {
     try {
-      final token = await AuthService.getToken();
-      if (token == null) {
-        throw Exception('Not authenticated');
-      }
+      await _apiClient.put('/users/me', body: {'name': name});
 
-      final baseUrl = Config.apiURL;
-      final response = await http.put(
-        Uri.parse('$baseUrl/users/me'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode({
-          'name': name,
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        // Update local state after successful API call
-        updateProfile(name: name);
-        return true;
-      } else {
-        throw Exception('Failed to update user name: ${response.body}');
-      }
+      updateProfile(name: name);
+      _ref.refresh(authProvider);
+      return true;
     } catch (e) {
       debugPrint('Error updating user name: $e');
       rethrow;

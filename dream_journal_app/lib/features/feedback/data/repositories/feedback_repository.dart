@@ -1,27 +1,19 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import '../../../../core/config/config.dart';
+// import 'dart:convert'; // Removed
+// import 'package:http/http.dart' as http; // To be removed
+// import '../../../../core/config/config.dart'; // To be removed
+import '../../../../core/network/api_client.dart'; // Added
 
 class FeedbackRepository {
-  final String _apiURL = Config.apiURL;
+  // final String _apiURL = Config.apiURL; // Removed
+  final ApiClient _apiClient; // Added
+
+  FeedbackRepository(this._apiClient); // Added constructor
 
   Future<void> submitFeedback(String content) async {
     try {
-      final headers = await Config.getAuthHeaders();
-      final response = await http.post(
-        Uri.parse('$_apiURL/feedback/'),
-        headers: headers,
-        body: jsonEncode({
-          'content': content,
-          //'rating': 0, // Ignoring rating for now as requested
-        }),
-      );
-
-      if (response.statusCode != 200 && response.statusCode != 201) {
-        throw Exception('Failed to submit feedback: ${response.statusCode}');
-      }
+      await _apiClient.post('/feedback/', body: {'content': content});
     } catch (e) {
-      throw Exception('Failed to connect to the server: $e');
+      rethrow;
     }
   }
 }

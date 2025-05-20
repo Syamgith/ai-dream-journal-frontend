@@ -1,13 +1,14 @@
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../auth/auth_service.dart';
-import '../../features/auth/data/repositories/auth_repository.dart';
+import '../../features/auth/presentation/providers/auth_providers.dart';
 
 // A simpler implementation without using the http_interceptor package
 class TokenInterceptor {
-  final AuthRepository _authRepository;
+  final Ref _ref;
 
-  TokenInterceptor(this._authRepository);
+  TokenInterceptor(this._ref);
 
   // Add authorization header to request
   Future<Map<String, String>> addAuthHeader(Map<String, String> headers) async {
@@ -26,7 +27,8 @@ class TokenInterceptor {
     // If the response is 401 Unauthorized, try to refresh the token
     if (response.statusCode == 401) {
       try {
-        final newToken = await _authRepository.refreshToken();
+        final authRepository = _ref.read(authRepositoryProvider);
+        final newToken = await authRepository.refreshToken();
 
         if (newToken != null) {
           // Retry the original request with the new token

@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/custom_snackbar.dart';
 import '../../../../core/widgets/keyboard_dismissible.dart';
 import '../../../../core/utils/keyboard_utils.dart';
-import '../../data/repositories/feedback_repository.dart';
+import '../../providers/feedback_repository_provider.dart';
 
-class FeedbackPage extends StatefulWidget {
+class FeedbackPage extends ConsumerStatefulWidget {
   const FeedbackPage({super.key});
 
   @override
-  State<FeedbackPage> createState() => _FeedbackPageState();
+  ConsumerState<FeedbackPage> createState() => _FeedbackPageState();
 }
 
-class _FeedbackPageState extends State<FeedbackPage> {
+class _FeedbackPageState extends ConsumerState<FeedbackPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _feedbackController = TextEditingController();
-  final _feedbackRepository = FeedbackRepository();
   bool _isSubmitting = false;
 
   @override
@@ -31,7 +31,8 @@ class _FeedbackPageState extends State<FeedbackPage> {
       });
 
       try {
-        await _feedbackRepository
+        final feedbackRepository = ref.read(feedbackRepositoryProvider);
+        await feedbackRepository
             .submitFeedback(_feedbackController.text.trim());
 
         if (mounted) {
