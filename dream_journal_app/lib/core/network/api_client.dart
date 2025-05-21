@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../network/token_interceptor.dart';
+import 'package:flutter/foundation.dart';
 
 class ApiClient {
   final String baseUrl;
@@ -43,86 +44,107 @@ class ApiClient {
 
   // GET request
   Future<dynamic> get(String endpoint, {bool requireAuth = true}) async {
-    final headers = await _getHeaders(requireAuth: requireAuth);
+    try {
+      final headers = await _getHeaders(requireAuth: requireAuth);
 
-    final response = await _handleResponse(
-      () => http.get(Uri.parse('$baseUrl$endpoint'), headers: headers),
-      (newToken) {
-        final newHeaders = Map<String, String>.from(headers);
-        newHeaders['Authorization'] = 'Bearer $newToken';
-        return http.get(Uri.parse('$baseUrl$endpoint'), headers: newHeaders);
-      },
-    );
+      final response = await _handleResponse(
+        () => http.get(Uri.parse('$baseUrl$endpoint'), headers: headers),
+        (newToken) {
+          final newHeaders = Map<String, String>.from(headers);
+          newHeaders['Authorization'] = 'Bearer $newToken';
+          return http.get(Uri.parse('$baseUrl$endpoint'), headers: newHeaders);
+        },
+      );
 
-    return _processResponse(response);
+      return _processResponse(response);
+    } on ForceLogoutInitiatedException {
+      debugPrint('ApiClient: Request aborted due to force logout.');
+      rethrow;
+    }
   }
 
   // POST request
   Future<dynamic> post(String endpoint,
       {dynamic body, bool requireAuth = true}) async {
-    final headers = await _getHeaders(requireAuth: requireAuth);
-    final encodedBody = jsonEncode(body);
+    try {
+      final headers = await _getHeaders(requireAuth: requireAuth);
+      final encodedBody = jsonEncode(body);
 
-    final response = await _handleResponse(
-      () => http.post(
-        Uri.parse('$baseUrl$endpoint'),
-        headers: headers,
-        body: encodedBody,
-      ),
-      (newToken) {
-        final newHeaders = Map<String, String>.from(headers);
-        newHeaders['Authorization'] = 'Bearer $newToken';
-        return http.post(
+      final response = await _handleResponse(
+        () => http.post(
           Uri.parse('$baseUrl$endpoint'),
-          headers: newHeaders,
+          headers: headers,
           body: encodedBody,
-        );
-      },
-    );
+        ),
+        (newToken) {
+          final newHeaders = Map<String, String>.from(headers);
+          newHeaders['Authorization'] = 'Bearer $newToken';
+          return http.post(
+            Uri.parse('$baseUrl$endpoint'),
+            headers: newHeaders,
+            body: encodedBody,
+          );
+        },
+      );
 
-    return _processResponse(response);
+      return _processResponse(response);
+    } on ForceLogoutInitiatedException {
+      debugPrint('ApiClient: Request aborted due to force logout.');
+      rethrow;
+    }
   }
 
   // PUT request
   Future<dynamic> put(String endpoint,
       {dynamic body, bool requireAuth = true}) async {
-    final headers = await _getHeaders(requireAuth: requireAuth);
-    final encodedBody = jsonEncode(body);
+    try {
+      final headers = await _getHeaders(requireAuth: requireAuth);
+      final encodedBody = jsonEncode(body);
 
-    final response = await _handleResponse(
-      () => http.put(
-        Uri.parse('$baseUrl$endpoint'),
-        headers: headers,
-        body: encodedBody,
-      ),
-      (newToken) {
-        final newHeaders = Map<String, String>.from(headers);
-        newHeaders['Authorization'] = 'Bearer $newToken';
-        return http.put(
+      final response = await _handleResponse(
+        () => http.put(
           Uri.parse('$baseUrl$endpoint'),
-          headers: newHeaders,
+          headers: headers,
           body: encodedBody,
-        );
-      },
-    );
+        ),
+        (newToken) {
+          final newHeaders = Map<String, String>.from(headers);
+          newHeaders['Authorization'] = 'Bearer $newToken';
+          return http.put(
+            Uri.parse('$baseUrl$endpoint'),
+            headers: newHeaders,
+            body: encodedBody,
+          );
+        },
+      );
 
-    return _processResponse(response);
+      return _processResponse(response);
+    } on ForceLogoutInitiatedException {
+      debugPrint('ApiClient: Request aborted due to force logout.');
+      rethrow;
+    }
   }
 
   // DELETE request
   Future<dynamic> delete(String endpoint, {bool requireAuth = true}) async {
-    final headers = await _getHeaders(requireAuth: requireAuth);
+    try {
+      final headers = await _getHeaders(requireAuth: requireAuth);
 
-    final response = await _handleResponse(
-      () => http.delete(Uri.parse('$baseUrl$endpoint'), headers: headers),
-      (newToken) {
-        final newHeaders = Map<String, String>.from(headers);
-        newHeaders['Authorization'] = 'Bearer $newToken';
-        return http.delete(Uri.parse('$baseUrl$endpoint'), headers: newHeaders);
-      },
-    );
+      final response = await _handleResponse(
+        () => http.delete(Uri.parse('$baseUrl$endpoint'), headers: headers),
+        (newToken) {
+          final newHeaders = Map<String, String>.from(headers);
+          newHeaders['Authorization'] = 'Bearer $newToken';
+          return http.delete(Uri.parse('$baseUrl$endpoint'),
+              headers: newHeaders);
+        },
+      );
 
-    return _processResponse(response);
+      return _processResponse(response);
+    } on ForceLogoutInitiatedException {
+      debugPrint('ApiClient: Request aborted due to force logout.');
+      rethrow;
+    }
   }
 
   // Process response

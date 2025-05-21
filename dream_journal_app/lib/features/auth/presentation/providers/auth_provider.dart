@@ -227,6 +227,29 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
     }
   }
 
+  // Add this new method
+  Future<void> forceLogout() async {
+    debugPrint("AuthNotifier: forceLogout initiated by system.");
+    try {
+      // Standard logout procedure: clear tokens, user data, Google sign-out.
+      // _repository.logout() handles API calls and local data clearing.
+      await _repository.logout();
+    } catch (e) {
+      // Log error during repository's logout, but ensure local state is cleared.
+      debugPrint(
+          "Error during _repository.logout() in forceLogout: $e. Ensuring local state is cleared.");
+      // _repository.logout() has a finally block that calls _clearLocalAuthData(),
+      // so local tokens/data should be cleared even if API call fails.
+    } finally {
+      // Crucially, reset any user-specific data (like dreams) and update the auth state.
+      _ref.read(dreamsProvider.notifier).reset();
+      state = const AsyncValue.data(
+          null); // This will notify listeners and trigger UI navigation.
+      debugPrint(
+          "AuthNotifier: forceLogout completed. Auth state set to null.");
+    }
+  }
+
   // Delete user account
   Future<void> deleteAccount() async {
     state = const AsyncValue.loading();
