@@ -247,26 +247,37 @@ class AuthRepository {
     }
   }
 
-  // Refresh token
-  Future<String?> refreshToken() async {
+  static Future<String?> refreshToken() async {
     final refreshToken = await AuthService.getRefreshToken();
     if (refreshToken == null) {
       throw Exception('No refresh token available');
     }
 
     try {
-      final data = await _apiClient.post('/users/refresh',
-          body: {'refresh': refreshToken}, requireAuth: false);
+      final uri = Uri.parse('${Config.apiURL}/users/refresh')
+          .replace(queryParameters: {'refresh_token': refreshToken});
 
-      final newAccessToken = data['access_token'];
-      await AuthService.setToken(newAccessToken);
-      if (data.containsKey('refresh_token')) {
-        await AuthService.setRefreshToken(data['refresh_token']);
+      final response = await http.post(uri, headers: {
+        'Accept': 'application/json',
+      });
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final newToken = data['access_token'];
+        await AuthService.setToken(newToken);
+        // If the response also contains a new refresh token, save it
+        if (data.containsKey('refresh_token')) {
+          await AuthService.setRefreshToken(data['refresh_token']);
+        }
+        return newToken;
+      } else {
+        debugPrint(
+            'Token refresh failed with status code: ${response.statusCode}');
+        return null;
       }
-      return newAccessToken;
     } catch (e) {
-      await logout();
-      rethrow;
+      debugPrint('Error refreshing token: $e');
+      return null;
     }
   }
 

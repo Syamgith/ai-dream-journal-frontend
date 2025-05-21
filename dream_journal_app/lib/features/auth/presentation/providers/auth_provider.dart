@@ -244,7 +244,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
   // Refresh token
   Future<bool> refreshToken() async {
     try {
-      final newToken = await _repository.refreshToken();
+      final newToken = await AuthRepository.refreshToken();
       return newToken != null;
     } catch (e) {
       debugPrint('Error refreshing token in AuthNotifier: $e');

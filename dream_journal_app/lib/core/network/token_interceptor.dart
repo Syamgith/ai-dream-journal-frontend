@@ -1,6 +1,7 @@
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../features/auth/data/repositories/auth_repository.dart';
 import '../auth/auth_service.dart';
 import '../../features/auth/presentation/providers/auth_providers.dart';
 
@@ -27,8 +28,8 @@ class TokenInterceptor {
     // If the response is 401 Unauthorized, try to refresh the token
     if (response.statusCode == 401) {
       try {
-        final authRepository = _ref.read(authRepositoryProvider);
-        final newToken = await authRepository.refreshToken();
+        //final authRepository = _ref.read(authRepositoryProvider);
+        final newToken = await AuthRepository.refreshToken();
 
         if (newToken != null) {
           // Retry the original request with the new token
