@@ -3,12 +3,15 @@ import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb, debugPrint;
 // import 'package:http/http.dart' as http; // Will be removed after refactoring confirmPasswordReset
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:http/http.dart' as http;
+import '../../../../core/config/config.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/config/auth_config.dart';
 import '../../../../core/auth/auth_service.dart';
 import '../../domain/models/user.dart';
 
 class AuthRepository {
+  final String _baseUrl = Config.apiURL;
   final ApiClient _apiClient;
 
   // Initialize Google Sign-In with platform-specific configuration
@@ -139,23 +142,66 @@ class AuthRepository {
       debugPrint('ID Token: ${googleAuth.idToken}');
       debugPrint('Access Token: ${googleAuth.accessToken}');
 
-      // Send the ID token to your backend
-      final data = await _apiClient.post('/users/auth/google',
-          body: {'id_token': googleAuth.idToken}, requireAuth: false);
+      // Use idToken if available, otherwise fall back to accessToken
+      final tokenToUse = googleAuth.idToken ?? googleAuth.accessToken;
 
-      // Save the tokens
-      await AuthService.setToken(data['access_token']);
-      await AuthService.setRefreshToken(data['refresh_token']);
+      if (tokenToUse == null) {
+        throw Exception('Failed to obtain authentication token from Google');
+      }
 
-      // Save user data locally for offline access
-      final user = User.fromJson(data['user']);
-      await AuthService.setUserData(jsonEncode(user.toJson()));
+      // Determine which type of token we're sending
+      final tokenType =
+          googleAuth.idToken != null ? 'id_token' : 'access_token';
 
-      return user;
+      // Send the token to your backend
+      final response = await http.post(
+        Uri.parse('$_baseUrl/users/auth/google'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'token': tokenToUse,
+          'token_type': tokenType,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        // Save the tokens
+        await AuthService.setToken(data['access_token']);
+        await AuthService.setRefreshToken(data['refresh_token']);
+
+        // Save user data locally for offline access
+        final user = User.fromJson(data['user']);
+        await AuthService.setUserData(jsonEncode(user.toJson()));
+
+        return user;
+      } else {
+        // Try to extract a more user-friendly error message
+        String errorMessage = 'Failed to login with Google';
+
+        if (response.body.isNotEmpty) {
+          try {
+            final errorData = jsonDecode(response.body);
+            if (errorData != null && errorData is Map) {
+              if (errorData.containsKey('detail')) {
+                errorMessage = errorData['detail'];
+              }
+            }
+          } catch (e) {
+            // If JSON parsing fails, use generic message
+            errorMessage = 'Google login failed. Please try again later.';
+          }
+        }
+
+        throw Exception(errorMessage);
+      }
     } catch (e) {
-      // Handle Google Sign-In specific errors or rethrow general errors
-      debugPrint('Google sign-in error: $e');
-      rethrow;
+      // Ensure sign out from Google when there's an error
+      await _googleSignIn.signOut();
+      if (e is Exception) {
+        rethrow;
+      }
+      throw Exception('Error during Google sign-in. Please try again.');
     }
   }
 
