@@ -49,7 +49,7 @@ class AboutPage extends StatelessWidget {
             ),
             const Center(
               child: Text(
-                'Version 1.0.0',
+                'Version 1.0.1',
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.white70,
