@@ -173,8 +173,14 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
     try {
       await _apiClient.put('/users/me', body: {'name': name});
 
+      // Optimistically update the local profile state
       updateProfile(name: name);
-      _ref.refresh(authProvider);
+
+      // Update the authProvider's state directly
+      _ref.read(authProvider.notifier).updateUserNameInState(name);
+
+      // No longer needed as authProvider update will trigger rebuilds
+      // _ref.refresh(authProvider);
       return true;
     } catch (e) {
       debugPrint('Error updating user name: $e');

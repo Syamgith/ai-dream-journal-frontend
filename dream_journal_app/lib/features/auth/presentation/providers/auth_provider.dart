@@ -274,6 +274,16 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
       return false;
     }
   }
+
+  // Method to update the username in the current state
+  void updateUserNameInState(String newName) {
+    state.whenData((currentUser) {
+      if (currentUser != null) {
+        final updatedUser = currentUser.copyWith(name: newName);
+        state = AsyncValue.data(updatedUser);
+      }
+    });
+  }
 }
 
 // Main auth provider

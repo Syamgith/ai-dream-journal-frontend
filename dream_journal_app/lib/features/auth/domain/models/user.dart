@@ -34,4 +34,20 @@ class User {
       'date_created': dateCreated?.toIso8601String(),
     };
   }
+
+  User copyWith({
+    int? id,
+    String? email,
+    String? name,
+    bool? isGuest,
+    DateTime? dateCreated,
+  }) {
+    return User(
+      id: id ?? this.id,
+      email: email ?? this.email,
+      name: name ?? this.name,
+      isGuest: isGuest ?? this.isGuest,
+      dateCreated: dateCreated ?? this.dateCreated,
+    );
+  }
 }
