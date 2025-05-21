@@ -4,16 +4,47 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../network/token_interceptor.dart';
 import 'package:flutter/foundation.dart';
 
+// Custom exception for rate limiting
+class RateLimitExceededException implements Exception {
+  final String message;
+  RateLimitExceededException(this.message);
+
+  @override
+  String toString() => 'RateLimitExceededException: $message';
+}
+
 class ApiClient {
   final String baseUrl;
   final Ref _ref;
   late final TokenInterceptor _tokenInterceptor;
+
+  // Rate limiting variables
+  final List<DateTime> _requestTimestamps = [];
+  static const int _maxRequests = 100;
+  static const Duration _timeWindow = Duration(hours: 1);
 
   ApiClient({
     required this.baseUrl,
     required Ref ref,
   }) : _ref = ref {
     _tokenInterceptor = TokenInterceptor(_ref);
+  }
+
+  // Core rate-limiting logic
+  void _checkAndRecordRequest() {
+    final now = DateTime.now();
+    // Remove old timestamps
+    _requestTimestamps
+        .removeWhere((timestamp) => now.difference(timestamp) > _timeWindow);
+
+    // Check request limit
+    if (_requestTimestamps.length >= _maxRequests) {
+      throw RateLimitExceededException(
+          'API rate limit exceeded. Please try again later.');
+    }
+
+    // Record current request timestamp
+    _requestTimestamps.add(now);
   }
 
   // Helper method to get auth headers
@@ -44,6 +75,7 @@ class ApiClient {
 
   // GET request
   Future<dynamic> get(String endpoint, {bool requireAuth = true}) async {
+    _checkAndRecordRequest();
     try {
       final headers = await _getHeaders(requireAuth: requireAuth);
 
@@ -57,6 +89,9 @@ class ApiClient {
       );
 
       return _processResponse(response);
+    } on RateLimitExceededException {
+      debugPrint('ApiClient: Rate limit exceeded for GET $endpoint.');
+      rethrow;
     } on ForceLogoutInitiatedException {
       debugPrint('ApiClient: Request aborted due to force logout.');
       rethrow;
@@ -66,6 +101,7 @@ class ApiClient {
   // POST request
   Future<dynamic> post(String endpoint,
       {dynamic body, bool requireAuth = true}) async {
+    _checkAndRecordRequest();
     try {
       final headers = await _getHeaders(requireAuth: requireAuth);
       final encodedBody = jsonEncode(body);
@@ -88,6 +124,9 @@ class ApiClient {
       );
 
       return _processResponse(response);
+    } on RateLimitExceededException {
+      debugPrint('ApiClient: Rate limit exceeded for POST $endpoint.');
+      rethrow;
     } on ForceLogoutInitiatedException {
       debugPrint('ApiClient: Request aborted due to force logout.');
       rethrow;
@@ -97,6 +136,7 @@ class ApiClient {
   // PUT request
   Future<dynamic> put(String endpoint,
       {dynamic body, bool requireAuth = true}) async {
+    _checkAndRecordRequest();
     try {
       final headers = await _getHeaders(requireAuth: requireAuth);
       final encodedBody = jsonEncode(body);
@@ -119,6 +159,9 @@ class ApiClient {
       );
 
       return _processResponse(response);
+    } on RateLimitExceededException {
+      debugPrint('ApiClient: Rate limit exceeded for PUT $endpoint.');
+      rethrow;
     } on ForceLogoutInitiatedException {
       debugPrint('ApiClient: Request aborted due to force logout.');
       rethrow;
@@ -127,6 +170,7 @@ class ApiClient {
 
   // DELETE request
   Future<dynamic> delete(String endpoint, {bool requireAuth = true}) async {
+    _checkAndRecordRequest();
     try {
       final headers = await _getHeaders(requireAuth: requireAuth);
 
@@ -141,6 +185,9 @@ class ApiClient {
       );
 
       return _processResponse(response);
+    } on RateLimitExceededException {
+      debugPrint('ApiClient: Rate limit exceeded for DELETE $endpoint.');
+      rethrow;
     } on ForceLogoutInitiatedException {
       debugPrint('ApiClient: Request aborted due to force logout.');
       rethrow;

@@ -5,6 +5,11 @@ class ErrorFormatter {
   /// Formats error messages from various sources to be user-friendly
   static String format(Object error) {
     final errorStr = error.toString();
+    debugPrint(errorStr);
+    // Handle RateLimitExceededException specifically
+    if (errorStr.contains('API rate limit exceeded')) {
+      return "Limit exceeded. Please try again later.";
+    }
 
     // Check if the error message contains a JSON string
     if (errorStr.contains('{"detail":')) {
