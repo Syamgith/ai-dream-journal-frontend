@@ -7,6 +7,8 @@ import 'package:intl/intl.dart';
 import '../../../../../core/network/api_client.dart';
 import 'package:flutter/foundation.dart';
 import '../../../../../core/providers/core_providers.dart';
+import 'dart:convert'; // For jsonEncode
+import '../../../../../core/auth/auth_service.dart'; // Corrected path for AuthService
 
 class ProfileState {
   final String name;
@@ -177,10 +179,17 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
       updateProfile(name: name);
 
       // Update the authProvider's state directly
-      _ref.read(authProvider.notifier).updateUserNameInState(name);
+      final authNotifier = _ref.read(authProvider.notifier);
+      authNotifier.updateUserNameInState(name);
 
-      // No longer needed as authProvider update will trigger rebuilds
-      // _ref.refresh(authProvider);
+      // Persist the updated user data locally
+      // Access the updated user directly from the authNotifier's state
+      final updatedUser = authNotifier.state.value;
+
+      if (updatedUser != null) {
+        await AuthService.setUserData(jsonEncode(updatedUser.toJson()));
+      }
+
       return true;
     } catch (e) {
       debugPrint('Error updating user name: $e');
