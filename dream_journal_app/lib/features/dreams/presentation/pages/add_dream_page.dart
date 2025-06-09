@@ -443,6 +443,43 @@ class _AddDreamPageState extends ConsumerState<AddDreamPage>
                             height: 1.5,
                           ),
                         ),
+                        const SizedBox(height: 16),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: InkWell(
+                            onTap: () {
+                              // TODO: Implement flag/report functionality
+                            },
+                            borderRadius: BorderRadius.circular(8),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 4, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: AppColors.primaryBlue.withAlpha(77),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.flag_outlined,
+                                    color: AppColors.white.withAlpha(179),
+                                    size: 12,
+                                  ),
+                                  const SizedBox(width: 2),
+                                  Text(
+                                    'Report',
+                                    style: TextStyle(
+                                      color: AppColors.white.withAlpha(179),
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
