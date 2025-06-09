@@ -135,4 +135,16 @@ class DreamRepository {
       rethrow;
     }
   }
+
+  // Report a dream for inappropriate content
+  Future<void> reportDream(int dreamId, {String? reason}) async {
+    try {
+      await _apiClient.post(
+        '/dreams/$dreamId/report',
+        body: reason != null ? {'reason': reason} : null,
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

@@ -27,6 +27,7 @@ class _AddDreamPageState extends ConsumerState<AddDreamPage>
   late DateTime _selectedDate;
   String? _interpretation;
   bool _isLoading = false;
+  int? _interpretedDreamId;
 
   // Animation controllers
   late AnimationController _starsController;
@@ -447,10 +448,8 @@ class _AddDreamPageState extends ConsumerState<AddDreamPage>
                         Align(
                           alignment: Alignment.centerRight,
                           child: InkWell(
-                            onTap: () {
-                              // TODO: Implement flag/report functionality
-                            },
-                            borderRadius: BorderRadius.circular(8),
+                            onTap: () => _showReportDialog(context),
+                            borderRadius: BorderRadius.circular(4),
                             child: Container(
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 4, vertical: 2),
@@ -584,6 +583,7 @@ class _AddDreamPageState extends ConsumerState<AddDreamPage>
         if (mounted) {
           setState(() {
             _interpretation = interpretedDream.interpretation;
+            _interpretedDreamId = interpretedDream.id;
             // Update the title controller if API returned a title and user didn't provide one
             if (_titleController.text.trim().isEmpty &&
                 interpretedDream.title != null) {
@@ -608,6 +608,137 @@ class _AddDreamPageState extends ConsumerState<AddDreamPage>
         });
       }
     }
+  }
+
+  void _showReportDialog(BuildContext context) {
+    final TextEditingController reasonController = TextEditingController();
+    bool isSubmitting = false;
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          backgroundColor: AppColors.darkBlue,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Text(
+            'Report Dream',
+            style: TextStyle(
+              color: AppColors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Please provide a reason for reporting this dream interpretation.',
+                style: TextStyle(
+                  color: AppColors.white,
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: reasonController,
+                maxLength: 200,
+                maxLines: 3,
+                style: const TextStyle(
+                  color: AppColors.white,
+                  fontSize: 14,
+                ),
+                decoration: InputDecoration(
+                  hintText: 'Enter reason (optional)',
+                  hintStyle: TextStyle(
+                    color: AppColors.white.withAlpha(128),
+                    fontSize: 14,
+                  ),
+                  filled: true,
+                  fillColor: AppColors.background,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide.none,
+                  ),
+                  counterStyle: TextStyle(
+                    color: AppColors.white.withAlpha(128),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed:
+                  isSubmitting ? null : () => Navigator.of(dialogContext).pop(),
+              child: Text(
+                'Cancel',
+                style: TextStyle(
+                  color: AppColors.white.withAlpha(179),
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: isSubmitting
+                  ? null
+                  : () async {
+                      setState(() => isSubmitting = true);
+                      try {
+                        final dreamId = widget.dream?.id ?? _interpretedDreamId;
+                        if (dreamId != null) {
+                          await ref.read(dreamsProvider.notifier).reportDream(
+                                dreamId,
+                                reason: reasonController.text.trim(),
+                              );
+                          if (context.mounted) {
+                            CustomSnackbar.show(
+                              context: context,
+                              message: 'Dream reported successfully',
+                              type: SnackBarType.success,
+                            );
+                            Navigator.of(dialogContext).pop();
+                          }
+                        } else {
+                          throw Exception('Dream ID not available');
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          CustomSnackbar.show(
+                            context: context,
+                            message: 'Error reporting dream: ${e.toString()}',
+                            type: SnackBarType.error,
+                          );
+                        }
+                      } finally {
+                        if (mounted) {
+                          setState(() => isSubmitting = false);
+                        }
+                      }
+                    },
+              child: isSubmitting
+                  ? SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          AppColors.white.withAlpha(179),
+                        ),
+                      ),
+                    )
+                  : Text(
+                      'Submit',
+                      style: TextStyle(
+                        color: AppColors.white.withAlpha(179),
+                      ),
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

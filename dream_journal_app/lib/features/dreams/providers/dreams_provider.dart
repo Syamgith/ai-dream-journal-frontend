@@ -135,6 +135,15 @@ class DreamsNotifier extends StateNotifier<List<DreamEntry>> {
     }
   }
 
+  // Report a dream for inappropriate content
+  Future<void> reportDream(int dreamId, {String? reason}) async {
+    try {
+      await _repository.reportDream(dreamId, reason: reason);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   // Method to refresh a specific dream by ID
   Future<void> refreshDream(int id) async {
     try {
