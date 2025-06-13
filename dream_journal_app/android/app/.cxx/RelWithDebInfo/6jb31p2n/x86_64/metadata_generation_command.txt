@@ -1,0 +1,20 @@
+                        -H/Users/syamgith/flutter/packages/flutter_tools/gradle/src/main/groovy
+-DCMAKE_SYSTEM_NAME=Android
+-DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+-DCMAKE_SYSTEM_VERSION=21
+-DANDROID_PLATFORM=android-21
+-DANDROID_ABI=x86_64
+-DCMAKE_ANDROID_ARCH_ABI=x86_64
+-DANDROID_NDK=/Users/syamgith/AndroidStudioCMD/ndk/21.4.7075529
+-DCMAKE_ANDROID_NDK=/Users/syamgith/AndroidStudioCMD/ndk/21.4.7075529
+-DCMAKE_TOOLCHAIN_FILE=/Users/syamgith/AndroidStudioCMD/ndk/21.4.7075529/build/cmake/android.toolchain.cmake
+-DCMAKE_MAKE_PROGRAM=/Users/syamgith/AndroidStudioCMD/cmake/3.22.1/bin/ninja
+-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=/Users/syamgith/Documents/Apps/ai-dream-journal-frontend/dream_journal_app/build/app/intermediates/cxx/RelWithDebInfo/6jb31p2n/obj/x86_64
+-DCMAKE_RUNTIME_OUTPUT_DIRECTORY=/Users/syamgith/Documents/Apps/ai-dream-journal-frontend/dream_journal_app/build/app/intermediates/cxx/RelWithDebInfo/6jb31p2n/obj/x86_64
+-DCMAKE_BUILD_TYPE=RelWithDebInfo
+-B/Users/syamgith/Documents/Apps/ai-dream-journal-frontend/dream_journal_app/android/app/.cxx/RelWithDebInfo/6jb31p2n/x86_64
+-GNinja
+-Wno-dev
+--no-warn-unused-cli
+                        Build command args: []
+                        Version: 2

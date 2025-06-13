@@ -12,7 +12,8 @@ if (keystorePropertiesFile.exists()) {
 android {
     namespace = "com.tinystars.dreamidiary"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "21.4.7075529"
+    // ndkVersion = flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
