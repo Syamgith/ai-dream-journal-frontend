@@ -29,9 +29,9 @@ A modern Flutter application that allows users to record, track, and analyze the
 #### Mobile App
 
 <p align="center">
-  <img src="../pics/ss1.jpg" alt="Login" width="200"/>
-  <img src="../pics/ss3.jpg" alt="Dream List" width="200"/>
-  <img src="../pics/s22.jpg" alt="Add Dream" width="200"/>
+  <img src="../pics/ss1.jpg" alt="Login" width="300"/>
+  <img src="../pics/ss3.jpg" alt="Dream List" width="300"/>
+  <img src="../pics/ss2.jpg" alt="Add Dream" width="300"/>
 </p>
 
 ## Tech Stack
