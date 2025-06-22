@@ -572,10 +572,21 @@ class _AddDreamPageState extends ConsumerState<AddDreamPage>
       );
 
       if (widget.dream != null) {
-        await ref.read(dreamsProvider.notifier).updateDream(dream);
+        final interpretedDream =
+            await ref.read(dreamsProvider.notifier).updateDream(dream);
+
         if (mounted) {
-          Navigator.pop(context);
+          setState(() {
+            _interpretation = interpretedDream.interpretation;
+            _interpretedDreamId = interpretedDream.id;
+            // Update the title controller if API returned a title and user didn't provide one
+            if (_titleController.text.trim().isEmpty &&
+                interpretedDream.title != null) {
+              _titleController.text = interpretedDream.title!;
+            }
+          });
         }
+        return;
       } else {
         final interpretedDream =
             await ref.read(dreamsProvider.notifier).addDream(dream);

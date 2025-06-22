@@ -103,16 +103,17 @@ class DreamsNotifier extends StateNotifier<List<DreamEntry>> {
   }
 
   // Update a dream without triggering a full reload
-  Future<void> updateDream(DreamEntry dream) async {
+  Future<DreamEntry> updateDream(DreamEntry dream) async {
     try {
       // Using a direct update approach without loading indicator to avoid UI flicker
-      await _repository.updateDream(dream);
+      final interpretedDream = await _repository.updateDream(dream);
 
       // Update only the specific dream in the list
       state = [
         for (final item in state)
-          if (item.id == dream.id) dream else item
+          if (item.id == dream.id) interpretedDream else item
       ];
+      return interpretedDream;
     } finally {
       // Ensure loading state is false when done
       _ref.read(dreamsLoadingProvider.notifier).state = false;

@@ -1,5 +1,3 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 import '../models/dream_entry.dart';
 import '../../../../core/network/api_client.dart';
 
@@ -106,18 +104,21 @@ class DreamRepository {
     }
   }
 
-  Future<void> updateDream(DreamEntry dream) async {
+  Future<DreamEntry> updateDream(DreamEntry dream) async {
     try {
-      await _apiClient.put(
+      final dynamic responseData = await _apiClient.put(
         '/dreams/${dream.id}/',
         body: dream.toJson(),
       );
 
+      final interpretedDream = DreamEntry.fromJson(responseData);
+
       // Update in cache
       final index = _dreams.indexWhere((d) => d.id == dream.id);
       if (index != -1) {
-        _dreams[index] = dream;
+        _dreams[index] = interpretedDream;
       }
+      return interpretedDream;
     } catch (e) {
       rethrow;
     }
