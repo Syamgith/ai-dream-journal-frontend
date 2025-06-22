@@ -28,6 +28,7 @@ class _AddDreamPageState extends ConsumerState<AddDreamPage>
   String? _interpretation;
   bool _isLoading = false;
   int? _interpretedDreamId;
+  bool _hasBeenUpdated = false;
 
   // Animation controllers
   late AnimationController _starsController;
@@ -40,7 +41,6 @@ class _AddDreamPageState extends ConsumerState<AddDreamPage>
       _titleController.text = widget.dream!.title ?? '';
       _descriptionController.text = widget.dream!.description;
       _selectedDate = widget.dream!.timestamp;
-      _interpretation = widget.dream!.interpretation;
     } else {
       _selectedDate = DateTime.now();
     }
@@ -248,7 +248,9 @@ class _AddDreamPageState extends ConsumerState<AddDreamPage>
                         ),
                       ),
                       const SizedBox(height: 20),
-                      if (widget.dream != null)
+                      if (widget.dream != null &&
+                          !_hasBeenUpdated &&
+                          !_isLoading)
                         Container(
                           height: 36,
                           decoration: BoxDecoration(
@@ -492,6 +494,15 @@ class _AddDreamPageState extends ConsumerState<AddDreamPage>
                       isHomeButton: _interpretation != null,
                     ),
                   ),
+                if (widget.dream != null &&
+                    _interpretation != null &&
+                    !_isLoading)
+                  Center(
+                    child: _DreamSaveButton(
+                      onTap: _navigateToHome,
+                      isHomeButton: true,
+                    ),
+                  ),
               ],
             ),
           ),
@@ -584,6 +595,7 @@ class _AddDreamPageState extends ConsumerState<AddDreamPage>
                 interpretedDream.title != null) {
               _titleController.text = interpretedDream.title!;
             }
+            _hasBeenUpdated = true;
           });
         }
         return;
@@ -600,6 +612,7 @@ class _AddDreamPageState extends ConsumerState<AddDreamPage>
                 interpretedDream.title != null) {
               _titleController.text = interpretedDream.title!;
             }
+            _hasBeenUpdated = true;
           });
         }
         return; // Don't pop the page, show interpretation instead
