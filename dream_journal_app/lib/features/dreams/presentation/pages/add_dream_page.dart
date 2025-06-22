@@ -565,6 +565,16 @@ class _AddDreamPageState extends ConsumerState<AddDreamPage>
       return;
     }
 
+    // Add validation for minimum character length
+    if (_descriptionController.text.trim().length < 10) {
+      CustomSnackbar.show(
+        context: context,
+        message: 'Dream description is too short..',
+        type: SnackBarType.error,
+      );
+      return;
+    }
+
     if (mounted) {
       setState(() {
         _isLoading = true;
