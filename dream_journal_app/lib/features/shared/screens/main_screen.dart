@@ -92,6 +92,17 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             _onTabTapped(index);
           },
         ),
+        floatingActionButton: _currentIndex == 0
+            ? FloatingActionButton(
+                onPressed: () {
+                  KeyboardUtils.hideKeyboard(context);
+                  Navigator.pushNamed(context, '/dream-explorer');
+                },
+                backgroundColor: AppColors.primaryBlue,
+                tooltip: 'Dream Explorer',
+                child: const Icon(Icons.auto_awesome, color: AppColors.white),
+              )
+            : null,
       ),
     );
   }

@@ -8,7 +8,6 @@ import '../../../../core/widgets/custom_snackbar.dart';
 import '../../../../core/widgets/error_message_display.dart';
 import '../../../../core/utils/error_formatter.dart';
 import '../../../../core/widgets/keyboard_dismissible.dart';
-import '../../../../core/utils/keyboard_utils.dart';
 
 class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});

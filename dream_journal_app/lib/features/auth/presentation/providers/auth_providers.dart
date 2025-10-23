@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/repositories/auth_repository.dart';
-import '../../../../core/network/api_client.dart'; // Will be needed for ApiClient type
-import '../../../../core/providers/core_providers.dart'; // Corrected import
+import '../../../../core/providers/core_providers.dart';
 
 // This provider will be defined in core_providers.dart later
 // extern final apiClientProvider;

@@ -9,6 +9,7 @@ import 'features/feedback/presentation/pages/feedback_page.dart';
 import 'features/about/presentation/pages/about_page.dart';
 import 'features/settings/presentation/pages/settings_page.dart';
 import 'features/shared/screens/main_screen.dart';
+import 'features/dream_explorer/presentation/pages/dream_explorer_page.dart';
 
 class AppRoutes {
   static const String main = '/';
@@ -22,6 +23,7 @@ class AppRoutes {
   static const String feedback = '/feedback';
   static const String about = '/about';
   static const String settings = '/settings';
+  static const String dreamExplorer = '/dream-explorer';
 
   static Map<String, WidgetBuilder> getRoutes() {
     return {
@@ -35,6 +37,7 @@ class AppRoutes {
       feedback: (context) => const FeedbackPage(),
       about: (context) => const AboutPage(),
       settings: (context) => const SettingsPage(),
+      dreamExplorer: (context) => const DreamExplorerPage(),
     };
   }
 }
