@@ -84,7 +84,7 @@ class _ChatTabState extends ConsumerState<ChatTab>
         if (conversationState.relevantDreams.isNotEmpty) ...[
           Container(
             padding: const EdgeInsets.all(8),
-            color: AppColors.darkBlue.withOpacity(0.3),
+            color: AppColors.darkBlue.withValues(alpha: 0.3),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -139,7 +139,7 @@ class _ChatTabState extends ConsumerState<ChatTab>
             color: AppColors.darkBlue,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.2),
+                color: Colors.black.withValues(alpha: 0.2),
                 blurRadius: 8,
                 offset: const Offset(0, -2),
               ),
@@ -155,7 +155,7 @@ class _ChatTabState extends ConsumerState<ChatTab>
                   style: const TextStyle(color: AppColors.white),
                   decoration: InputDecoration(
                     hintText: 'Ask about your dreams...',
-                    hintStyle: TextStyle(color: AppColors.white.withOpacity(0.5)),
+                    hintStyle: TextStyle(color: AppColors.white.withValues(alpha: 0.5)),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(24),
                       borderSide: const BorderSide(color: AppColors.lightBlue),
@@ -181,11 +181,11 @@ class _ChatTabState extends ConsumerState<ChatTab>
                 icon: Icon(
                   Icons.send,
                   color: conversationState.isLoading
-                      ? AppColors.white.withOpacity(0.3)
+                      ? AppColors.white.withValues(alpha: 0.3)
                       : AppColors.primaryBlue,
                 ),
                 style: IconButton.styleFrom(
-                  backgroundColor: AppColors.primaryBlue.withOpacity(0.2),
+                  backgroundColor: AppColors.primaryBlue.withValues(alpha: 0.2),
                   padding: const EdgeInsets.all(12),
                 ),
               ),
@@ -204,13 +204,13 @@ class _ChatTabState extends ConsumerState<ChatTab>
           Icon(
             Icons.chat_bubble_outline,
             size: 64,
-            color: AppColors.lightBlue.withOpacity(0.5),
+            color: AppColors.lightBlue.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
             'Start a conversation',
             style: TextStyle(
-              color: AppColors.white.withOpacity(0.7),
+              color: AppColors.white.withValues(alpha: 0.7),
               fontSize: 18,
             ),
           ),
@@ -218,7 +218,7 @@ class _ChatTabState extends ConsumerState<ChatTab>
           Text(
             'Ask me anything about your dreams!',
             style: TextStyle(
-              color: AppColors.white.withOpacity(0.5),
+              color: AppColors.white.withValues(alpha: 0.5),
               fontSize: 14,
             ),
           ),

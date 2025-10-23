@@ -96,7 +96,7 @@ class _SimilarTabState extends ConsumerState<SimilarTab>
                       size: 40,
                       color: _selectedDreamId != null
                           ? AppColors.primaryBlue
-                          : AppColors.lightBlue.withOpacity(0.5),
+                          : AppColors.lightBlue.withValues(alpha: 0.5),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -115,7 +115,7 @@ class _SimilarTabState extends ConsumerState<SimilarTab>
                             Text(
                               'Dream ID: $_selectedDreamId',
                               style: TextStyle(
-                                color: AppColors.white.withOpacity(0.7),
+                                color: AppColors.white.withValues(alpha: 0.7),
                                 fontSize: 12,
                               ),
                             )
@@ -123,7 +123,7 @@ class _SimilarTabState extends ConsumerState<SimilarTab>
                             Text(
                               'Tap to select a dream',
                               style: TextStyle(
-                                color: AppColors.white.withOpacity(0.5),
+                                color: AppColors.white.withValues(alpha: 0.5),
                                 fontSize: 12,
                               ),
                             ),
@@ -184,7 +184,7 @@ class _SimilarTabState extends ConsumerState<SimilarTab>
                 foregroundColor: AppColors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 disabledBackgroundColor: AppColors.darkBlue,
-                disabledForegroundColor: AppColors.white.withOpacity(0.3),
+                disabledForegroundColor: AppColors.white.withValues(alpha: 0.3),
               ),
             ),
           ),
@@ -248,13 +248,13 @@ class _SimilarTabState extends ConsumerState<SimilarTab>
                     Icon(
                       Icons.search_off,
                       size: 64,
-                      color: AppColors.lightBlue.withOpacity(0.5),
+                      color: AppColors.lightBlue.withValues(alpha: 0.5),
                     ),
                     const SizedBox(height: 16),
                     Text(
                       'No similar dreams found',
                       style: TextStyle(
-                        color: AppColors.white.withOpacity(0.7),
+                        color: AppColors.white.withValues(alpha: 0.7),
                         fontSize: 16,
                       ),
                     ),

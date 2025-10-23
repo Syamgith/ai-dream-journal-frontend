@@ -102,7 +102,7 @@ class _SearchTabState extends ConsumerState<SearchTab>
                   style: const TextStyle(color: AppColors.white),
                   decoration: InputDecoration(
                     hintText: 'Search dreams by meaning...',
-                    hintStyle: TextStyle(color: AppColors.white.withOpacity(0.5)),
+                    hintStyle: TextStyle(color: AppColors.white.withValues(alpha: 0.5)),
                     prefixIcon: const Icon(Icons.search, color: AppColors.lightBlue),
                     suffixIcon: _searchController.text.isNotEmpty
                         ? IconButton(
@@ -155,7 +155,7 @@ class _SearchTabState extends ConsumerState<SearchTab>
         if (_showFilters)
           Container(
             padding: const EdgeInsets.all(16),
-            color: AppColors.darkBlue.withOpacity(0.5),
+            color: AppColors.darkBlue.withValues(alpha: 0.5),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -249,7 +249,7 @@ class _SearchTabState extends ConsumerState<SearchTab>
                   child: ElevatedButton(
                     onPressed: _clearFilters,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryBlue.withOpacity(0.2),
+                      backgroundColor: AppColors.primaryBlue.withValues(alpha: 0.2),
                       foregroundColor: AppColors.primaryBlue,
                     ),
                     child: const Text('Clear Filters'),
@@ -298,13 +298,13 @@ class _SearchTabState extends ConsumerState<SearchTab>
           Icon(
             query == null ? Icons.search : Icons.search_off,
             size: 64,
-            color: AppColors.lightBlue.withOpacity(0.5),
+            color: AppColors.lightBlue.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
             query == null ? 'Search your dreams' : 'No dreams found',
             style: TextStyle(
-              color: AppColors.white.withOpacity(0.7),
+              color: AppColors.white.withValues(alpha: 0.7),
               fontSize: 18,
             ),
           ),
@@ -314,7 +314,7 @@ class _SearchTabState extends ConsumerState<SearchTab>
                 ? 'Try searching by meaning, not keywords'
                 : 'Try adjusting your search or filters',
             style: TextStyle(
-              color: AppColors.white.withOpacity(0.5),
+              color: AppColors.white.withValues(alpha: 0.5),
               fontSize: 14,
             ),
             textAlign: TextAlign.center,

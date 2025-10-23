@@ -39,7 +39,7 @@ class _DreamSelectorModalState extends ConsumerState<DreamSelectorModal> {
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: AppColors.lightBlue.withOpacity(0.5),
+              color: AppColors.lightBlue.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -74,7 +74,7 @@ class _DreamSelectorModalState extends ConsumerState<DreamSelectorModal> {
               style: const TextStyle(color: AppColors.white),
               decoration: InputDecoration(
                 hintText: 'Search dreams...',
-                hintStyle: TextStyle(color: AppColors.white.withOpacity(0.5)),
+                hintStyle: TextStyle(color: AppColors.white.withValues(alpha: 0.5)),
                 prefixIcon: const Icon(Icons.search, color: AppColors.lightBlue),
                 suffixIcon: _searchQuery.isNotEmpty
                     ? IconButton(
@@ -125,7 +125,7 @@ class _DreamSelectorModalState extends ConsumerState<DreamSelectorModal> {
                   return Center(
                     child: Text(
                       'Error loading dreams',
-                      style: TextStyle(color: AppColors.white.withOpacity(0.7)),
+                      style: TextStyle(color: AppColors.white.withValues(alpha: 0.7)),
                     ),
                   );
                 }
@@ -149,13 +149,13 @@ class _DreamSelectorModalState extends ConsumerState<DreamSelectorModal> {
                         Icon(
                           Icons.search_off,
                           size: 64,
-                          color: AppColors.lightBlue.withOpacity(0.5),
+                          color: AppColors.lightBlue.withValues(alpha: 0.5),
                         ),
                         const SizedBox(height: 16),
                         Text(
                           'No dreams found',
                           style: TextStyle(
-                            color: AppColors.white.withOpacity(0.7),
+                            color: AppColors.white.withValues(alpha: 0.7),
                             fontSize: 16,
                           ),
                         ),
@@ -192,7 +192,7 @@ class _DreamSelectorModalState extends ConsumerState<DreamSelectorModal> {
                             Text(
                               dream.description,
                               style: TextStyle(
-                                color: AppColors.white.withOpacity(0.7),
+                                color: AppColors.white.withValues(alpha: 0.7),
                                 fontSize: 12,
                               ),
                               maxLines: 2,

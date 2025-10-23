@@ -119,7 +119,7 @@ class _CompareTabState extends ConsumerState<CompareTab>
                 foregroundColor: AppColors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 disabledBackgroundColor: AppColors.darkBlue,
-                disabledForegroundColor: AppColors.white.withOpacity(0.3),
+                disabledForegroundColor: AppColors.white.withValues(alpha: 0.3),
               ),
             ),
           ),
@@ -244,7 +244,7 @@ class _CompareTabState extends ConsumerState<CompareTab>
                 size: 40,
                 color: dreamId != null
                     ? AppColors.primaryBlue
-                    : AppColors.lightBlue.withOpacity(0.5),
+                    : AppColors.lightBlue.withValues(alpha: 0.5),
               ),
               const SizedBox(height: 8),
               Text(
@@ -259,7 +259,7 @@ class _CompareTabState extends ConsumerState<CompareTab>
                 Text(
                   'ID: $dreamId',
                   style: TextStyle(
-                    color: AppColors.white.withOpacity(0.7),
+                    color: AppColors.white.withValues(alpha: 0.7),
                     fontSize: 12,
                   ),
                 ),

@@ -75,7 +75,7 @@ class _PatternsTabState extends ConsumerState<PatternsTab>
             style: const TextStyle(color: AppColors.white),
             decoration: InputDecoration(
               hintText: 'Describe a pattern to analyze...',
-              hintStyle: TextStyle(color: AppColors.white.withOpacity(0.5)),
+              hintStyle: TextStyle(color: AppColors.white.withValues(alpha: 0.5)),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: const BorderSide(color: AppColors.lightBlue),
