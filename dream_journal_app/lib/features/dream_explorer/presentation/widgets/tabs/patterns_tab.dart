@@ -6,7 +6,7 @@ import '../../../../../core/widgets/custom_snackbar.dart';
 import '../../../providers/pattern_analysis_provider.dart';
 import '../dream_summary_card.dart';
 import '../error_message_widget.dart';
-import '../shimmer_skeleton.dart';
+import '../exploring_indicator.dart';
 
 class PatternsTab extends ConsumerStatefulWidget {
   const PatternsTab({super.key});
@@ -49,17 +49,6 @@ class _PatternsTabState extends ConsumerState<PatternsTab>
           query,
           topK: _topK,
         );
-
-    // Show success snackbar
-    final state = ref.read(patternAnalysisProvider);
-    if (state.error == null && state.analysis != null && mounted) {
-      CustomSnackbar.show(
-        context: context,
-        message: 'Pattern analysis complete!',
-        type: SnackBarType.success,
-        duration: const Duration(seconds: 2),
-      );
-    }
   }
 
   void _copyToClipboard(String text) {
@@ -196,11 +185,11 @@ class _PatternsTabState extends ConsumerState<PatternsTab>
               onRetry: _analyzePatterns,
             ),
 
-          // Loading skeleton
+          // Loading indicator
           if (patternState.isLoading)
             const Padding(
               padding: EdgeInsets.only(top: 16),
-              child: AnalysisSkeleton(),
+              child: ExploringIndicator(),
             ),
 
           // Analysis results

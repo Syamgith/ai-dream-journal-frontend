@@ -180,3 +180,39 @@
 - Consistent haptic feedback usage across the app
 
 **Description:** Complete polish pass adding animations, haptic feedback, pull-to-refresh, success feedback, and skeleton loaders while maintaining consistency with existing app patterns and widgets.
+
+### Phase 12 Update: Enhanced Loading Experience
+**Time:** 17:30
+**Files Created:**
+- `lib/features/dream_explorer/presentation/widgets/exploring_indicator.dart` - Animated loading indicator with rotating star ring and moon, matching add_dream page style
+
+**Files Modified:**
+- `lib/features/dream_explorer/presentation/widgets/tabs/chat_tab.dart` - Replaced LoadingChatIndicator with ExploringIndicator, removed success snackbar
+- `lib/features/dream_explorer/presentation/widgets/tabs/search_tab.dart` - Replaced DreamCardSkeleton list with ExploringIndicator, removed success snackbar
+- `lib/features/dream_explorer/presentation/widgets/tabs/patterns_tab.dart` - Replaced AnalysisSkeleton with ExploringIndicator, removed success snackbar
+- `lib/features/dream_explorer/presentation/widgets/tabs/compare_tab.dart` - Replaced AnalysisSkeleton with ExploringIndicator, removed success snackbar
+- `lib/features/dream_explorer/presentation/widgets/tabs/similar_tab.dart` - Replaced DreamCardSkeleton list with ExploringIndicator, removed success snackbar
+
+**Changes Made:**
+1. **ExploringIndicator Widget:** Created custom animated loading indicator reusing the star ring and moon animation from add_dream page
+   - Rotating 8-point star ring (3 seconds rotation)
+   - Inner rotating moon with radial gradient (5 seconds)
+   - Animated "Exploring..." text with animated dots (similar to "thinking" in LLMs)
+   - Consistent with existing app's visual language
+
+2. **Replaced All Loading States:** Changed skeleton loaders and loading indicators to ExploringIndicator across all 5 tabs
+   - Chat: Replaced LoadingChatIndicator with ExploringIndicator
+   - Search: Replaced DreamCardSkeleton list with single centered ExploringIndicator
+   - Patterns: Replaced AnalysisSkeleton with ExploringIndicator
+   - Compare: Replaced AnalysisSkeleton with ExploringIndicator
+   - Similar: Replaced DreamCardSkeleton list with ExploringIndicator
+
+3. **Removed Success Snackbars:** Eliminated success snackbars showing result counts and completion messages from all tabs for cleaner UX
+
+**User Experience Improvements:**
+- More elegant and consistent loading experience across all tabs
+- Reduced visual noise by removing success notifications
+- Familiar animation pattern matching the dream creation flow
+- "Exploring..." messaging better conveys AI processing similar to LLM "thinking" states
+
+**Description:** Enhanced loading experience with unified "Exploring" animation and removed unnecessary success notifications for cleaner user experience.

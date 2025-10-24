@@ -6,7 +6,7 @@ import '../../../../../core/widgets/custom_snackbar.dart';
 import '../../../providers/comparison_state_provider.dart';
 import '../error_message_widget.dart';
 import '../dream_selector_modal.dart';
-import '../shimmer_skeleton.dart';
+import '../exploring_indicator.dart';
 
 class CompareTab extends ConsumerStatefulWidget {
   const CompareTab({super.key});
@@ -55,17 +55,6 @@ class _CompareTabState extends ConsumerState<CompareTab>
       await ref
           .read(comparisonStateProvider.notifier)
           .compareDreams(state.selectedDream1Id!, state.selectedDream2Id!);
-
-      // Show success snackbar
-      final newState = ref.read(comparisonStateProvider);
-      if (newState.error == null && newState.comparison != null && mounted) {
-        CustomSnackbar.show(
-          context: context,
-          message: 'Dreams compared successfully!',
-          type: SnackBarType.success,
-          duration: const Duration(seconds: 2),
-        );
-      }
     }
   }
 
@@ -168,11 +157,11 @@ class _CompareTabState extends ConsumerState<CompareTab>
               onRetry: _compareDreams,
             ),
 
-          // Loading skeleton
+          // Loading indicator
           if (comparisonState.isLoading)
             const Padding(
               padding: EdgeInsets.only(top: 16),
-              child: AnalysisSkeleton(),
+              child: ExploringIndicator(),
             ),
 
           // Comparison results

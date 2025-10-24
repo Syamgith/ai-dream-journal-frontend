@@ -5,7 +5,7 @@ import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/widgets/custom_snackbar.dart';
 import '../../../providers/conversation_state_provider.dart';
 import '../chat_message_bubble.dart';
-import '../loading_chat_indicator.dart';
+import '../exploring_indicator.dart';
 import '../error_message_widget.dart';
 import '../dream_summary_card.dart';
 
@@ -53,17 +53,6 @@ class _ChatTabState extends ConsumerState<ChatTab>
     _questionController.clear();
     await ref.read(conversationStateProvider.notifier).askQuestion(question);
     _scrollToBottom();
-
-    // Show success snackbar if no error
-    final state = ref.read(conversationStateProvider);
-    if (state.error == null && mounted) {
-      CustomSnackbar.show(
-        context: context,
-        message: 'Response received!',
-        type: SnackBarType.success,
-        duration: const Duration(seconds: 2),
-      );
-    }
   }
 
   @override
@@ -101,7 +90,10 @@ class _ChatTabState extends ConsumerState<ChatTab>
                         (conversationState.isLoading ? 1 : 0),
                     itemBuilder: (context, index) {
                       if (index == conversationState.chatHistory.length) {
-                        return const LoadingChatIndicator();
+                        return const Padding(
+                          padding: EdgeInsets.all(32.0),
+                          child: ExploringIndicator(),
+                        );
                       }
 
                       final message = conversationState.chatHistory[index];
