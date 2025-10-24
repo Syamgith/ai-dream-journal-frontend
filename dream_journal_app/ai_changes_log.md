@@ -293,3 +293,36 @@ Modified the provider to save the old chat history before adding the user messag
 - Clean, single conversation thread maintained
 
 **Description:** Fixed duplicate user message bug by passing old history to API while showing user message immediately in UI.
+
+### Phase 12 Update: Added Example Questions
+**Time:** 18:30
+**Files Modified:**
+- `lib/features/dream_explorer/presentation/widgets/tabs/chat_tab.dart` - Added tappable example questions to empty state
+
+**Features Added:**
+1. **Example Question Chips:** Added 4 example questions in the empty state to help users get started:
+   - "Did I dream about flying?"
+   - "What are my recurring dream themes?"
+   - "Tell me about my nightmares"
+   - "What emotions appear most in my dreams?"
+
+2. **One-Tap Sending:** Clicking any example question chip immediately sends it as a message
+   - Question fills the input field
+   - Automatically triggers send
+   - User sees their message + exploring indicator
+   - Response follows naturally
+
+3. **Visual Design:**
+   - Styled as rounded chip buttons with icon
+   - Dark blue background with primary blue border
+   - Auto-awesome sparkle icon for each chip
+   - Wrapped layout for responsive display
+   - Shows under "Try asking:" header
+
+**User Experience Improvements:**
+- Helps new users understand what they can ask
+- Reduces friction - no typing needed to start
+- Shows the breadth of available queries
+- Natural conversation starters
+
+**Description:** Added tappable example questions to empty chat state for quick conversation starters.

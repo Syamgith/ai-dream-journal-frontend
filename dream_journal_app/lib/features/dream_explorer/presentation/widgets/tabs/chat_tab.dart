@@ -236,32 +236,98 @@ class _ChatTabState extends ConsumerState<ChatTab>
   }
 
   Widget _buildEmptyState() {
+    final exampleQuestions = [
+      'Did I dream about flying?',
+      'What are my recurring dream themes?',
+      'Tell me about my nightmares',
+      'What emotions appear most in my dreams?',
+    ];
+
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.chat_bubble_outline,
-            size: 64,
-            color: AppColors.lightBlue.withValues(alpha: 0.5),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Start a conversation',
-            style: TextStyle(
-              color: AppColors.white.withValues(alpha: 0.7),
-              fontSize: 18,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.chat_bubble_outline,
+              size: 64,
+              color: AppColors.lightBlue.withValues(alpha: 0.5),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Ask me anything about your dreams!',
-            style: TextStyle(
-              color: AppColors.white.withValues(alpha: 0.5),
-              fontSize: 14,
+            const SizedBox(height: 16),
+            Text(
+              'Start a conversation',
+              style: TextStyle(
+                color: AppColors.white.withValues(alpha: 0.7),
+                fontSize: 18,
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 8),
+            Text(
+              'Ask me anything about your dreams!',
+              style: TextStyle(
+                color: AppColors.white.withValues(alpha: 0.5),
+                fontSize: 14,
+              ),
+            ),
+            const SizedBox(height: 32),
+            Text(
+              'Try asking:',
+              style: TextStyle(
+                color: AppColors.lightBlue.withValues(alpha: 0.8),
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 8,
+              runSpacing: 8,
+              children: exampleQuestions.map((question) {
+                return InkWell(
+                  onTap: () {
+                    _questionController.text = question;
+                    _askQuestion();
+                  },
+                  borderRadius: BorderRadius.circular(20),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.darkBlue,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: AppColors.primaryBlue.withValues(alpha: 0.5),
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.auto_awesome,
+                          size: 16,
+                          color: AppColors.lightBlue.withValues(alpha: 0.8),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          question,
+                          style: TextStyle(
+                            color: AppColors.white.withValues(alpha: 0.9),
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ],
+        ),
       ),
     );
   }
