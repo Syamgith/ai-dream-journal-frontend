@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../core/constants/app_colors.dart';
+import '../../../../../core/widgets/custom_snackbar.dart';
 import '../../../providers/pattern_analysis_provider.dart';
 import '../dream_summary_card.dart';
 import '../error_message_widget.dart';
+import '../shimmer_skeleton.dart';
 
 class PatternsTab extends ConsumerStatefulWidget {
   const PatternsTab({super.key});
@@ -40,19 +42,34 @@ class _PatternsTabState extends ConsumerState<PatternsTab>
     final query = _queryController.text.trim();
     if (query.isEmpty) return;
 
+    // Haptic feedback
+    HapticFeedback.lightImpact();
+
     await ref.read(patternAnalysisProvider.notifier).analyzePatterns(
           query,
           topK: _topK,
         );
+
+    // Show success snackbar
+    final state = ref.read(patternAnalysisProvider);
+    if (state.error == null && state.analysis != null && mounted) {
+      CustomSnackbar.show(
+        context: context,
+        message: 'Pattern analysis complete!',
+        type: SnackBarType.success,
+        duration: const Duration(seconds: 2),
+      );
+    }
   }
 
   void _copyToClipboard(String text) {
+    HapticFeedback.mediumImpact();
     Clipboard.setData(ClipboardData(text: text));
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Analysis copied to clipboard'),
-        duration: Duration(seconds: 2),
-      ),
+    CustomSnackbar.show(
+      context: context,
+      message: 'Analysis copied to clipboard',
+      type: SnackBarType.success,
+      duration: const Duration(seconds: 2),
     );
   }
 
@@ -179,13 +196,11 @@ class _PatternsTabState extends ConsumerState<PatternsTab>
               onRetry: _analyzePatterns,
             ),
 
-          // Loading indicator
+          // Loading skeleton
           if (patternState.isLoading)
-            const Center(
-              child: Padding(
-                padding: EdgeInsets.all(32),
-                child: CircularProgressIndicator(),
-              ),
+            const Padding(
+              padding: EdgeInsets.only(top: 16),
+              child: AnalysisSkeleton(),
             ),
 
           // Analysis results

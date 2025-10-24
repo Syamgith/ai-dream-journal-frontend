@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../core/constants/app_colors.dart';
+import '../../../../../core/widgets/custom_snackbar.dart';
 import '../../../providers/comparison_state_provider.dart';
 import '../error_message_widget.dart';
 import '../dream_selector_modal.dart';
+import '../shimmer_skeleton.dart';
 
 class CompareTab extends ConsumerStatefulWidget {
   const CompareTab({super.key});
@@ -47,19 +49,34 @@ class _CompareTabState extends ConsumerState<CompareTab>
   Future<void> _compareDreams() async {
     final state = ref.read(comparisonStateProvider);
     if (state.selectedDream1Id != null && state.selectedDream2Id != null) {
+      // Haptic feedback
+      HapticFeedback.lightImpact();
+
       await ref
           .read(comparisonStateProvider.notifier)
           .compareDreams(state.selectedDream1Id!, state.selectedDream2Id!);
+
+      // Show success snackbar
+      final newState = ref.read(comparisonStateProvider);
+      if (newState.error == null && newState.comparison != null && mounted) {
+        CustomSnackbar.show(
+          context: context,
+          message: 'Dreams compared successfully!',
+          type: SnackBarType.success,
+          duration: const Duration(seconds: 2),
+        );
+      }
     }
   }
 
   void _copyToClipboard(String text) {
+    HapticFeedback.mediumImpact();
     Clipboard.setData(ClipboardData(text: text));
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Comparison copied to clipboard'),
-        duration: Duration(seconds: 2),
-      ),
+    CustomSnackbar.show(
+      context: context,
+      message: 'Comparison copied to clipboard',
+      type: SnackBarType.success,
+      duration: const Duration(seconds: 2),
     );
   }
 
@@ -151,13 +168,11 @@ class _CompareTabState extends ConsumerState<CompareTab>
               onRetry: _compareDreams,
             ),
 
-          // Loading indicator
+          // Loading skeleton
           if (comparisonState.isLoading)
-            const Center(
-              child: Padding(
-                padding: EdgeInsets.all(32),
-                child: CircularProgressIndicator(),
-              ),
+            const Padding(
+              padding: EdgeInsets.only(top: 16),
+              child: AnalysisSkeleton(),
             ),
 
           // Comparison results

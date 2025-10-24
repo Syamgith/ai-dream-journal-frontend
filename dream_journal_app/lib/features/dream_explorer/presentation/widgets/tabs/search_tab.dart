@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../core/constants/app_colors.dart';
+import '../../../../../core/widgets/custom_snackbar.dart';
 import '../../../providers/search_state_provider.dart';
 import '../dream_summary_card.dart';
 import '../error_message_widget.dart';
 import '../filter_chips_widget.dart';
+import '../shimmer_skeleton.dart';
 
 class SearchTab extends ConsumerStatefulWidget {
   const SearchTab({super.key});
@@ -46,6 +49,9 @@ class _SearchTabState extends ConsumerState<SearchTab>
     final query = _searchController.text.trim();
     if (query.isEmpty) return;
 
+    // Haptic feedback
+    HapticFeedback.lightImpact();
+
     await ref.read(searchStateProvider.notifier).searchDreams(
           query,
           topK: _topK,
@@ -53,6 +59,17 @@ class _SearchTabState extends ConsumerState<SearchTab>
           endDate: _endDate,
           emotionTags: _selectedEmotions.isNotEmpty ? _selectedEmotions : null,
         );
+
+    // Show success snackbar
+    final state = ref.read(searchStateProvider);
+    if (state.error == null && mounted) {
+      CustomSnackbar.show(
+        context: context,
+        message: '${state.totalFound} dreams found',
+        type: SnackBarType.success,
+        duration: const Duration(seconds: 2),
+      );
+    }
   }
 
   Future<void> _selectDateRange() async {
@@ -269,7 +286,10 @@ class _SearchTabState extends ConsumerState<SearchTab>
         // Results
         Expanded(
           child: searchState.isLoading
-              ? const Center(child: CircularProgressIndicator())
+              ? ListView.builder(
+                  itemCount: 3,
+                  itemBuilder: (context, index) => const DreamCardSkeleton(),
+                )
               : searchState.searchResults.isEmpty
                   ? _buildEmptyState(searchState.currentQuery)
                   : ListView.builder(

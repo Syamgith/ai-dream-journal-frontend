@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../core/constants/app_colors.dart';
+import '../../../../../core/widgets/custom_snackbar.dart';
 import '../../../providers/similar_dreams_provider.dart';
 import '../dream_summary_card.dart';
 import '../error_message_widget.dart';
 import '../dream_selector_modal.dart';
+import '../shimmer_skeleton.dart';
 
 class SimilarTab extends ConsumerStatefulWidget {
   final int? dreamId;
@@ -52,9 +55,23 @@ class _SimilarTabState extends ConsumerState<SimilarTab>
   Future<void> _findSimilarDreams() async {
     if (_selectedDreamId == null) return;
 
+    // Haptic feedback
+    HapticFeedback.lightImpact();
+
     await ref
         .read(similarDreamsProvider.notifier)
         .findSimilar(_selectedDreamId!, topK: _topK);
+
+    // Show success snackbar
+    final state = ref.read(similarDreamsProvider);
+    if (state.error == null && mounted) {
+      CustomSnackbar.show(
+        context: context,
+        message: '${state.similarDreams.length} similar dreams found',
+        type: SnackBarType.success,
+        duration: const Duration(seconds: 2),
+      );
+    }
   }
 
   @override
@@ -197,13 +214,13 @@ class _SimilarTabState extends ConsumerState<SimilarTab>
               onRetry: _findSimilarDreams,
             ),
 
-          // Loading indicator
+          // Loading skeleton
           if (similarState.isLoading)
-            const Center(
-              child: Padding(
-                padding: EdgeInsets.all(32),
-                child: CircularProgressIndicator(),
-              ),
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: 3,
+              itemBuilder: (context, index) => const DreamCardSkeleton(),
             ),
 
           // Results

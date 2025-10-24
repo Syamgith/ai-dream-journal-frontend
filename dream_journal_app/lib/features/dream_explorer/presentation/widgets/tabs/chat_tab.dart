@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../core/constants/app_colors.dart';
+import '../../../../../core/widgets/custom_snackbar.dart';
 import '../../../providers/conversation_state_provider.dart';
 import '../chat_message_bubble.dart';
 import '../loading_chat_indicator.dart';
@@ -45,9 +47,23 @@ class _ChatTabState extends ConsumerState<ChatTab>
     final question = _questionController.text.trim();
     if (question.isEmpty) return;
 
+    // Haptic feedback on send
+    HapticFeedback.lightImpact();
+
     _questionController.clear();
     await ref.read(conversationStateProvider.notifier).askQuestion(question);
     _scrollToBottom();
+
+    // Show success snackbar if no error
+    final state = ref.read(conversationStateProvider);
+    if (state.error == null && mounted) {
+      CustomSnackbar.show(
+        context: context,
+        message: 'Response received!',
+        type: SnackBarType.success,
+        duration: const Duration(seconds: 2),
+      );
+    }
   }
 
   @override
@@ -58,25 +74,55 @@ class _ChatTabState extends ConsumerState<ChatTab>
 
     return Column(
       children: [
-        // Chat history
+        // Chat history with pull-to-refresh
         Expanded(
           child: conversationState.chatHistory.isEmpty &&
                   !conversationState.isLoading &&
                   conversationState.error == null
               ? _buildEmptyState()
-              : ListView.builder(
-                  controller: _scrollController,
-                  padding: const EdgeInsets.all(8),
-                  itemCount: conversationState.chatHistory.length +
-                      (conversationState.isLoading ? 1 : 0),
-                  itemBuilder: (context, index) {
-                    if (index == conversationState.chatHistory.length) {
-                      return const LoadingChatIndicator();
+              : RefreshIndicator(
+                  onRefresh: () async {
+                    HapticFeedback.mediumImpact();
+                    ref.read(conversationStateProvider.notifier).clearConversation();
+                    if (mounted) {
+                      CustomSnackbar.show(
+                        context: context,
+                        message: 'Conversation cleared',
+                        type: SnackBarType.info,
+                        duration: const Duration(seconds: 2),
+                      );
                     }
-
-                    final message = conversationState.chatHistory[index];
-                    return ChatMessageBubble(message: message);
                   },
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.all(8),
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    itemCount: conversationState.chatHistory.length +
+                        (conversationState.isLoading ? 1 : 0),
+                    itemBuilder: (context, index) {
+                      if (index == conversationState.chatHistory.length) {
+                        return const LoadingChatIndicator();
+                      }
+
+                      final message = conversationState.chatHistory[index];
+                      // Fade-in animation for each message
+                      return TweenAnimationBuilder<double>(
+                        duration: const Duration(milliseconds: 400),
+                        tween: Tween(begin: 0.0, end: 1.0),
+                        curve: Curves.easeOut,
+                        builder: (context, value, child) {
+                          return Opacity(
+                            opacity: value,
+                            child: Transform.translate(
+                              offset: Offset(0, 20 * (1 - value)),
+                              child: child,
+                            ),
+                          );
+                        },
+                        child: ChatMessageBubble(message: message),
+                      );
+                    },
+                  ),
                 ),
         ),
 

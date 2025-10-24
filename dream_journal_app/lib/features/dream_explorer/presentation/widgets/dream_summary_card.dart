@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../data/models/dream_summary_model.dart';
@@ -24,7 +25,12 @@ class DreamSummaryCard extends StatelessWidget {
       color: AppColors.darkBlue,
       elevation: 4,
       child: InkWell(
-        onTap: onTap,
+        onTap: onTap != null
+            ? () {
+                HapticFeedback.selectionClick();
+                onTap!();
+              }
+            : null,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(16),
