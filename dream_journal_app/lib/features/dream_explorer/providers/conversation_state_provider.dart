@@ -49,13 +49,28 @@ class ConversationStateNotifier extends StateNotifier<ConversationState> {
       return;
     }
 
-    state = state.copyWith(isLoading: true, error: null);
+    // Save old history before updating (to pass to API)
+    final oldHistory = state.chatHistory;
+
+    // Add user's message to chat history immediately for UI
+    final userMessage = ChatMessage(
+      role: 'user',
+      content: question,
+    );
+    final updatedHistory = [...oldHistory, userMessage];
+
+    state = state.copyWith(
+      chatHistory: updatedHistory,
+      isLoading: true,
+      error: null,
+    );
 
     try {
       final repository = _ref.read(dreamExplorerRepositoryProvider);
+      // Pass old history (without user message) - backend will add it
       final response = await repository.askQuestion(
         question,
-        state.chatHistory,
+        oldHistory,
         topK: topK,
       );
 

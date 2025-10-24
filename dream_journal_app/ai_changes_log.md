@@ -216,3 +216,80 @@
 - "Exploring..." messaging better conveys AI processing similar to LLM "thinking" states
 
 **Description:** Enhanced loading experience with unified "Exploring" animation and removed unnecessary success notifications for cleaner user experience.
+
+### Phase 12 Update: Refined Chat Indicator
+**Time:** 17:45
+**Files Created:**
+- `lib/features/dream_explorer/presentation/widgets/compact_exploring_indicator.dart` - Compact version of exploring indicator for inline chat display
+
+**Files Modified:**
+- `lib/features/dream_explorer/presentation/widgets/tabs/chat_tab.dart` - Replaced full ExploringIndicator with CompactExploringIndicator for better chat UX
+
+**Changes Made:**
+1. **CompactExploringIndicator:** Created a smaller, inline version of the exploring indicator specifically for chat
+   - 24x24 star/moon animation (vs 60x60 in full version)
+   - Styled as a chat bubble aligned to the left like assistant messages
+   - Displays below user's question while waiting for response
+   - More natural typing indicator experience similar to messaging apps
+
+2. **Chat Tab Positioning:** Updated to show compact indicator inline with chat messages instead of centered full-screen
+   - Appears as the last item in chat history when loading
+   - Positioned left-aligned like assistant responses
+   - Shows immediately after user sends question
+   - Replaced by actual response when ready
+
+**User Experience Improvements:**
+- More intuitive chat flow - indicator appears right where response will be
+- Maintains conversation context - no jarring full-screen loading state
+- Familiar messaging app pattern - typing indicator below last message
+- Compact 24px animation doesn't disrupt reading flow
+
+**Description:** Refined chat loading indicator to appear inline below user's question, creating a natural messaging app experience.
+
+### Phase 12 Update: Fixed Chat Message Display
+**Time:** 18:00
+**Files Modified:**
+- `lib/features/dream_explorer/providers/conversation_state_provider.dart` - Modified to add user's message to chat history immediately before API call
+- `lib/features/dream_explorer/presentation/widgets/tabs/chat_tab.dart` - Updated scroll timing to show user message and loading indicator
+
+**Changes Made:**
+1. **Immediate Message Display:** Modified conversation provider to add user's message to chat history immediately when question is asked
+   - User message appears in chat history before API call
+   - Loading state set to true simultaneously
+   - Backend response updates the full chat history when ready
+
+2. **Proper Scroll Behavior:** Updated chat tab to scroll after user message is added
+   - Removed await from askQuestion call for immediate state update
+   - Scroll executes right after state update
+   - User sees their question and the loading indicator below it
+
+**User Experience Improvements:**
+- User's question is now visible immediately when sent
+- Loading indicator appears below the user's message (not replacing it)
+- View scrolls to show both the question and loading indicator
+- Natural chat flow matching messaging app behavior
+
+**Description:** Fixed chat to show user's message immediately with loading indicator below, creating proper messaging app flow.
+
+### Phase 12 Update: Fixed Duplicate Message Bug
+**Time:** 18:15
+**Files Modified:**
+- `lib/features/dream_explorer/providers/conversation_state_provider.dart` - Fixed duplicate user message issue
+
+**Bug Fixed:**
+The user's message was appearing twice in the chat - once from the frontend's immediate display and once from the backend response.
+
+**Solution:**
+Modified the provider to save the old chat history before adding the user message, then pass the **old history** (without the user message) to the API:
+- Frontend adds user message immediately to state for instant UI feedback
+- API receives old history without the user message
+- Backend adds both user message and assistant response to history
+- Backend response replaces frontend's temporary state with correct full history
+
+**Result:**
+- No more duplicate messages
+- User sees their message immediately (with loading indicator below)
+- Response arrives and replaces the loading indicator
+- Clean, single conversation thread maintained
+
+**Description:** Fixed duplicate user message bug by passing old history to API while showing user message immediately in UI.

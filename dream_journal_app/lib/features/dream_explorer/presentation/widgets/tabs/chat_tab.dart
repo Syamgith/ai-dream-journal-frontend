@@ -5,7 +5,7 @@ import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/widgets/custom_snackbar.dart';
 import '../../../providers/conversation_state_provider.dart';
 import '../chat_message_bubble.dart';
-import '../exploring_indicator.dart';
+import '../compact_exploring_indicator.dart';
 import '../error_message_widget.dart';
 import '../dream_summary_card.dart';
 
@@ -51,7 +51,11 @@ class _ChatTabState extends ConsumerState<ChatTab>
     HapticFeedback.lightImpact();
 
     _questionController.clear();
-    await ref.read(conversationStateProvider.notifier).askQuestion(question);
+
+    // Ask question (this immediately adds user message to history)
+    ref.read(conversationStateProvider.notifier).askQuestion(question);
+
+    // Scroll to show the user's message and loading indicator
     _scrollToBottom();
   }
 
@@ -90,10 +94,7 @@ class _ChatTabState extends ConsumerState<ChatTab>
                         (conversationState.isLoading ? 1 : 0),
                     itemBuilder: (context, index) {
                       if (index == conversationState.chatHistory.length) {
-                        return const Padding(
-                          padding: EdgeInsets.all(32.0),
-                          child: ExploringIndicator(),
-                        );
+                        return const CompactExploringIndicator();
                       }
 
                       final message = conversationState.chatHistory[index];
