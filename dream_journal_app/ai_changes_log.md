@@ -450,3 +450,78 @@ Modified the provider to save the old chat history before adding the user messag
 - Proper constraints for responsive icon positioning
 
 **Description:** Fixed visual alignment issue where the description field's border/outline wasn't properly matching the expanded TextField, ensuring the icon stays properly positioned and content is correctly indented.
+
+### Clickable Relevant Dreams Navigation Implementation
+**Time:** 17:15
+**Files Modified:**
+- `lib/features/dreams/presentation/pages/dream_details_page.dart` - Converted to StatefulWidget with optimistic navigation support
+- `lib/features/dream_explorer/presentation/widgets/tabs/chat_tab.dart` - Implemented navigation callback for relevant dreams
+- `lib/features/dream_explorer/presentation/widgets/tabs/search_tab.dart` - Implemented navigation callback for search results
+- `lib/features/dream_explorer/presentation/widgets/tabs/similar_tab.dart` - Implemented navigation callback for similar dreams
+
+**Changes Made:**
+
+1. **DreamDetailsPage Enhancement (optimistic navigation):**
+   - Converted from `ConsumerWidget` to `ConsumerStatefulWidget` for state management
+   - Added optional constructor parameters: `dreamId`, `initialTitle`, `initialDate`
+   - Modified constructor to accept **either** full `DreamEntry` OR just `dreamId` (with assertion)
+   - Added state variables: `_currentDream`, `_isLoading`, `_errorMessage`
+   - Implemented `_initializeDream()` method that:
+     - Shows full dream immediately if provided (existing behavior)
+     - Creates partial dream entry and fetches full data if only dreamId provided (optimistic navigation)
+     - Uses `dreamRepositoryProvider` to fetch dream data via `getDreamById()`
+     - Handles loading and error states with CustomSnackbar
+   - Added loading indicators:
+     - Shows CircularProgressIndicator for description while fetching
+     - Shows CircularProgressIndicator for interpretation while fetching
+     - Displays "Loading dream details..." and "Loading interpretation..." messages
+   - Error handling: Shows toast/snackbar with error message, keeps partial data visible
+   - Added import for `dream_repository_provider.dart`
+
+2. **Chat Tab Navigation:**
+   - Added import for `DreamDetailsPage`
+   - Implemented empty `onTap` callback (line 152-154)
+   - Added `HapticFeedback.lightImpact()` on tap
+   - Uses `Navigator.push()` with `MaterialPageRoute`
+   - Passes `dreamId`, `initialTitle`, and `initialDate` from DreamSummary
+   - Stacks DreamDetailsPage on top of Dream Explorer (user can go back)
+
+3. **Search Tab Navigation:**
+   - Added import for `DreamDetailsPage`
+   - Implemented empty `onTap` callback (line 287-289)
+   - Same navigation pattern as Chat tab
+   - Added haptic feedback and optimistic navigation
+
+4. **Similar Tab Navigation:**
+   - Added import for `DreamDetailsPage`
+   - Implemented empty `onTap` callback (line 233-235)
+   - Same navigation pattern as Chat and Search tabs
+   - Consistent haptic feedback and optimistic navigation
+
+**Navigation Flow:**
+1. User taps relevant dream card → haptic feedback
+2. Navigate immediately with partial data (title, date from DreamSummary)
+3. DreamDetailsPage shows title & date instantly
+4. Background: fetch full dream data via `getDreamById()` API
+5. Update UI progressively as data arrives (description, interpretation)
+6. On error: show CustomSnackbar (toast), keep partial data visible
+7. User can go back to Dream Explorer from DreamDetailsPage
+
+**User Experience Improvements:**
+- Instant navigation - no waiting for API call before page transition
+- Optimistic UI - shows available data immediately (title, date)
+- Progressive loading - description and interpretation load in background
+- Smooth navigation stack - Dream Explorer stays in background
+- Consistent haptic feedback across all three tabs
+- Error recovery - shows errors via toast, doesn't block navigation
+- Familiar pattern - matches existing dream card navigation in dreams list
+
+**Code Quality:**
+- Follows existing navigation patterns in the app (Navigator.push)
+- Reuses existing CustomSnackbar for error display
+- Maintains backward compatibility - DreamDetailsPage still works with full DreamEntry
+- Consistent implementation across all three tabs (Chat, Search, Similar)
+- Proper null safety and mounted checks
+- Clean separation of concerns - details page handles its own data fetching
+
+**Description:** Implemented clickable navigation for relevant dreams in Dream Explorer (Chat, Search, Similar tabs). Enhanced DreamDetailsPage to support optimistic navigation pattern - shows partial data immediately and fetches full dream in background, creating smooth instant navigation experience while maintaining Dream Explorer in the navigation stack.

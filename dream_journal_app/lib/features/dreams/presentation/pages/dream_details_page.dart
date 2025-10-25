@@ -5,19 +5,123 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/custom_snackbar.dart';
 import '../../../../core/widgets/markdown_text.dart';
 import '../../data/models/dream_entry.dart';
+import '../../providers/dream_repository_provider.dart';
 import '../../providers/dreams_provider.dart';
 import 'add_dream_page.dart';
 
-class DreamDetailsPage extends ConsumerWidget {
-  final DreamEntry dream;
+class DreamDetailsPage extends ConsumerStatefulWidget {
+  final DreamEntry? dream;
+  final int? dreamId;
+  final String? initialTitle;
+  final DateTime? initialDate;
 
   const DreamDetailsPage({
     super.key,
-    required this.dream,
-  });
+    this.dream,
+    this.dreamId,
+    this.initialTitle,
+    this.initialDate,
+  }) : assert(dream != null || dreamId != null,
+            'Either dream or dreamId must be provided');
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DreamDetailsPage> createState() => _DreamDetailsPageState();
+}
+
+class _DreamDetailsPageState extends ConsumerState<DreamDetailsPage> {
+  DreamEntry? _currentDream;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeDream();
+  }
+
+  Future<void> _initializeDream() async {
+    if (widget.dream != null) {
+      // Full dream provided, use it directly
+      setState(() {
+        _currentDream = widget.dream;
+      });
+    } else if (widget.dreamId != null) {
+      // Only dreamId provided, create partial dream and fetch full data
+      setState(() {
+        _currentDream = DreamEntry(
+          id: widget.dreamId,
+          title: widget.initialTitle,
+          description: '', // Will be loaded
+          timestamp: widget.initialDate ?? DateTime.now(),
+          interpretation: null, // Will be loaded
+        );
+        _isLoading = true;
+      });
+
+      // Fetch full dream data
+      try {
+        final dreamRepository = ref.read(dreamRepositoryProvider);
+        final fullDream = await dreamRepository.getDreamById(widget.dreamId!);
+
+        if (fullDream != null && mounted) {
+          setState(() {
+            _currentDream = fullDream;
+            _isLoading = false;
+          });
+        } else if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+          if (context.mounted) {
+            CustomSnackbar.show(
+              context: context,
+              message: 'Dream not found',
+              type: SnackBarType.error,
+            );
+          }
+        }
+      } catch (e) {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+          if (context.mounted) {
+            CustomSnackbar.show(
+              context: context,
+              message: 'Failed to load dream: ${e.toString()}',
+              type: SnackBarType.error,
+            );
+          }
+        }
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_currentDream == null) {
+      return Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: AppBar(
+          title: const Text(
+            'Dream Details',
+            style: TextStyle(
+              color: AppColors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          iconTheme: const IconThemeData(color: AppColors.white),
+        ),
+        body: const Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryBlue),
+          ),
+        ),
+      );
+    }
+
+    final dream = _currentDream!;
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -102,20 +206,44 @@ class DreamDetailsPage extends ConsumerWidget {
                     const SizedBox(height: 16),
 
                     // Description
-                    Text(
-                      dream.description,
-                      style: const TextStyle(
-                        color: AppColors.white,
-                        fontSize: 16,
-                        height: 1.5,
-                      ),
-                    ),
+                    _isLoading && dream.description.isEmpty
+                        ? Column(
+                            children: [
+                              const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      AppColors.primaryBlue),
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Loading dream details...',
+                                style: TextStyle(
+                                  color: AppColors.white.withAlpha(179),
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          )
+                        : Text(
+                            dream.description.isEmpty
+                                ? 'No description available'
+                                : dream.description,
+                            style: const TextStyle(
+                              color: AppColors.white,
+                              fontSize: 16,
+                              height: 1.5,
+                            ),
+                          ),
                   ],
                 ),
               ),
 
-              // Interpretation section if available
-              if (dream.interpretation != null) ...[
+              // Interpretation section if available or loading
+              if (_isLoading || dream.interpretation != null) ...[
                 const SizedBox(height: 24),
                 Container(
                   width: double.infinity,
@@ -143,10 +271,32 @@ class DreamDetailsPage extends ConsumerWidget {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      MarkdownText(
-                        data: dream.interpretation!,
-                        fontSize: 15,
-                      ),
+                      _isLoading && dream.interpretation == null
+                          ? Column(
+                              children: [
+                                const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        AppColors.primaryBlue),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Loading interpretation...',
+                                  style: TextStyle(
+                                    color: AppColors.white.withAlpha(179),
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
+                            )
+                          : MarkdownText(
+                              data: dream.interpretation ?? '',
+                              fontSize: 15,
+                            ),
                     ],
                   ),
                 ),
@@ -223,7 +373,7 @@ class DreamDetailsPage extends ConsumerWidget {
               onPressed: () async {
                 Navigator.of(dialogContext).pop(); // Close dialog
                 try {
-                  await ref.read(dreamsProvider.notifier).deleteDream(dream.id);
+                  await ref.read(dreamsProvider.notifier).deleteDream(_currentDream?.id);
                   if (context.mounted) {
                     // Show success message with custom snackbar
                     CustomSnackbar.show(

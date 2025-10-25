@@ -8,6 +8,7 @@ import '../chat_message_bubble.dart';
 import '../compact_exploring_indicator.dart';
 import '../error_message_widget.dart';
 import '../dream_summary_card.dart';
+import '../../../../dreams/presentation/pages/dream_details_page.dart';
 
 class ChatTab extends ConsumerStatefulWidget {
   const ChatTab({super.key});
@@ -150,7 +151,20 @@ class _ChatTabState extends ConsumerState<ChatTab>
                         child: DreamSummaryCard(
                           dreamSummary: dream,
                           onTap: () {
-                            // Navigate to dream detail page
+                            // Haptic feedback
+                            HapticFeedback.lightImpact();
+
+                            // Navigate to dream details page with optimistic navigation
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => DreamDetailsPage(
+                                  dreamId: dream.dreamId,
+                                  initialTitle: dream.title,
+                                  initialDate: dream.date,
+                                ),
+                              ),
+                            );
                           },
                         ),
                       );

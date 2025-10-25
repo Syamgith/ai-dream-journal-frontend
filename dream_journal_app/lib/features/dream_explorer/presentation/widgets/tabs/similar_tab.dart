@@ -7,6 +7,7 @@ import '../dream_summary_card.dart';
 import '../error_message_widget.dart';
 import '../dream_selector_modal.dart';
 import '../exploring_indicator.dart';
+import '../../../../dreams/presentation/pages/dream_details_page.dart';
 
 class SimilarTab extends ConsumerStatefulWidget {
   final int? dreamId;
@@ -231,7 +232,20 @@ class _SimilarTabState extends ConsumerState<SimilarTab>
                 return DreamSummaryCard(
                   dreamSummary: dream,
                   onTap: () {
-                    // Navigate to dream detail
+                    // Haptic feedback
+                    HapticFeedback.lightImpact();
+
+                    // Navigate to dream details page with optimistic navigation
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => DreamDetailsPage(
+                          dreamId: dream.dreamId,
+                          initialTitle: dream.title,
+                          initialDate: dream.date,
+                        ),
+                      ),
+                    );
                   },
                 );
               },
