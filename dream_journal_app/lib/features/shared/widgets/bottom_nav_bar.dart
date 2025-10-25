@@ -42,12 +42,12 @@ class BottomNavBar extends StatelessWidget {
           TextButton.icon(
             onPressed: () => onTap(1),
             icon: Icon(
-              Icons.person,
+              Icons.auto_awesome,
               color:
                   currentIndex == 1 ? AppColors.primaryBlue : AppColors.white,
             ),
             label: Text(
-              'Profile',
+              'Explorer',
               style: TextStyle(
                 color:
                     currentIndex == 1 ? AppColors.primaryBlue : AppColors.white,

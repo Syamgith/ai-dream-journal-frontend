@@ -4,7 +4,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/widgets/keyboard_dismissible.dart';
 import '../../../core/utils/keyboard_utils.dart';
 import '../../dreams/presentation/pages/dreams_page.dart';
-import '../../profile/presentation/pages/profile_page.dart';
+import '../../dream_explorer/presentation/pages/dream_explorer_page.dart';
 import '../widgets/bottom_nav_bar.dart';
 import '../widgets/app_drawer.dart';
 import '../../dreams/providers/dreams_provider.dart';
@@ -21,7 +21,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   // List of page titles corresponding to the pages in the IndexedStack
-  final List<String> _pageTitles = const ['Dreams', 'Profile'];
+  final List<String> _pageTitles = const ['Dreams', 'Dream Explorer'];
 
   @override
   void initState() {
@@ -82,7 +82,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           index: _currentIndex,
           children: const [
             DreamsPage(),
-            ProfilePage(),
+            DreamExplorerPage(),
           ],
         ),
         bottomNavigationBar: BottomNavBar(
@@ -92,17 +92,6 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             _onTabTapped(index);
           },
         ),
-        floatingActionButton: _currentIndex == 0
-            ? FloatingActionButton(
-                onPressed: () {
-                  KeyboardUtils.hideKeyboard(context);
-                  Navigator.pushNamed(context, '/dream-explorer');
-                },
-                backgroundColor: AppColors.primaryBlue,
-                tooltip: 'Dream Explorer',
-                child: const Icon(Icons.auto_awesome, color: AppColors.white),
-              )
-            : null,
       ),
     );
   }

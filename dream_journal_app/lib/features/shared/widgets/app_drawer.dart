@@ -44,18 +44,14 @@ class AppDrawer extends ConsumerWidget {
               padding: EdgeInsets.zero,
               children: [
                 ListTile(
-                  leading: const Icon(Icons.auto_awesome, color: AppColors.lightBlue),
+                  leading: const Icon(Icons.person, color: Colors.white),
                   title: const Text(
-                    'Dream Explorer',
-                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                  ),
-                  subtitle: const Text(
-                    'Chat with your dreams',
-                    style: TextStyle(color: AppColors.lightBlue, fontSize: 12),
+                    'Profile',
+                    style: TextStyle(color: Colors.white),
                   ),
                   onTap: () {
                     Navigator.pop(context); // Close the drawer
-                    Navigator.pushNamed(context, AppRoutes.dreamExplorer);
+                    Navigator.pushNamed(context, AppRoutes.profile);
                   },
                 ),
                 const Divider(color: AppColors.lightBlue),
