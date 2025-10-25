@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/widgets/custom_snackbar.dart';
+import '../../../../../core/widgets/markdown_text.dart';
 import '../../../providers/pattern_analysis_provider.dart';
 import '../dream_summary_card.dart';
 import '../error_message_widget.dart';
@@ -233,13 +234,9 @@ class _PatternsTabState extends ConsumerState<PatternsTab>
                     ),
                     const Divider(color: AppColors.lightBlue),
                     const SizedBox(height: 8),
-                    Text(
-                      patternState.analysis!,
-                      style: const TextStyle(
-                        color: AppColors.white,
-                        fontSize: 14,
-                        height: 1.5,
-                      ),
+                    MarkdownText(
+                      data: patternState.analysis!,
+                      fontSize: 14,
                     ),
                   ],
                 ),

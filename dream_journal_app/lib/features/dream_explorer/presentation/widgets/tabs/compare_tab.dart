@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/widgets/custom_snackbar.dart';
+import '../../../../../core/widgets/markdown_text.dart';
 import '../../../providers/comparison_state_provider.dart';
 import '../error_message_widget.dart';
 import '../dream_selector_modal.dart';
@@ -208,13 +209,9 @@ class _CompareTabState extends ConsumerState<CompareTab>
                     ),
                     const Divider(color: AppColors.lightBlue),
                     const SizedBox(height: 8),
-                    Text(
-                      comparisonState.comparison!,
-                      style: const TextStyle(
-                        color: AppColors.white,
-                        fontSize: 14,
-                        height: 1.5,
-                      ),
+                    MarkdownText(
+                      data: comparisonState.comparison!,
+                      fontSize: 14,
                     ),
                   ],
                 ),

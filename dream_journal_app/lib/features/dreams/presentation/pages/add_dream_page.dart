@@ -8,6 +8,7 @@ import '../../data/models/dream_entry.dart';
 import '../../providers/dreams_provider.dart';
 import '../../../../core/widgets/custom_snackbar.dart';
 import '../../../../core/widgets/keyboard_dismissible.dart';
+import '../../../../core/widgets/markdown_text.dart';
 import '../../../../core/utils/keyboard_utils.dart';
 
 class AddDreamPage extends ConsumerStatefulWidget {
@@ -438,13 +439,9 @@ class _AddDreamPageState extends ConsumerState<AddDreamPage>
                           ),
                         ),
                         const SizedBox(height: 12),
-                        Text(
-                          _interpretation!,
-                          style: const TextStyle(
-                            color: AppColors.white,
-                            fontSize: 15,
-                            height: 1.5,
-                          ),
+                        MarkdownText(
+                          data: _interpretation!,
+                          fontSize: 15,
                         ),
                         const SizedBox(height: 16),
                         Align(

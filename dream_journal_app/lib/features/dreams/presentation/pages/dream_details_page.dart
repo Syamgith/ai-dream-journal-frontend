@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/custom_snackbar.dart';
+import '../../../../core/widgets/markdown_text.dart';
 import '../../data/models/dream_entry.dart';
 import '../../providers/dreams_provider.dart';
 import 'add_dream_page.dart';
@@ -142,13 +143,9 @@ class DreamDetailsPage extends ConsumerWidget {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      Text(
-                        dream.interpretation!,
-                        style: const TextStyle(
-                          color: AppColors.white,
-                          fontSize: 15,
-                          height: 1.5,
-                        ),
+                      MarkdownText(
+                        data: dream.interpretation!,
+                        fontSize: 15,
                       ),
                     ],
                   ),

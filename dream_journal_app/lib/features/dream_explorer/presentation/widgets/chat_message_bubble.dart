@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/widgets/markdown_text.dart';
 import '../../data/models/chat_message_model.dart';
 
 class ChatMessageBubble extends StatelessWidget {
@@ -44,13 +45,19 @@ class ChatMessageBubble extends StatelessWidget {
           crossAxisAlignment:
               isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
-            Text(
-              message.content,
-              style: const TextStyle(
-                color: AppColors.white,
+            if (isUser)
+              Text(
+                message.content,
+                style: const TextStyle(
+                  color: AppColors.white,
+                  fontSize: 14,
+                ),
+              )
+            else
+              MarkdownText(
+                data: message.content,
                 fontSize: 14,
               ),
-            ),
           ],
         ),
       ),
