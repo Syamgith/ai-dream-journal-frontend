@@ -140,14 +140,14 @@ class _ChatTabState extends ConsumerState<ChatTab>
                   ),
                 ),
                 SizedBox(
-                  height: 120,
+                  height: MediaQuery.of(context).size.height * 0.16,
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
                     itemCount: conversationState.relevantDreams.length,
                     itemBuilder: (context, index) {
                       final dream = conversationState.relevantDreams[index];
                       return SizedBox(
-                        width: 250,
+                        width: MediaQuery.of(context).size.width * 0.65,
                         child: DreamSummaryCard(
                           dreamSummary: dream,
                           onTap: () {

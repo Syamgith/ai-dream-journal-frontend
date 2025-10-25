@@ -1,5 +1,14 @@
 # AI Changes Log
 
+## 2025-10-25
+
+### Fix: Dream Explorer Relevant Dreams Card Overflow
+**Time:** 20:31
+**Files Modified:**
+- `lib/features/dream_explorer/presentation/widgets/tabs/chat_tab.dart` - Changed to relative sizing for relevant dreams ListView
+
+**Description:** Fixed RenderFlex overflow error (5 pixels on bottom) in the relevant dreams section by using responsive sizing instead of fixed pixels. Changed height from 120px to 16% of screen height and width from 250px to 65% of screen width using MediaQuery. This provides better responsiveness across different screen sizes.
+
 ## 2025-10-24
 
 ### Phase 1.1: Dream Explorer Data Models
