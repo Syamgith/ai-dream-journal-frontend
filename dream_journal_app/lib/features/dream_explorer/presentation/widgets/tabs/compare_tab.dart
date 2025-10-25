@@ -22,28 +22,34 @@ class _CompareTabState extends ConsumerState<CompareTab>
   bool get wantKeepAlive => true;
 
   Future<void> _selectDream1() async {
-    final dreamId = await showModalBottomSheet<int>(
+    final result = await showModalBottomSheet<Map<String, dynamic>>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => const DreamSelectorModal(),
     );
 
-    if (dreamId != null) {
-      ref.read(comparisonStateProvider.notifier).selectDream1(dreamId);
+    if (result != null) {
+      ref.read(comparisonStateProvider.notifier).selectDream1(
+        result['id'] as int,
+        result['title'] as String,
+      );
     }
   }
 
   Future<void> _selectDream2() async {
-    final dreamId = await showModalBottomSheet<int>(
+    final result = await showModalBottomSheet<Map<String, dynamic>>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => const DreamSelectorModal(),
     );
 
-    if (dreamId != null) {
-      ref.read(comparisonStateProvider.notifier).selectDream2(dreamId);
+    if (result != null) {
+      ref.read(comparisonStateProvider.notifier).selectDream2(
+        result['id'] as int,
+        result['title'] as String,
+      );
     }
   }
 
@@ -97,7 +103,7 @@ class _CompareTabState extends ConsumerState<CompareTab>
               Expanded(
                 child: _buildDreamSelector(
                   title: 'Dream 1',
-                  dreamId: comparisonState.selectedDream1Id,
+                  dreamTitle: comparisonState.selectedDream1Title,
                   onSelect: _selectDream1,
                 ),
               ),
@@ -105,7 +111,7 @@ class _CompareTabState extends ConsumerState<CompareTab>
               Expanded(
                 child: _buildDreamSelector(
                   title: 'Dream 2',
-                  dreamId: comparisonState.selectedDream2Id,
+                  dreamTitle: comparisonState.selectedDream2Title,
                   onSelect: _selectDream2,
                 ),
               ),
@@ -225,9 +231,14 @@ class _CompareTabState extends ConsumerState<CompareTab>
 
   Widget _buildDreamSelector({
     required String title,
-    required int? dreamId,
+    required String? dreamTitle,
     required VoidCallback onSelect,
   }) {
+    // Crop dream title to 10 characters
+    final displayTitle = dreamTitle != null && dreamTitle.length > 10
+        ? '${dreamTitle.substring(0, 10)}...'
+        : dreamTitle;
+
     return Card(
       color: AppColors.darkBlue,
       elevation: 4,
@@ -244,9 +255,9 @@ class _CompareTabState extends ConsumerState<CompareTab>
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
-                dreamId != null ? Icons.check_circle : Icons.add_circle_outline,
+                dreamTitle != null ? Icons.check_circle : Icons.add_circle_outline,
                 size: 40,
-                color: dreamId != null
+                color: dreamTitle != null
                     ? AppColors.primaryBlue
                     : AppColors.lightBlue.withValues(alpha: 0.5),
               ),
@@ -259,9 +270,9 @@ class _CompareTabState extends ConsumerState<CompareTab>
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              if (dreamId != null)
+              if (dreamTitle != null)
                 Text(
-                  'ID: $dreamId',
+                  displayTitle!,
                   style: TextStyle(
                     color: AppColors.white.withValues(alpha: 0.7),
                     fontSize: 12,

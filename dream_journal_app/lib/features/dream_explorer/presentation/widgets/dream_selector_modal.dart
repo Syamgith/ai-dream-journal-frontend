@@ -214,7 +214,10 @@ class _DreamSelectorModalState extends ConsumerState<DreamSelectorModal> {
                           size: 16,
                         ),
                         onTap: () {
-                          Navigator.pop(context, dream.id);
+                          Navigator.pop(context, {
+                            'id': dream.id,
+                            'title': dream.title ?? 'Untitled Dream',
+                          });
                         },
                       ),
                     );

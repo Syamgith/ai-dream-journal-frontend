@@ -8,6 +8,7 @@ import '../error_message_widget.dart';
 import '../dream_selector_modal.dart';
 import '../exploring_indicator.dart';
 import '../../../../dreams/presentation/pages/dream_details_page.dart';
+import '../../../../dreams/providers/dream_repository_provider.dart';
 
 class SimilarTab extends ConsumerStatefulWidget {
   final int? dreamId;
@@ -22,6 +23,7 @@ class _SimilarTabState extends ConsumerState<SimilarTab>
     with AutomaticKeepAliveClientMixin {
   int _topK = 5;
   int? _selectedDreamId;
+  String? _selectedDreamTitle;
 
   @override
   bool get wantKeepAlive => true;
@@ -31,36 +33,51 @@ class _SimilarTabState extends ConsumerState<SimilarTab>
     super.initState();
     _selectedDreamId = widget.dreamId;
     if (_selectedDreamId != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _findSimilarDreams();
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        // Fetch dream details to get the title
+        try {
+          final dreamRepo = ref.read(dreamRepositoryProvider);
+          final dreams = await dreamRepo.getDreams();
+          final dream = dreams.firstWhere(
+            (d) => d.id == _selectedDreamId,
+            orElse: () => throw Exception('Dream not found'),
+          );
+          setState(() {
+            _selectedDreamTitle = dream.title ?? 'Untitled Dream';
+          });
+          _findSimilarDreams();
+        } catch (e) {
+          debugPrint('Error fetching dream details: $e');
+        }
       });
     }
   }
 
   Future<void> _selectDream() async {
-    final dreamId = await showModalBottomSheet<int>(
+    final result = await showModalBottomSheet<Map<String, dynamic>>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => const DreamSelectorModal(),
     );
 
-    if (dreamId != null) {
+    if (result != null) {
       setState(() {
-        _selectedDreamId = dreamId;
+        _selectedDreamId = result['id'] as int;
+        _selectedDreamTitle = result['title'] as String;
       });
     }
   }
 
   Future<void> _findSimilarDreams() async {
-    if (_selectedDreamId == null) return;
+    if (_selectedDreamId == null || _selectedDreamTitle == null) return;
 
     // Haptic feedback
     HapticFeedback.lightImpact();
 
     await ref
         .read(similarDreamsProvider.notifier)
-        .findSimilar(_selectedDreamId!, topK: _topK);
+        .findSimilar(_selectedDreamId!, _selectedDreamTitle!, topK: _topK);
   }
 
   @override
@@ -117,9 +134,11 @@ class _SimilarTabState extends ConsumerState<SimilarTab>
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          if (_selectedDreamId != null)
+                          if (_selectedDreamTitle != null)
                             Text(
-                              'Dream ID: $_selectedDreamId',
+                              _selectedDreamTitle!.length > 10
+                                  ? '${_selectedDreamTitle!.substring(0, 10)}...'
+                                  : _selectedDreamTitle!,
                               style: TextStyle(
                                 color: AppColors.white.withValues(alpha: 0.7),
                                 fontSize: 12,

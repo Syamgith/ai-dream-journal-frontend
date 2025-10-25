@@ -8,12 +8,14 @@ class SimilarDreamsState {
   final bool isLoading;
   final String? error;
   final int? sourceDreamId;
+  final String? sourceDreamTitle;
 
   SimilarDreamsState({
     this.similarDreams = const [],
     this.isLoading = false,
     this.error,
     this.sourceDreamId,
+    this.sourceDreamTitle,
   });
 
   SimilarDreamsState copyWith({
@@ -21,12 +23,14 @@ class SimilarDreamsState {
     bool? isLoading,
     String? error,
     int? sourceDreamId,
+    String? sourceDreamTitle,
   }) {
     return SimilarDreamsState(
       similarDreams: similarDreams ?? this.similarDreams,
       isLoading: isLoading ?? this.isLoading,
       error: error,
       sourceDreamId: sourceDreamId ?? this.sourceDreamId,
+      sourceDreamTitle: sourceDreamTitle ?? this.sourceDreamTitle,
     );
   }
 }
@@ -36,7 +40,7 @@ class SimilarDreamsNotifier extends StateNotifier<SimilarDreamsState> {
 
   SimilarDreamsNotifier(this._ref) : super(SimilarDreamsState());
 
-  Future<void> findSimilar(int dreamId, {int topK = 5}) async {
+  Future<void> findSimilar(int dreamId, String dreamTitle, {int topK = 5}) async {
     if (topK < 1 || topK > 20) {
       state = state.copyWith(error: 'Top K must be between 1 and 20');
       return;
@@ -46,6 +50,7 @@ class SimilarDreamsNotifier extends StateNotifier<SimilarDreamsState> {
       isLoading: true,
       error: null,
       sourceDreamId: dreamId,
+      sourceDreamTitle: dreamTitle,
     );
 
     try {
