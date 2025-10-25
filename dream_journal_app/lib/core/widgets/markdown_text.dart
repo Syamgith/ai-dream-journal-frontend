@@ -89,7 +89,7 @@ class MarkdownText extends StatelessWidget {
           ),
         ),
         // Links
-        LinkConfig(
+        const LinkConfig(
           style: TextStyle(
             color: AppColors.primaryBlue,
             decoration: TextDecoration.underline,

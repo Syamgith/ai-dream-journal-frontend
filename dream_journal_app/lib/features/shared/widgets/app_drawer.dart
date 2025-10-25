@@ -87,9 +87,9 @@ class AppDrawer extends ConsumerWidget {
           gradient: LinearGradient(
             colors: [
               Colors.transparent,
-              AppColors.lightBlue.withOpacity(0.3),
-              AppColors.lightBlue.withOpacity(0.5),
-              AppColors.lightBlue.withOpacity(0.3),
+              AppColors.lightBlue.withValues(alpha: 0.3),
+              AppColors.lightBlue.withValues(alpha: 0.5),
+              AppColors.lightBlue.withValues(alpha: 0.3),
               Colors.transparent,
             ],
             stops: const [0.0, 0.2, 0.5, 0.8, 1.0],
@@ -103,9 +103,9 @@ class AppDrawer extends ConsumerWidget {
     return Container(
       color: AppColors.darkBlue,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-      child: Column(
+      child: const Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: const [
+        children: [
           Text(
             'Dreami Diary',
             style: TextStyle(
@@ -242,7 +242,7 @@ class AppDrawer extends ConsumerWidget {
         margin: const EdgeInsets.symmetric(horizontal: 16),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: AppColors.darkBlue.withOpacity(0.5),
+          color: AppColors.darkBlue.withValues(alpha: 0.5),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Column(
@@ -292,10 +292,10 @@ class AppDrawer extends ConsumerWidget {
   Widget _buildMenuSection(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.darkBlue.withOpacity(0.3),
+        color: AppColors.darkBlue.withValues(alpha: 0.3),
         border: Border(
           top: BorderSide(
-            color: AppColors.lightBlue.withOpacity(0.3),
+            color: AppColors.lightBlue.withValues(alpha: 0.3),
             width: 1,
           ),
         ),

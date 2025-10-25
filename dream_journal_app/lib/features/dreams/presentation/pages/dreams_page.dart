@@ -258,10 +258,10 @@ class _AddDreamButtonState extends State<_AddDreamButton>
               width: 60,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: LinearGradient(
+                gradient: const LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: const [
+                  colors: [
                     AppColors.darkBlue,
                     AppColors.primaryBlue,
                   ],
@@ -295,14 +295,14 @@ class _AddDreamButtonState extends State<_AddDreamButton>
                         ),
 
                       // Moon icon
-                      Center(
+                      const Center(
                         child: Stack(
                           alignment: Alignment.center,
-                          children: const [
+                          children: [
                             // Plus sign
                             Icon(
                               Icons.add,
-                              color: Color(0xFFE6FFFFFF),
+                              color: Color(0xE6FFFFFF),
                               size: 30,
                             ),
 
@@ -319,7 +319,7 @@ class _AddDreamButtonState extends State<_AddDreamButton>
                                     gradient: RadialGradient(
                                       colors: [
                                         Color(
-                                            0xFFE6FFFFFF), // Colors.white.withAlpha(230)
+                                            0xE6FFFFFF), // Colors.white.withAlpha(230)
                                         Color(
                                             0xFFB3B5C6), // AppColors.lightBlue.withAlpha(179)
                                       ],
@@ -329,7 +329,7 @@ class _AddDreamButtonState extends State<_AddDreamButton>
                                     boxShadow: [
                                       BoxShadow(
                                         color: Color(
-                                            0xFF80FFFFFF), // Colors.white.withAlpha(128)
+                                            0x80FFFFFF), // Colors.white.withAlpha(128)
                                         blurRadius: 6,
                                         spreadRadius: 1,
                                       ),
@@ -352,12 +352,12 @@ class _AddDreamButtonState extends State<_AddDreamButton>
                             width: 8,
                             decoration: const BoxDecoration(
                               shape: BoxShape.circle,
-                              color: const Color(
-                                  0xFFB3FFFFFF), // Colors.white.withAlpha(179)
+                              color: Color(
+                                  0xB3FFFFFF), // Colors.white.withAlpha(179)
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(
-                                      0xFF80FFFFFF), // Colors.white.withAlpha(128)
+                                  color: Color(
+                                      0x80FFFFFF), // Colors.white.withAlpha(128)
                                   blurRadius: 6,
                                   spreadRadius: 2,
                                 ),
@@ -385,7 +385,7 @@ class _StarryBackgroundPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final Random random = Random(12); // Different seed from other stars
     final paint = Paint()
-      ..color = const Color(0xFF66FFFFFF) // Colors.white.withAlpha(102)
+      ..color = const Color(0x66FFFFFF) // Colors.white.withAlpha(102)
       ..style = PaintingStyle.fill;
 
     // Draw tiny stars
@@ -434,7 +434,7 @@ class _HoverTextState extends State<_HoverText> {
           shadows: _isHovered
               ? const [
                   BoxShadow(
-                    color: Color(0xFF26FFFFFF), // Colors.white.withAlpha(38)
+                    color: Color(0x26FFFFFF), // Colors.white.withAlpha(38)
                     blurRadius: 8,
                     spreadRadius: 1,
                   )

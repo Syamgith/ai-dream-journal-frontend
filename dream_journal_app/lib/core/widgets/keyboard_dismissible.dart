@@ -7,10 +7,10 @@ class KeyboardDismissible extends StatelessWidget {
   final bool excludeFromSemantics;
 
   const KeyboardDismissible({
-    Key? key,
+    super.key,
     required this.child,
     this.excludeFromSemantics = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
