@@ -75,17 +75,19 @@ class _DreamExplorerPageState extends State<DreamExplorerPage>
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onVerticalDragStart: _handleVerticalDragStart,
-      onVerticalDragUpdate: _handleVerticalDragUpdate,
-      onVerticalDragEnd: _handleVerticalDragEnd,
-      child: AnimatedContainer(
-        duration:
-            _isDragging ? Duration.zero : const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-        transform: Matrix4.translationValues(0, _dragOffset, 0),
-        child: Scaffold(
-          backgroundColor: AppColors.background,
+    return Container(
+      color: AppColors.background,
+      child: GestureDetector(
+        onVerticalDragStart: _handleVerticalDragStart,
+        onVerticalDragUpdate: _handleVerticalDragUpdate,
+        onVerticalDragEnd: _handleVerticalDragEnd,
+        child: AnimatedContainer(
+          duration:
+              _isDragging ? Duration.zero : const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+          transform: Matrix4.translationValues(0, _dragOffset, 0),
+          child: Scaffold(
+            backgroundColor: AppColors.background,
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(kToolbarHeight + 48 + 20),
             child: Padding(
@@ -148,6 +150,7 @@ class _DreamExplorerPageState extends State<DreamExplorerPage>
             ],
           ),
         ),
+      ),
       ),
     );
   }
