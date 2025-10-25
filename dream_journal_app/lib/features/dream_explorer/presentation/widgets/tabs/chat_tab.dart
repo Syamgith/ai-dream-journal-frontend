@@ -140,7 +140,7 @@ class _ChatTabState extends ConsumerState<ChatTab>
                   ),
                 ),
                 SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.16,
+                  height: MediaQuery.of(context).size.height * 0.18,
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
                     itemCount: conversationState.relevantDreams.length,

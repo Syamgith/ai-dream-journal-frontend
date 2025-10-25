@@ -29,13 +29,18 @@ class _DreamCardState extends State<DreamCard> {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeOutCubic,
-        constraints: const BoxConstraints(minHeight: 120, maxHeight: 140),
+        constraints: BoxConstraints(
+          minHeight: screenHeight * 0.14,
+          maxHeight: screenHeight * 0.17,
+        ),
         margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),

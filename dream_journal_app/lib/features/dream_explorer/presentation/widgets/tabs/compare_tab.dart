@@ -235,10 +235,13 @@ class _CompareTabState extends ConsumerState<CompareTab>
         onTap: onSelect,
         borderRadius: BorderRadius.circular(12),
         child: Container(
-          height: 120,
+          constraints: BoxConstraints(
+            minHeight: MediaQuery.of(context).size.height * 0.14,
+          ),
           padding: const EdgeInsets.all(16),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
                 dreamId != null ? Icons.check_circle : Icons.add_circle_outline,

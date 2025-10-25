@@ -2,12 +2,29 @@
 
 ## 2025-10-25
 
-### Fix: Dream Explorer Relevant Dreams Card Overflow
+### Fix: Comprehensive Overflow Prevention with Relative Sizing
 **Time:** 20:31
 **Files Modified:**
-- `lib/features/dream_explorer/presentation/widgets/tabs/chat_tab.dart` - Changed to relative sizing for relevant dreams ListView
+- `lib/features/dream_explorer/presentation/widgets/tabs/chat_tab.dart` - Changed to relative sizing for relevant dreams horizontal ListView
+- `lib/features/dream_explorer/presentation/widgets/tabs/compare_tab.dart` - Replaced fixed height with responsive constraints in dream selector cards
+- `lib/features/dreams/presentation/widgets/dream_card.dart` - Converted fixed BoxConstraints to relative sizing based on screen height
 
-**Description:** Fixed RenderFlex overflow error (5 pixels on bottom) in the relevant dreams section by using responsive sizing instead of fixed pixels. Changed height from 120px to 16% of screen height and width from 250px to 65% of screen width using MediaQuery. This provides better responsiveness across different screen sizes.
+**Description:**
+Fixed RenderFlex overflow error (5 pixels on bottom) in the relevant dreams section and proactively prevented similar issues across the app by converting fixed pixel dimensions to relative sizing:
+
+1. **chat_tab.dart (line 143, 150)**:
+   - Height: 120px → 18% of screen height (accounts for card margins + content)
+   - Width: 250px → 65% of screen width
+
+2. **compare_tab.dart (line 238-240)**:
+   - Replaced fixed `height: 120` with `BoxConstraints(minHeight: 14% of screen height)`
+   - Added `mainAxisSize: MainAxisSize.min` to Column for better content fitting
+
+3. **dream_card.dart (line 40-42)**:
+   - minHeight: 120px → 14% of screen height
+   - maxHeight: 140px → 17% of screen height
+
+These changes ensure better responsiveness across different screen sizes and prevent overflow issues on smaller devices or with larger text sizes.
 
 ## 2025-10-24
 
