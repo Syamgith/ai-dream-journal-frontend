@@ -178,11 +178,14 @@ class _AddDreamPageState extends ConsumerState<AddDreamPage>
                             height: 1.5,
                             letterSpacing: 0.3,
                           ),
-                          maxLines: 8,
-                          textInputAction: TextInputAction.done,
-                          onEditingComplete: () =>
-                              KeyboardUtils.hideKeyboard(context),
+                          minLines: 8,
+                          maxLines: null,
+                          maxLength: 1000,
                           decoration: InputDecoration(
+                            counterStyle: TextStyle(
+                              color: AppColors.white.withAlpha(128),
+                              fontSize: 12,
+                            ),
                             hintText: 'Write about your dream experience...',
                             hintStyle: TextStyle(
                               color: AppColors.white.withAlpha(128),
@@ -195,7 +198,15 @@ class _AddDreamPageState extends ConsumerState<AddDreamPage>
                               borderRadius: BorderRadius.circular(16),
                               borderSide: BorderSide.none,
                             ),
-                            contentPadding: const EdgeInsets.all(16),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide.none,
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide.none,
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                             prefixIcon: Padding(
                               padding: const EdgeInsets.only(left: 16, top: 12),
                               child: Icon(

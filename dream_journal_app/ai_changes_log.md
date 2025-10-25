@@ -385,3 +385,68 @@ Modified the provider to save the old chat history before adding the user messag
 - Reusable component reduces code duplication
 
 **Description:** Implemented comprehensive markdown formatting for all AI responses using markdown_widget package. Created reusable MarkdownText widget and integrated it across dream interpretations, chat messages, pattern analysis, and comparison features for improved readability and better structured AI output.
+
+### Auto-Expandable Dream Description Field with Enter Key Support
+**Time:** 14:41
+**Files Modified:**
+- `lib/features/dreams/presentation/pages/add_dream_page.dart` - Updated description TextField (lines 172-208)
+
+**Changes Made:**
+1. **Enable Enter key for new lines:**
+   - Removed `textInputAction: TextInputAction.done` (was dismissing keyboard on Enter)
+   - Removed `onEditingComplete: () => KeyboardUtils.hideKeyboard(context)` (was preventing new lines)
+   - Enter key now creates new lines naturally instead of dismissing keyboard
+
+2. **Make description field auto-expandable:**
+   - Changed from `maxLines: 8` (fixed height) to `minLines: 3, maxLines: null`
+   - Field starts with 3 visible lines for better initial appearance
+   - Grows automatically as user types or adds new lines
+   - No maximum height limit - expands infinitely as needed
+
+3. **Added character limit:**
+   - Added `maxLength: 1000` to prevent extremely long entries
+   - Counter text styled to match app theme (white with alpha 128, size 12)
+
+**User Experience Improvements:**
+- Enter key now works as expected - creates new lines in description
+- Field automatically expands when content grows beyond 3 lines
+- Same behavior as dream explorer chat input for consistency
+- Character counter visible in bottom-right corner
+- Users can write multi-paragraph dream descriptions naturally
+
+**Code Quality:**
+- All changes passed Flutter analyzer (no new errors or warnings)
+- Follows same pattern as chat input in dream explorer
+- Minimal changes - only modified TextField properties
+- Maintains existing styling and visual consistency
+
+**Description:** Enhanced dream description input field to support Enter key for new lines and auto-expand as users type, matching the chat input behavior in dream explorer for a consistent and intuitive user experience.
+
+### Fixed Description Field Icon Alignment
+**Time:** 14:52
+**Files Modified:**
+- `lib/features/dreams/presentation/pages/add_dream_page.dart` - Fixed prefixIcon alignment for multi-line TextField (lines 184-217)
+
+**Changes Made:**
+1. **Fixed icon positioning for multi-line field:**
+   - Wrapped Icon in Align widget with `alignment: Alignment.topLeft`
+   - Added proper padding: `left: 16, top: 16, bottom: 16` (was only `left: 16, top: 12`)
+   - Added `prefixIconConstraints` to define minimum icon area size
+
+2. **Adjusted content padding:**
+   - Changed from `EdgeInsets.all(16)` to `EdgeInsets.fromLTRB(50, 16, 16, 16)`
+   - Ensures text starts at proper position accounting for icon width
+   - Prevents text overlap with icon
+
+**Issue Fixed:**
+- Border/outline hover effect now properly aligns with the Container border
+- Icon stays fixed at top-left when field expands
+- No visual gap or misalignment at the bottom of the field
+- Text content properly indented to avoid icon overlap
+
+**Code Quality:**
+- All changes passed Flutter analyzer (no new errors or warnings)
+- Maintains existing visual styling
+- Proper constraints for responsive icon positioning
+
+**Description:** Fixed visual alignment issue where the description field's border/outline wasn't properly matching the expanded TextField, ensuring the icon stays properly positioned and content is correctly indented.
