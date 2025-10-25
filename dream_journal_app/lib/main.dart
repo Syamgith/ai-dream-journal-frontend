@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
         title: 'Dreami Diary',
         theme: AppTheme.darkTheme,
         initialRoute: AppRoutes.main,
-        routes: AppRoutes.getRoutes(),
+        onGenerateRoute: AppRoutes.onGenerateRoute,
       ),
     );
   }

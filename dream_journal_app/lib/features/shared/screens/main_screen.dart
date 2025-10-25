@@ -4,7 +4,6 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/widgets/keyboard_dismissible.dart';
 import '../../../core/utils/keyboard_utils.dart';
 import '../../dreams/presentation/pages/dreams_page.dart';
-import '../../dream_explorer/presentation/pages/dream_explorer_page.dart';
 import '../widgets/bottom_nav_bar.dart';
 import '../widgets/app_drawer.dart';
 import '../../dreams/providers/dreams_provider.dart';
@@ -17,11 +16,7 @@ class MainScreen extends ConsumerStatefulWidget {
 }
 
 class _MainScreenState extends ConsumerState<MainScreen> {
-  int _currentIndex = 0;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
-  // List of page titles corresponding to the pages in the IndexedStack
-  final List<String> _pageTitles = const ['Dreams', 'Dream Explorer'];
 
   @override
   void initState() {
@@ -45,12 +40,6 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     }
   }
 
-  void _onTabTapped(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return KeyboardDismissible(
@@ -58,7 +47,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         key: _scaffoldKey,
         appBar: AppBar(
           backgroundColor: AppColors.background,
-          title: Text(_pageTitles[_currentIndex]),
+          title: const Text('Dreams'),
           elevation: 0,
           leading: IconButton(
             icon: const Icon(Icons.menu),
@@ -68,28 +57,21 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             },
           ),
           actions: [
-            if (_currentIndex == 0) // Only show refresh button on Dreams page
-              IconButton(
-                icon: const Icon(Icons.refresh),
-                onPressed: () =>
-                    KeyboardUtils.hideKeyboardThen(context, _refreshDreamsData),
-                tooltip: 'Refresh Dreams',
-              ),
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              onPressed: () =>
+                  KeyboardUtils.hideKeyboardThen(context, _refreshDreamsData),
+              tooltip: 'Refresh Dreams',
+            ),
           ],
         ),
         drawer: const AppDrawer(),
-        body: IndexedStack(
-          index: _currentIndex,
-          children: const [
-            DreamsPage(),
-            DreamExplorerPage(),
-          ],
-        ),
+        body: const DreamsPage(),
         bottomNavigationBar: BottomNavBar(
-          currentIndex: _currentIndex,
+          currentIndex: 0,
           onTap: (index) {
             KeyboardUtils.hideKeyboard(context);
-            _onTabTapped(index);
+            // Index is always 0 since we only have Dreams page here
           },
         ),
       ),

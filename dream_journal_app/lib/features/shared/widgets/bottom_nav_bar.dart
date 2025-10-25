@@ -40,17 +40,17 @@ class BottomNavBar extends StatelessWidget {
             },
           ),
           TextButton.icon(
-            onPressed: () => onTap(1),
-            icon: Icon(
+            onPressed: () {
+              Navigator.pushNamed(context, AppRoutes.dreamExplorer);
+            },
+            icon: const Icon(
               Icons.auto_awesome,
-              color:
-                  currentIndex == 1 ? AppColors.primaryBlue : AppColors.white,
+              color: AppColors.white,
             ),
-            label: Text(
+            label: const Text(
               'Explorer',
               style: TextStyle(
-                color:
-                    currentIndex == 1 ? AppColors.primaryBlue : AppColors.white,
+                color: AppColors.white,
               ),
             ),
           ),

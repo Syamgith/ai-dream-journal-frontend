@@ -37,7 +37,46 @@ class AppRoutes {
       feedback: (context) => const FeedbackPage(),
       about: (context) => const AboutPage(),
       settings: (context) => const SettingsPage(),
-      dreamExplorer: (context) => const DreamExplorerPage(),
     };
+  }
+
+  // Custom route generator for special transitions
+  static Route<dynamic>? onGenerateRoute(RouteSettings settings) {
+    // Dream Explorer with slide-up transition
+    if (settings.name == dreamExplorer) {
+      return PageRouteBuilder(
+        settings: settings,
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            const DreamExplorerPage(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          const begin = Offset(0.0, 1.0); // Start from bottom
+          const end = Offset.zero;
+          const curve = Curves.easeInOut;
+
+          var tween = Tween(begin: begin, end: end).chain(
+            CurveTween(curve: curve),
+          );
+          var offsetAnimation = animation.drive(tween);
+
+          return SlideTransition(
+            position: offsetAnimation,
+            child: child,
+          );
+        },
+        transitionDuration: const Duration(milliseconds: 300),
+      );
+    }
+
+    // Default route handling
+    final routes = getRoutes();
+    final builder = routes[settings.name];
+    if (builder != null) {
+      return MaterialPageRoute(
+        builder: (context) => builder(context),
+        settings: settings,
+      );
+    }
+
+    return null;
   }
 }
