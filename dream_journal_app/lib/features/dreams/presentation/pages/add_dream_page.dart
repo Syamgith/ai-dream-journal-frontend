@@ -160,60 +160,59 @@ class _AddDreamPageState extends ConsumerState<AddDreamPage>
                         ),
                       ),
                       const SizedBox(height: 20),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: AppColors.background,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: AppColors.primaryBlue.withAlpha(77),
-                            width: 1,
-                          ),
+                      TextField(
+                        controller: _descriptionController,
+                        focusNode: _descriptionFocusNode,
+                        style: const TextStyle(
+                          color: AppColors.white,
+                          fontSize: 15,
+                          height: 1.5,
+                          letterSpacing: 0.3,
                         ),
-                        child: TextField(
-                          controller: _descriptionController,
-                          focusNode: _descriptionFocusNode,
-                          style: const TextStyle(
-                            color: AppColors.white,
+                        minLines: 8,
+                        maxLines: null,
+                        maxLength: 1000,
+                        decoration: InputDecoration(
+                          counterStyle: TextStyle(
+                            color: AppColors.white.withAlpha(128),
+                            fontSize: 12,
+                          ),
+                          hintText: 'Write about your dream experience...',
+                          hintStyle: TextStyle(
+                            color: AppColors.white.withAlpha(128),
                             fontSize: 15,
-                            height: 1.5,
                             letterSpacing: 0.3,
                           ),
-                          minLines: 8,
-                          maxLines: null,
-                          maxLength: 1000,
-                          decoration: InputDecoration(
-                            counterStyle: TextStyle(
+                          filled: true,
+                          fillColor: AppColors.background,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide(
+                              color: AppColors.primaryBlue.withAlpha(77),
+                              width: 1,
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide(
+                              color: AppColors.primaryBlue.withAlpha(77),
+                              width: 1,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide(
+                              color: AppColors.primaryBlue.withAlpha(77),
+                              width: 1,
+                            ),
+                          ),
+                          contentPadding: const EdgeInsets.all(16),
+                          prefixIcon: Padding(
+                            padding: const EdgeInsets.only(left: 16, top: 12),
+                            child: Icon(
+                              Icons.auto_stories_outlined,
                               color: AppColors.white.withAlpha(128),
-                              fontSize: 12,
-                            ),
-                            hintText: 'Write about your dream experience...',
-                            hintStyle: TextStyle(
-                              color: AppColors.white.withAlpha(128),
-                              fontSize: 15,
-                              letterSpacing: 0.3,
-                            ),
-                            filled: true,
-                            fillColor: Colors.transparent,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
-                              borderSide: BorderSide.none,
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
-                              borderSide: BorderSide.none,
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
-                              borderSide: BorderSide.none,
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                            prefixIcon: Padding(
-                              padding: const EdgeInsets.only(left: 16, top: 12),
-                              child: Icon(
-                                Icons.auto_stories_outlined,
-                                color: AppColors.white.withAlpha(128),
-                                size: 20,
-                              ),
+                              size: 20,
                             ),
                           ),
                         ),
